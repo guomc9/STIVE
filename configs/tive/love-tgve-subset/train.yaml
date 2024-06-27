@@ -1,0 +1,68 @@
+pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/tive/loveu-tgve-subset/base/"
+
+train_data:
+  data_dir: "data/loveu-tgve-subset/videos"
+  csv_file: "data/loveu-tgve-subset/LOVEU-TGVE-subset-Abstracts-Prompts.csv"
+  width: 512
+  height: 512
+  num_frames: 4
+  sample_stride: 1
+  rand_slice: False
+  abstracts_prompt: True
+
+validation_data:
+  sources: 
+    - "data/loveu-tgve-subset/videos/aircraft-landing.mp4"
+    - "data/loveu-tgve-subset/videos/aircraft-landing.mp4"
+    - "data/loveu-tgve-subset/videos/cat-in-the-sun.mp4"
+    - "data/loveu-tgve-subset/videos/cat-in-the-sun.mp4"
+    - "data/loveu-tgve-subset/videos/american-flag-in-wind.mp4"
+    - "data/loveu-tgve-subset/videos/american-flag-in-wind.mp4"
+    - "data/loveu-tgve-subset/videos/lotus.mp4"
+    - "data/loveu-tgve-subset/videos/lotus.mp4"
+    
+  prompts:
+    - "A $DETLAAIRCRAFT descends onto the runaway during a cloudless morning with a blue sky in the background."
+    - "A $DETLAAIRCRAFT descends onto the runaway during sunset with an orange sky in the background."
+    - "A $CAT in the grassland on a sunny day."
+    - "A $CAT in the grassland on a snowy day."
+    - "An $AMERICANFLAG on a flagpole moves in the wind with a blue sky in the background."
+    - "An $AMERICANFLAG on a flagpole moves in the wind during sunset with an orange sky in the background."
+    - "A $LOTUS in river water on a rainy day."
+    - "A $LOTUS in river water on a sunny day."
+
+  num_frames: 4
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+abstracts_file: "data/loveu-tgve-subset/abstracts.json"
+abstracts_num_embedding: 1
+max_temporal_steps: 12
+learning_rate: 3e-5
+batch_size: 1
+num_train_epoch: 500
+checkpointing_steps: 1000
+validation_steps: 100
+
+trainable_modules:
+  - "tp_blocks"
+  - "attn1.primary_lin"
+  - "attn1.comp_q"
+  - "attn1.comp_out"
+  - "attn1.to_q"
+  - "attn2.to_q"
+  - "attn_temp"
+
+seed: 33
+mixed_precision: fp16
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True

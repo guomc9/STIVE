@@ -1,0 +1,47 @@
+pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/vae3d/loveu-tgve/base/"
+
+train_data:
+  data_dir: "data/loveu-tgve/videos"
+  csv_file: "data/loveu-tgve/LOVEU-TGVE-2023_Dataset.csv"
+  width: 512
+  height: 512
+  num_frames: 4
+  sample_stride: 1
+  rand_slice: False
+
+validation_data:
+  sources: 
+    - "data/loveu-tgve/videos/aircraft-landing.mp4"
+    - "data/loveu-tgve/videos/cat-in-the-sun.mp4"
+    - "data/loveu-tgve/videos/eiffel-flyover.mp4"
+  prompts:
+    - "A Detla Airlines aircraft descends onto the runaway during a cloudless morning."
+    - "A cat in the grass in the sun."
+    - "Drone flyover of the Eiffel Tower in front of the city, sunset."
+  num_frames: 4
+  sample_stride: 1
+  width: 512
+  height: 512
+
+learning_rate: 1e-3
+batch_size: 1
+rec_weight: 1
+kl_weight: 1e-8
+
+num_train_epoch: 100
+checkpointing_steps: 1000
+validation_steps: 200
+
+num_temp_down_blocks: 1
+num_temp_up_blocks: 1
+
+trainable_modules:
+  - "temp_down_blocks"
+  - "temp_up_blocks"
+
+seed: 33
+mixed_precision: fp16
+use_8bit_adam: False
+gradient_accumulation_steps: 1
+# gradient_checkpointing: True
