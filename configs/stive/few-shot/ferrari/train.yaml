@@ -1,9 +1,9 @@
 pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/stive/few-shot/ski-lift-time-lapse/base/"
-abstracts_clip_path: "checkpoints/abstracts_clip/few-shot/ski-lift-time-lapse"
+output_dir: ".log/stive/few-shot/ferrari/base/"
+abstracts_clip_path: "checkpoints/abstracts_clip/few-shot/ferrari"
 
 train_data:
-  data_dir: "data/few-shot/ski-lift-time-lapse/"
+  data_dir: "data/few-shot/car/"
   width: 512
   height: 512
   num_frames: 6
@@ -12,14 +12,16 @@ train_data:
   abstracts_prompt: True
 
 validation_data:
-  sources: 
-    - "data/few-shot/ski-lift-time-lapse/videos/ski-lift-time-lapse.mp4"
-    - "data/few-shot/ski-lift-time-lapse/videos/kettleball-training.mp4"
-    - "data/few-shot/ski-lift-time-lapse/videos/ski-lift-time-lapse.mp4"
+  sources:
+    - "data/few-shot/ferrari/videos/ferrari.mp4"
+    - "data/few-shot/ferrari/videos/car-turn.mp4"
+    - "data/few-shot/ferrari/videos/ferrari.mp4"
+    - "data/few-shot/ferrari/videos/car-turn.mp4"
   prompts:
-    - "$CHAIRLIFTS move up and down with a $SNOWYMOUNTAIN in the background."
-    - "A man does kettlebell exercises on a beach with a $WARMSUN in the background."
-    - "a $SNOWYMOUNTAIN and a $WARMSUN in the background."
+    - "a $FERRARI is driving through the forest."
+    - "a $JEEP is moving on the road."
+    - "a $JEEP is driving through the forest."
+    - "a $FERRARI is moving on the road."
 
   num_frames: 6
   sample_stride: 1

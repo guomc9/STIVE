@@ -1,0 +1,54 @@
+pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/abstracts_clip/few-shot/ferrari/base/"
+checkpoints_dir: "checkpoints/abstracts_clip/few-shot/ferrari/"
+
+train_data:
+  data_dir: "data/few-shot/ferrari/"
+  width: 512
+  height: 512
+  num_frames: 6
+  sample_stride: 1
+  rand_slice: False
+  abstracts_prompt: True
+
+validation_data:
+  sources:
+    - "data/few-shot/ferrari/videos/ferrari.mp4"
+    - "data/few-shot/ferrari/videos/car-turn.mp4"
+    - "data/few-shot/ferrari/videos/ferrari.mp4"
+    - "data/few-shot/ferrari/videos/car-turn.mp4"
+  prompts:
+    - "a $FERRARI is driving through the forest."
+    - "a $JEEP is moving on the road."
+    - "a $JEEP is driving through the forest."
+    - "a $FERRARI is moving on the road."
+
+  num_frames: 6
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+
+abstracts_file: "data/few-shot/ferrari/abstracts.json"
+attention_mask_one_hot: true
+retain_position_embedding: True
+abstracts_num_embedding: 1
+learning_rate: 5.0e-3
+batch_size: 1
+num_train_epoch: 1000
+checkpointing_steps: 2000
+validation_steps: 10
+
+seed: 33
+# mixed_precision: fp16
+mixed_precision: 'no'
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+gradient_accumulation_steps: 1

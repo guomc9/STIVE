@@ -1,6 +1,6 @@
 pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/stive/one-shot/cybertrunk/base/"
-abstracts_clip_path: "checkpoints/abstracts_clip/one-shot/cybertrunk"
+output_dir: ".log/abstracts_clip/one-shot/cybertrunk/base/"
+checkpoints_dir: "checkpoints/abstracts_clip/one-shot/cybertrunk/"
 
 train_data:
   data_dir: "data/one-shot/cybertrunk/"
@@ -33,24 +33,19 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 50
 
-max_temporal_steps: 12
-learning_rate: 3.0e-5
+abstracts_file: "data/one-shot/cybertrunk/abstracts.json"
+abstracts_num_embedding: 1
+attention_mask_one_hot: True
+retain_position_embedding: True
+learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 100
-checkpointing_steps: 100
-validation_steps: 10
-
-trainable_modules:
-  - "tp_blocks"
-  - "attn1.primary_lin"
-  - "attn1.comp_q"
-  - "attn1.comp_out"
-  - "attn1.to_q"
-  - "attn2.to_q"
-  - "attn_temp"
+num_train_epoch: 1000
+checkpointing_steps: 1000
+validation_steps: 50
 
 seed: 33
-mixed_precision: fp16
+# mixed_precision: fp16
+mixed_precision: "no"
 use_8bit_adam: False
 gradient_checkpointing: True
 enable_xformers_memory_efficient_attention: True
