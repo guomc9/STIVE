@@ -1,0 +1,72 @@
+pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/tp_tive_with_mask/few-shot/ski-lift-time-lapse/base/"
+
+train_data:
+  data_dir: "data/few-shot/ski-lift-time-lapse/"
+  width: 512
+  height: 512
+  num_frames: 6
+  sample_stride: 1
+  rand_slice: False
+  abstracts_prompt: True
+
+validation_data:
+  sources: 
+    - "data/few-shot/ski-lift-time-lapse/videos/ski-lift-time-lapse.mp4"
+    - "data/few-shot/ski-lift-time-lapse/videos/kettleball-training.mp4"
+    - "data/few-shot/ski-lift-time-lapse/videos/ski-lift-time-lapse.mp4"
+  prompts:
+    - "$CHAIRLIFTS move up and down with a $SNOWYMOUNTAIN in the background."
+    - "A man does kettlebell exercises on a beach with a $WARMSUN in the background."
+    - "a $SNOWYMOUNTAIN and a $WARMSUN in the background."
+
+  num_frames: 6
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 17.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+abstracts_file: "data/few-shot/ski-lift-time-lapse/abstracts.json"
+attention_mask_one_hot: true
+max_temporal_steps: 12
+learning_rate: 5.0e-3
+batch_size: 1
+num_train_epoch: 1000
+checkpointing_steps: 2000
+validation_steps: 10
+
+trainable_modules:
+  - "none"
+  # - "tp_blocks"
+  # - "attn1.primary_lin"
+  # - "attn1.comp_q"
+  # - "attn1.comp_out"
+  # - "attn1.to_q"
+  # - "attn2.to_q"
+  # - "attn2.to_k"
+  # - "attn2.to_v"
+  # - "attn_temp"
+
+# second_trainable_modules:
+#   # - "tp_blocks"
+#   # - "attn1.primary_lin"
+#   # - "attn1.comp_q"
+#   # - "attn1.comp_out"
+#   - "attn1.to_q"
+#   - "attn2.to_q"
+#   - "attn2.to_k"
+#   - "attn2.to_v"
+#   - "attn_temp"
+
+
+seed: 33
+mixed_precision: fp16
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+gradient_accumulation_steps: 1

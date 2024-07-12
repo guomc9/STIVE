@@ -1,6 +1,9 @@
 data
+!tive/data
 .log
 checkpoints
 .debug.txt
-test.py
+test*
 outputs
+check.py
+.backup

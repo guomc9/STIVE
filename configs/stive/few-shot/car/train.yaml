@@ -1,0 +1,62 @@
+pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/tp_tive_with_mask/few-shot/car/base/"
+
+train_data:
+  data_dir: "data/few-shot/car/"
+  width: 512
+  height: 512
+  num_frames: 6
+  sample_stride: 1
+  rand_slice: False
+  abstracts_prompt: True
+
+validation_data:
+  sources:
+    - "data/few-shot/car/videos/cybertrunk.mp4"
+    - "data/few-shot/car/videos/drift-turn.mp4"
+    - "data/few-shot/car/videos/cybertrunk.mp4"
+    - "data/few-shot/car/videos/drift-turn.mp4"
+  prompts:
+    - "a $CYBERTRUNK is driving through the forest."
+    - "a $RACECAR drifts on a racetrack."
+    - "a $RACECAR is driving through the forest."
+    - "a $CYBERTRUNK drifts on a racetrack."
+
+  num_frames: 6
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 17.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+abstracts_file: "data/few-shot/car/abstracts.json"
+attention_mask_one_hot: true
+max_temporal_steps: 12
+learning_rate: 5.0e-3
+batch_size: 1
+num_train_epoch: 1000
+checkpointing_steps: 2000
+validation_steps: 10
+
+trainable_modules:
+  - "none"
+  # - "tp_blocks"
+  # - "attn1.primary_lin"
+  # - "attn1.comp_q"
+  # - "attn1.comp_out"
+  # - "attn1.to_q"
+  # - "attn2.to_q"  
+  # - "attn2.to_k"
+  # - "attn2.to_v"
+  # - "attn_temp"
+
+seed: 33
+mixed_precision: fp16
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+gradient_accumulation_steps: 1
