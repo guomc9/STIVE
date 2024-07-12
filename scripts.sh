@@ -1,3 +1,23 @@
+# Train
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 python scripts/extract_abstracts.py -f data/few-shot/ski-lift-time-lapse/video_prompts.csv -o data/few-shot/ski-lift-time-lapse/abstracts.json
 python scripts/extract_correspondences.py -d data/few-shot/ski-lift-time-lapse -t 0.018
 

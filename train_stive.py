@@ -38,6 +38,7 @@ logger = get_logger(__name__, log_level="INFO")
 def main(
     pretrained_model_path: str,
     output_dir: str,
+    abstracts_clip_path: str, 
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
@@ -104,8 +105,8 @@ def main(
 
     noise_scheduler = DDPMScheduler.from_pretrained(pretrained_model_path, subfolder="scheduler")
 
-    tokenizer = AbstractsCLIPTokenizer.from_pretrained(pretrained_model_path, subfolder="tokenizer")
-    text_encoder = AbstractsCLIPTextModel.from_pretrained(pretrained_model_path, subfolder="text_encoder")
+    tokenizer = AbstractsCLIPTokenizer.from_pretrained(abstracts_clip_path, subfolder="tokenizer")
+    text_encoder = AbstractsCLIPTextModel.from_pretrained(abstracts_clip_path, subfolder="text_encoder")
     
     vae = AutoencoderKL.from_pretrained(pretrained_model_path, subfolder="vae")
     unet = UNet3DConditionModel.from_pretrained_2d(pretrained_model_path, subfolder="unet")

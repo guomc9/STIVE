@@ -1,5 +1,6 @@
 pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
 output_dir: ".log/stive/few-shot/ski-lift-time-lapse/base/"
+abstracts_clip_path: "checkpoints/abstracts_clip/few-shot/ski-lift-time-lapse"
 
 train_data:
   data_dir: "data/few-shot/ski-lift-time-lapse/"
@@ -31,7 +32,6 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 50
 
-abstracts_clip_path: "checkpoints/abstracts_clip/few-shot/ski-lift-time-lapse"
 attention_mask_one_hot: true
 max_temporal_steps: 12
 learning_rate: 5.0e-3
