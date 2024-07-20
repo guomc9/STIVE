@@ -1,0 +1,7 @@
+checkpoints
+data
+p2p
+wandb
+!stive/data
+.log
+test*
