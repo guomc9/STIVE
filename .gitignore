@@ -5,3 +5,4 @@ wandb
 !stive/data
 .log
 test*
+__pycache__
