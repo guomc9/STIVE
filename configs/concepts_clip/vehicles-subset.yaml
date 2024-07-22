@@ -14,22 +14,21 @@ train_data:
 validation_data:
   sources:
     - "data/targets/videos/car-turn.mp4"
+    - "data/concepts/vehicles-subset/videos/ferrari.mp4"
   prompts:
     - "a $FERRARI is moving on the road."
-
-  num_frames: 8
+    - "a $FERRARI is driving through the forest."
+  num_frames: 20
   sample_stride: 1
   width: 512
   height: 512
 
 inference_conf:
   num_inference_steps: 50
-  guidance_scale: 10
+  guidance_scale: 12
   use_inv_latent: True
   num_inv_steps: 50
 
-
-concepts_file: "data/concepts/vehicles-subset/concepts.json"
 retain_position_embedding: True
 concepts_num_embedding: 1
 learning_rate: 5.0e-3

@@ -6,7 +6,7 @@ checkpoints_dir: "checkpoints/stive/vehicles-subset/"
 train_data:
   sources:
     - "data/targets/videos/car-turn.mp4"
-    - "data/concepts/videos/ferrari.mp4"
+    - "data/concepts/vehicles-subset/videos/ferrari.mp4"
   prompts:
     - "a jeep car is moving on the road."
     - "a $FERRARI is moving on the road."
@@ -20,6 +20,9 @@ validation_data:
   source: "data/targets/videos/car-turn.mp4"
   edit_prompts:
     - "a $FERRARI is moving on the road."
+  # source: "data/concepts/vehicles-subset/videos/ferrari.mp4"
+  # edit_prompts:
+  #   - "a $FERRARI is driving through the forest."
   num_frames: 8
   sample_stride: 1
   width: 512

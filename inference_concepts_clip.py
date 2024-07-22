@@ -107,13 +107,10 @@ def main(
     validation_data: Dict,
     inference_conf: Dict, 
     validation_steps: int = 200,
-    concepts_file: str = None, 
-    concepts_num_embedding: int = 1, 
-    retain_position_embedding: bool = True, 
     batch_size: int = 1,
     warmup_epoch_rate: float = 0.1, 
     num_train_epoch: int = 200,
-    learning_rate: float = 3e-5,
+    learning_rate: float = 5e-3,
     scale_lr: bool = False,
     lr_scheduler_type: str = "constant",
     adam_beta1: float = 0.9,
@@ -158,16 +155,15 @@ def main(
         os.makedirs(os.path.join(checkpoints_dir, 'inferences'), exist_ok=True)
         output_dir = checkpoints_dir
 
-    if concepts_file is None and os.path.exists(concepts_file):
-        raise Exception(f"concepts_file is None or not exists.")
-    else:
-        with open(concepts_file, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            concepts_list = data['concepts']
-
     noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    tokenizer = ConceptsCLIPTokenizer.from_pretrained(checkpoints_dir, subfolder="tokenizer")
-    text_encoder = ConceptsCLIPTextModel.from_pretrained(checkpoints_dir, subfolder="text_encoder")
+    concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(checkpoints_dir, subfolder="text_encoder")
+    tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
+    concepts_text_encoder.requires_grad_(False)
+    add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
+    del concepts_text_encoder
+    torch.cuda.empty_cache()
+    
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
     unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
     vae.requires_grad_(False)
@@ -179,42 +175,31 @@ def main(
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=batch_size
     )
-    
-    clip_tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
-    clip_text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
-    clip_text_encoder.requires_grad_(False)
-    add_concepts_embeddings(clip_tokenizer, clip_text_encoder, concept_tokens=concepts_list, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=clip_text_encoder, tokenizer=clip_tokenizer, unet=unet, 
+        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
     )
     validation_pipeline.enable_vae_slicing()
     
     ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder='scheduler')
     ddim_inv_scheduler.set_timesteps(inference_conf.num_inv_steps)
 
-    
-    text_encoder, val_dataloader = accelerator.prepare(
-        text_encoder, val_dataloader
+    unet, text_encoder, vae, val_dataloader = accelerator.prepare(
+        unet, text_encoder, vae, val_dataloader
     )
-
     weight_dtype = torch.float32
     if accelerator.mixed_precision == "fp16":
         weight_dtype = torch.float16
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
-
-    # text_encoder.to(dtype=weight_dtype)
-    # text_encoder.concepts_embedder.to(dtype=weight_dtype)
-    clip_text_encoder.to(accelerator.device, dtype=weight_dtype)
+        
+    text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     unet.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
     unet.eval()
-    clip_text_encoder.eval()
-
+    text_encoder.eval()
     torch.cuda.empty_cache()
-    with torch.no_grad():
-        update_concepts_embedding(clip_tokenizer, clip_text_encoder, concept_tokens=concepts_list, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
+    with torch.no_grad(), accelerator.autocast():
         generator = torch.Generator(device=accelerator.device)
         if seed is not None:
             generator.manual_seed(seed)
@@ -232,7 +217,7 @@ def main(
             
             noise = torch.randn_like(latents)
             bsz = latents.shape[0]
-            timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+            timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
             timesteps = timesteps.long()
 
             noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
@@ -261,11 +246,11 @@ def main(
             samples = []
             prompts_samples = accelerator.gather(prompts_samples)
             for prompt, sample in prompts_samples.items():
-                save_video(sample, f"{output_dir}/inferences/{prompt}.gif", rescale=True)
+                save_video(sample, f"{output_dir}/inferences/{prompt}.gif", rescale=False)
                 samples.append(sample)
             samples = torch.stack(samples)
             save_path = f"{output_dir}/inferences/global.gif"
-            save_videos_grid(samples, save_path, rescale=True)
+            save_videos_grid(samples, save_path, rescale=False)
             logger.info(f"Saved samples to {save_path}")
 
     torch.cuda.empty_cache()

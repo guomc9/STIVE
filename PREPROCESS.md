@@ -12,3 +12,4 @@ python scripts/cache_latents.py -d data/concepts/vehicles
 CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_concepts_clip.py --config configs/concepts_clip/vehicles-subset.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_concepts_clip.py --config configs/concepts_clip/vehicles-subset.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_stive.py --config configs/stive/vehicles-subset.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive.py --config configs/stive/vehicles-subset.yaml

@@ -303,7 +303,7 @@ def main(
 
                         noise = torch.randn_like(latents)
                         bsz = latents.shape[0]
-                        timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+                        timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
                         timesteps = timesteps.long()
 
                         noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
@@ -355,7 +355,7 @@ def main(
 
                 if global_step % validation_steps == 0:
                     torch.cuda.empty_cache()
-                    with torch.no_grad() and accelerator.autocast():
+                    with torch.no_grad(), accelerator.autocast():
                         generator = torch.Generator(device=accelerator.device)
                         if seed is not None:
                             generator.manual_seed(seed)
@@ -373,7 +373,7 @@ def main(
                             
                             noise = torch.randn_like(latents)
                             bsz = latents.shape[0]
-                            timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+                            timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
                             timesteps = timesteps.long()
 
                             noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
@@ -413,15 +413,9 @@ def main(
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         lora_unet = accelerator.unwrap_model(lora_unet)
-        validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-            vae=vae,
-            text_encoder=text_encoder,
-            tokenizer=tokenizer,
-            unet=lora_unet,
-            scheduler=noise_scheduler,
-        )
-        validation_pipeline.save_pretrained(output_dir)
-        logger.info(f"Saved TextToVideoSDPipeline to {output_dir}")
+        save_path = os.path.join(output_dir, 'lora')
+        lora_unet.save_pretrained(save_path)
+        logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
 
     accelerator.end_training()
     if os.path.exists(checkpoints_dir):

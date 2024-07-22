@@ -258,8 +258,8 @@ def main(
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
 
-    # text_encoder.to(dtype=weight_dtype)
-    # text_encoder.concepts_embedder.to(dtype=weight_dtype)
+    text_encoder.to(dtype=weight_dtype)
+    text_encoder.concepts_embedder.to(dtype=torch.float)
     clip_text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     unet.to(accelerator.device, dtype=weight_dtype)
@@ -296,7 +296,7 @@ def main(
 
                         noise = torch.randn_like(latents)
                         bsz = latents.shape[0]
-                        timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+                        timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
                         timesteps = timesteps.long()
 
                         noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
@@ -318,8 +318,6 @@ def main(
                         model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                         
                         loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                        # with accelerator.autocast():
-                        #     loss = F.mse_loss(model_pred, target, reduction="mean")
 
                         avg_loss = accelerator.gather(loss.repeat(batch_size)).mean()
 
@@ -354,7 +352,7 @@ def main(
                         logger.info(f"Saved state to {save_path}")
 
                 if global_step % validation_steps == 0:
-                    with torch.no_grad():
+                    with torch.no_grad(), accelerator.autocast():
                         update_concepts_embedding(clip_tokenizer, clip_text_encoder, concept_tokens=concepts_list, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
                         generator = torch.Generator(device=latents.device)
                         if seed is not None:
@@ -373,7 +371,7 @@ def main(
                             
                             noise = torch.randn_like(latents)
                             bsz = latents.shape[0]
-                            timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+                            timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
                             timesteps = timesteps.long()
 
                             noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
@@ -404,12 +402,12 @@ def main(
                             samples = []
                             prompts_samples = accelerator.gather(prompts_samples)
                             for prompt, sample in prompts_samples.items():
-                                save_video(sample, f"{output_dir}/samples/sample-{global_step}/{prompt}.gif", rescale=Fasle)
+                                save_video(sample, f"{output_dir}/samples/sample-{global_step}/{prompt}.gif", rescale=False)
                                 accelerator.log({f"sample/{prompt}": wandb.Video((255 * sample.permute(1, 0, 2, 3)).to(torch.uint8).detach().cpu().numpy())}, step=global_step)
                                 samples.append(sample)
                             samples = torch.stack(samples)
                             save_path = f"{output_dir}/samples/sample-{global_step}.gif"
-                            save_videos_grid(samples, save_path, rescale=Fasle)
+                            save_videos_grid(samples, save_path, rescale=False)
                             logger.info(f"Saved samples to {save_path}")
 
                     torch.cuda.empty_cache()
