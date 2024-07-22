@@ -1,0 +1,60 @@
+pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
+pretrained_concepts_model_path: "./checkpoints/concepts_clip/vehicles-subset"
+output_dir: ".log/stive/vehicles-subset/base/"
+checkpoints_dir: "checkpoints/stive/vehicles-subset/"
+
+train_data:
+  sources:
+    - "data/targets/videos/car-turn.mp4"
+    - "data/concepts/videos/ferrari.mp4"
+  prompts:
+    - "a jeep car is moving on the road."
+    - "a $FERRARI is moving on the road."
+  num_frames: 8
+  sample_stride: 1
+  width: 512
+  height: 512
+  rand_slice: True
+
+validation_data:
+  source: "data/targets/videos/car-turn.mp4"
+  edit_prompts:
+    - "a $FERRARI is moving on the road."
+  num_frames: 8
+  sample_stride: 1
+  width: 512
+  height: 512
+
+lora_conf:
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
+  target_modules:
+    - "attn1.to_q"
+    - "attn2.to_k"
+    - "attn2.to_v"
+    # - "ff.net.0.proj"
+    # - "ff.net.2"
+
+  bias: "none"
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+learning_rate: 5.0e-5
+batch_size: 1
+num_train_epoch: 500
+checkpointing_steps: 1000
+validation_steps: 50
+
+seed: 33
+mixed_precision: 'fp16'
+# mixed_precision: 'no'
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+enable_torch_2_attn: True
+gradient_accumulation_steps: 1

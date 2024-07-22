@@ -6,13 +6,15 @@ import torchvision
 from einops import rearrange
 
 def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=4, fps=8):
-    videos = rearrange(videos, "b c t h w -> t b c h w")
+    videos = rearrange(videos, "b t c h w -> t b c h w")
     outputs = []
     for x in videos:
         x = torchvision.utils.make_grid(x, nrow=n_rows)
         x = x.transpose(0, 1).transpose(1, 2).squeeze(-1)
         if rescale:
-            x = ((x + 1.0) / 2.0).clamp(0, 1)  # -1,1 -> 0,1
+            x = ((x + 1.0) / 2.0).clamp(0, 1)  # -1,1 -> 0,1、
+        else:
+            x = x.clamp(0, 1)
         x = (x * 255).cpu().numpy().astype(np.uint8)
         outputs.append(x)
 
@@ -47,7 +49,7 @@ def save_images(images, rescale=True, save_path=None):
     return horizontal_image
 
 def save_video(video: torch.Tensor, path: str, rescale=False, fps=8):
-    video = rearrange(video, "c t h w -> t h w c")
+    video = rearrange(video, "t c h w -> t h w c")
     if rescale:
         video = (video / 2 + 0.5)
     video = video.clamp(0, 1)

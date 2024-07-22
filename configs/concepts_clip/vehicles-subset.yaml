@@ -1,0 +1,48 @@
+pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
+output_dir: ".log/concepts_clip/vehicles-subset/base/"
+checkpoints_dir: "checkpoints/concepts_clip/vehicles-subset/"
+
+train_data:
+  data_dir: "data/concepts/vehicles-subset/"
+  width: 512
+  height: 512
+  num_frames: 8
+  sample_stride: 1
+  rand_slice: True
+  concepts_prompt: True
+
+validation_data:
+  sources:
+    - "data/targets/videos/car-turn.mp4"
+  prompts:
+    - "a $FERRARI is moving on the road."
+
+  num_frames: 8
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 10
+  use_inv_latent: True
+  num_inv_steps: 50
+
+
+concepts_file: "data/concepts/vehicles-subset/concepts.json"
+retain_position_embedding: True
+concepts_num_embedding: 1
+learning_rate: 5.0e-3
+batch_size: 1
+num_train_epoch: 500
+checkpointing_steps: 1000
+validation_steps: 50
+
+seed: 33
+mixed_precision: 'fp16'
+# mixed_precision: 'no'
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+enable_torch_2_attn: True
+gradient_accumulation_steps: 1

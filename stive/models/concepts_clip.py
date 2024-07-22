@@ -150,6 +150,9 @@ class ConceptsCLIPTextModel(CLIPTextModel):
             output_hidden_states: Optional[bool] = None,
             return_dict: Optional[bool] = None,
     ):
+        print(f'input_ids: {input_ids}')
+        print(f'replace_indices: {replace_indices}')
+        print(f'concept_indices: {concept_indices}')
         assert input_ids is not None and len(input_ids) > 0, f"Invaild input_ids, input_ids is None or len(input_ids) == 0"
         
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
