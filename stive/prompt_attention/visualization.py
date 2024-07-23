@@ -6,9 +6,9 @@ from PIL import Image
 
 import torch
 
-import video_diffusion.prompt_attention.ptp_utils as ptp_utils
-from video_diffusion.common.image_util import save_gif_mp4_folder_type
-from video_diffusion.prompt_attention.attention_store import AttentionStore
+import stive.prompt_attention.ptp_utils as ptp_utils
+from stive.utils.pta_utils import save_gif_mp4_folder_type
+from stive.prompt_attention.attention_store import AttentionStore
 
 
 def aggregate_attention(prompts, attention_store: AttentionStore, res: int, from_where: List[str], is_cross: bool, select: int):

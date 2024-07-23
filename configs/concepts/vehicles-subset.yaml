@@ -1,6 +1,6 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-output_dir: ".log/concepts_clip/vehicles-subset/base/"
-checkpoints_dir: "checkpoints/concepts_clip/vehicles-subset/"
+output_dir: ".log/concepts/vehicles-subset/base/"
+checkpoints_dir: "checkpoints/concepts/vehicles-subset/"
 
 train_data:
   data_dir: "data/concepts/vehicles-subset/"
@@ -13,27 +13,28 @@ train_data:
 
 validation_data:
   sources:
-    - "data/targets/videos/car-turn.mp4"
+    - "data/concepts/vehicles-subset/videos/car-turn.mp4"
     - "data/concepts/vehicles-subset/videos/ferrari.mp4"
+    - "data/concepts/vehicles-subset/videos/car-turn.mp4"
   prompts:
-    - "a $FERRARI is moving on the road."
+    - "a $JEEP is moving on the road."
     - "a $FERRARI is driving through the forest."
-  num_frames: 20
+    - "a $FERRARI is moving on the road."
+  num_frames: 8
   sample_stride: 1
   width: 512
   height: 512
 
 inference_conf:
   num_inference_steps: 50
-  guidance_scale: 12
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 50
 
-retain_position_embedding: True
-concepts_num_embedding: 1
+concepts_file: "data/concepts/vehicles-subset/concepts.json"
 learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 500
+num_train_epoch: 200
 checkpointing_steps: 1000
 validation_steps: 50
 

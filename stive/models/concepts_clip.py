@@ -153,6 +153,9 @@ class ConceptsCLIPTextModel(CLIPTextModel):
         print(f'input_ids: {input_ids}')
         print(f'replace_indices: {replace_indices}')
         print(f'concept_indices: {concept_indices}')
+        print(f'concepts_list: {self.concepts_list}')
+        print(f'concepts_embedder: {self.concepts_embedder.weight.data}')
+        
         assert input_ids is not None and len(input_ids) > 0, f"Invaild input_ids, input_ids is None or len(input_ids) == 0"
         
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
@@ -178,9 +181,11 @@ class ConceptsCLIPTextModel(CLIPTextModel):
                 replace_idx = torch.as_tensor(replace_indices[i], dtype=torch.long, device=input_ids.device)
                 concept_idx = torch.as_tensor(concept_indices[i], dtype=torch.long, device=input_ids.device)
                 if self.retain_position_embedding:
-                    hidden_states[i, replace_idx] = self.concepts_embedder(concept_idx) + self.text_model.embeddings.position_embedding(replace_idx)
+                    hidden_states[i, replace_idx] = 0
+                    hidden_states[i, replace_idx] += self.concepts_embedder(concept_idx) + self.text_model.embeddings.position_embedding(replace_idx)
                 else:
-                    hidden_states[i, replace_idx] = self.concepts_embedder(concept_idx)
+                    hidden_states[i, replace_idx] = 0
+                    hidden_states[i, replace_idx] += self.concepts_embedder(concept_idx)
         
         # CLIP's text model uses causal mask, prepare it here.
         # https://github.com/openai/CLIP/blob/cfcffb90e69f37bf2ff1e988237a0fbe41f33c04/clip/model.py#L324

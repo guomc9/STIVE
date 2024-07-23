@@ -1,6 +1,6 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-output_dir: ".log/concepts_clip/vehicles/base/"
-checkpoints_dir: "checkpoints/concepts_clip/vehicles/"
+output_dir: ".log/concepts/vehicles/base/"
+checkpoints_dir: "checkpoints/concepts/vehicles/"
 
 train_data:
   data_dir: "data/concepts/vehicles/"

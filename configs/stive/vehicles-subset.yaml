@@ -1,14 +1,14 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-pretrained_concepts_model_path: "./checkpoints/concepts_clip/vehicles-subset"
+pretrained_concepts_model_path: "./checkpoints/concepts/vehicles-subset"
 output_dir: ".log/stive/vehicles-subset/base/"
 checkpoints_dir: "checkpoints/stive/vehicles-subset/"
 
 train_data:
   sources:
-    - "data/targets/videos/car-turn.mp4"
+    - "data/concepts/vehicles-subset/videos/car-turn.mp4"
     - "data/concepts/vehicles-subset/videos/ferrari.mp4"
   prompts:
-    - "a jeep car is moving on the road."
+    - "a $JEEP is moving on the road."
     - "a $FERRARI is moving on the road."
   num_frames: 8
   sample_stride: 1
@@ -17,12 +17,11 @@ train_data:
   rand_slice: True
 
 validation_data:
-  source: "data/targets/videos/car-turn.mp4"
+  source: "data/concepts/vehicles-subset/videos/car-turn.mp4"
+  source_prompt: "a $JEEP is moving on the road."
   edit_prompts:
-    - "a $FERRARI is moving on the road."
-  # source: "data/concepts/vehicles-subset/videos/ferrari.mp4"
-  # edit_prompts:
-  #   - "a $FERRARI is driving through the forest."
+    - "a $JEEP is moving on the road.
+    - "a $FERRARI car is moving on the road."
   num_frames: 8
   sample_stride: 1
   width: 512
@@ -49,7 +48,7 @@ inference_conf:
 
 learning_rate: 5.0e-5
 batch_size: 1
-num_train_epoch: 500
+num_train_epoch: 400
 checkpointing_steps: 1000
 validation_steps: 50
 

@@ -7,7 +7,7 @@ import abc
 import os
 import copy
 import torch
-from video_diffusion.common.util import get_time_string
+from stive.utils.pta_utils import get_time_string
 
 class AttentionControl(abc.ABC):
     

@@ -41,10 +41,10 @@ class VideoPromptDataset(Dataset):
         videos = {}
         for _, row in df.iterrows():
             video_name = row['Video name']
-            videos[video_name] = {}
             prompt = row['Our GT caption'] if not self.concepts_prompt else row['Concepts Prompt']
             video_path = os.path.join(video_dir, video_name)
             if os.path.exists(video_path):
+                videos[video_name] = {}
                 cap = cv2.VideoCapture(video_path)
                 if len(cap) >= self.num_frames:
                     frames = []
@@ -69,7 +69,6 @@ class VideoPromptDataset(Dataset):
             F = video.shape[0]
             max_start_frame = F - (self.num_frames - 1) * sample_stride
             start_frame = random.randint(0, max_start_frame - 1)
-            print(f'start_frame: {start_frame}')
             sample_indices = torch.arange(start_frame, start_frame + self.num_frames * sample_stride, sample_stride)[:self.num_frames]
             frames = video[sample_indices]
         else:
@@ -185,8 +184,9 @@ class VideoPromptTupleDataset(Dataset):
 
 
 class VideoEditPromptsDataset(Dataset):
-    def __init__(self, source, edit_prompts=None, num_frames=12, sample_stride=1, height=512, width=512):
+    def __init__(self, source, source_prompt, edit_prompts=None, num_frames=12, sample_stride=1, height=512, width=512):
         self.source = source
+        self.source_prompt = source_prompt
         if edit_prompts is None:
             self.prompts = []
         else:
@@ -233,23 +233,27 @@ class VideoEditPromptsDataset(Dataset):
         return len(self.prompts)
 
     def __getitem__(self, idx):
+        source_prompts = []
         prompts = []                            # [B]
         frames_list = []                        # [B, F, H, W, 3]
         if isinstance(idx, list):
             for i in idx:
+                source_prompts.append(self.source_prompt)
                 prompt = self.prompts[i]
                 frames, sample_indices = self._sample_frames(self.frames)                    # [F, H, W, 3]
                 prompts.append(prompt)
                 frames_list.append(frames)
                 
-            return {'frames': torch.stack(frames_list), 'prompts': prompts}
+            return {'frames': torch.stack(frames_list), 'prompts': prompts, 'source_prompts': source_prompts}
         else:
+            source_prompts = []
             prompt = prompts[idx]
+            source_prompts.append(self.source_prompt)
             frames, sample_indices = self._sample_frames(self.frames)                        # [F, H, W, 3]
             prompts.append(prompt)
             frames_list.append(frames)
                 
-            return {'frames': torch.stack(frames_list), 'prompts': prompts}
+            return {'frames': torch.stack(frames_list), 'prompts': prompts, 'source_prompts': source_prompts}
 
 
 class LatentPromptCacheDataset(Dataset):
@@ -274,12 +278,12 @@ class LatentPromptCacheDataset(Dataset):
         else:
             prompts = df['Our GT caption'].tolist()
 
+        latent_names = df['Video name'].tolist()
         # Load latents
         latents = []
-        for latent_file in sorted(os.listdir(latents_dir)):
-            if latent_file.endswith('.pt'):
-                latent_path = os.path.join(latents_dir, latent_file)
-                latents.append(torch.load(latent_path))
+        for i, latent_name in enumerate(latent_names):
+            latent_path = os.path.join(latents_dir, f'{latent_name}.pt')
+            latents.append(torch.load(latent_path))
 
         return latents, prompts
 

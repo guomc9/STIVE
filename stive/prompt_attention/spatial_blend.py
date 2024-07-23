@@ -12,7 +12,7 @@ from einops import rearrange
 import torch
 import torch.nn.functional as F
 
-import video_diffusion.prompt_attention.ptp_utils as ptp_utils
+import stive.prompt_attention.ptp_utils as ptp_utils
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -165,6 +165,7 @@ class SpatialBlender:
         
         self.alpha_layers = alpha_layers.to(device)
         print('the index mask of edited word in the prompt')
+        print(prompts)
         print(self.alpha_layers[0][..., 0:(len(prompts[0].split(" "))+2)])
         print(self.alpha_layers[1][..., 0:(len(prompts[1].split(" "))+2)])
         

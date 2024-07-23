@@ -9,7 +9,7 @@ def add_concepts_embeddings(tokenizer: CLIPTokenizer, text_encoder: CLIPTextMode
     token_ids = tokenizer.convert_tokens_to_ids(concept_tokens)
     token_ids_and_embeddings = zip(token_ids, concept_embeddings)
     with torch.no_grad():
-        for token_id, embedding in token_ids_and_embeddings:
+        for i, (token_id, embedding) in enumerate(token_ids_and_embeddings):
             text_encoder.get_input_embeddings().weight.data[token_id] = embedding
     
 
@@ -17,5 +17,5 @@ def update_concepts_embedding(tokenizer: CLIPTokenizer, text_encoder: CLIPTextMo
     token_ids = tokenizer.convert_tokens_to_ids(concept_tokens)
     token_ids_and_embeddings = zip(token_ids, concept_embeddings)
     with torch.no_grad():
-        for token_id, embedding in token_ids_and_embeddings:
+        for i, (token_id, embedding) in enumerate(token_ids_and_embeddings):
             text_encoder.get_input_embeddings().weight.data[token_id] = embedding

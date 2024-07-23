@@ -12,12 +12,12 @@ from einops import rearrange
 import torch
 import torch.nn.functional as F
 
-import video_diffusion.prompt_attention.ptp_utils as ptp_utils
-import video_diffusion.prompt_attention.seq_aligner as seq_aligner
-from video_diffusion.prompt_attention.spatial_blend import SpatialBlender
-from video_diffusion.prompt_attention.visualization import show_cross_attention, show_self_attention_comp
-from video_diffusion.prompt_attention.attention_store import AttentionStore, AttentionControl
-from video_diffusion.prompt_attention.attention_register import register_attention_control
+import stive.prompt_attention.ptp_utils as ptp_utils
+import stive.prompt_attention.seq_aligner as seq_aligner
+from stive.prompt_attention.spatial_blend import SpatialBlender
+from stive.prompt_attention.visualization import show_cross_attention, show_self_attention_comp
+from stive.prompt_attention.attention_store import AttentionStore, AttentionControl
+from stive.prompt_attention.attention_register import register_attention_control
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 

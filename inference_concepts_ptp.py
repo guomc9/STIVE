@@ -27,14 +27,15 @@ from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
 from stive.models.unet_3d_condition import UNet3DConditionModel
-from stive.data.dataset import VideoPromptTupleDataset as VideoPromptValDataset
+from stive.data.dataset import VideoEditPromptsDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from einops import rearrange, repeat
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
 import os
-import wandb
-import subprocess
+from stive.prompt_attention.attention_util import AttentionControlEdit, SpatialBlender, make_controller
+from stive.prompt_attention.attention_register import register_attention_control
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
@@ -101,47 +102,19 @@ def handle_memory_attention(enable_xformers_memory_efficient_attention, enable_t
 
 def main(
     pretrained_t2v_model_path: str,
+    pretrained_concepts_model_path: str,
     output_dir: str,
     checkpoints_dir: str, 
-    train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
-    validation_steps: int = 200,
-    batch_size: int = 1,
-    warmup_epoch_rate: float = 0.1, 
-    num_train_epoch: int = 200,
-    learning_rate: float = 5e-3,
-    scale_lr: bool = False,
-    lr_scheduler_type: str = "constant",
-    adam_beta1: float = 0.9,
-    adam_beta2: float = 0.999,
-    adam_weight_decay: float = 1e-2,
-    adam_epsilon: float = 1e-08,
-    max_grad_norm: float = 1.0,
-    gradient_accumulation_steps: int = 1,
-    gradient_checkpointing: bool = True,
-    checkpointing_steps: int = 200,
+    ptp_conf: Dict, 
     mixed_precision: Optional[str] = "fp16",
-    use_8bit_adam: bool = False,
-    enable_xformers_memory_efficient_attention: bool = True,
-    enable_torch_2_attn: bool = True, 
     seed: Optional[int] = None, 
+    **extra_args,
 ):
     *_, config = inspect.getargvalues(inspect.currentframe())
 
-    # result = subprocess.run([
-    #     'python', 
-    #     'scripts/cache_latents.py', 
-    #     '-d', f"{train_data['data_dir']}", 
-    #     '-H', f"{train_data['height']}", 
-    #     '-W', f"{train_data['width']}", 
-    #     '-s', f"{seed}", 
-    # ], capture_output=True, text=True)
-    # print("scripts/cache_latents.py stdout:", result.stdout)
-    # print("scripts/cache_latents.py stderr:", result.stderr)
-    
     accelerator = Accelerator(
-        gradient_accumulation_steps=gradient_accumulation_steps,
         mixed_precision=mixed_precision
     )
     
@@ -156,7 +129,7 @@ def main(
         output_dir = checkpoints_dir
 
     noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(checkpoints_dir, subfolder="text_encoder")
+    concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
     concepts_text_encoder.requires_grad_(False)
@@ -169,11 +142,11 @@ def main(
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     unet.requires_grad_(False)
-    handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
-    
-    val_dataset = VideoPromptValDataset(**validation_data)
+    # handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
+
+    val_dataset = VideoEditPromptsDataset(**validation_data)
     val_dataloader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=batch_size
+        val_dataset, batch_size=1
     )
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
         pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
@@ -204,9 +177,26 @@ def main(
         if seed is not None:
             generator.manual_seed(seed)
         prompts_samples = {}
-        for _, batch in enumerate(val_dataloader):
-            pixel_values = batch["frames"].to(weight_dtype)
-            prompts = batch['prompts']
+        for i, batch in enumerate(val_dataloader):
+            pixel_values = batch["frames"].to(weight_dtype)             # [1, F, C, H, W]
+            prompts = batch['prompts']                                  # [1, T]
+            source_prompts = batch['source_prompts']                    # [1, T]
+            blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
+            
+            controller = make_controller(
+                tokenizer=tokenizer,
+                prompts=[source_prompts[0], prompts[0]],
+                is_replace_controller=ptp_conf['is_replace_controller'],
+                cross_replace_steps={"default_": (ptp_conf['cross_replace_steps']['begin'], ptp_conf['cross_replace_steps']['end'])},
+                self_replace_steps=(ptp_conf['self_replace_steps']['begin'], ptp_conf['self_replace_steps']['end']),
+                blend_words=blend_word,
+                blend_self_attention=ptp_conf['blend_self_attention'],
+                use_inversion_attention=ptp_conf['use_inversion_attention'], 
+                NUM_DDIM_STEPS=inference_conf["num_inference_steps"],
+                save_path="./attention_masks"
+            )
+
+            register_attention_control(validation_pipeline, controller)
             
             video_length = pixel_values.shape[1]
             pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
@@ -246,14 +236,11 @@ def main(
             samples = []
             prompts_samples = accelerator.gather(prompts_samples)
             for prompt, sample in prompts_samples.items():
-                save_video(sample, f"{output_dir}/inferences/{prompt}.gif", rescale=False)
-                samples.append(sample)
-            samples = torch.stack(samples)
-            save_path = f"{output_dir}/inferences/global.gif"
-            save_videos_grid(samples, save_path, rescale=False)
-            logger.info(f"Saved samples to {save_path}")
-
-    torch.cuda.empty_cache()
+                save_path = f'{output_dir}/inferences/{prompt}.gif'
+                save_video(sample, save_path, rescale=False)
+                logger.info(f"Saved {prompt} to {save_path}")
+        
+        torch.cuda.empty_cache()
     accelerator.wait_for_everyone()
 
 if __name__ == "__main__":
