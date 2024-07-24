@@ -190,12 +190,16 @@ def main(
     unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
     handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
     unet.to(dtype=weight_dtype)
-    lora_conf = LoraConfig(
-        r = 8, 
-        lora_alpha = 32, 
-        lora_dropout = 0.1, 
-        target_modules = ["attn1.to_q", "attn2.to_k", "attn2.to_v"]
-    )
+    print(lora_conf)
+    lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+    # lora_conf = LoraConfig(
+    #     r = 8, 
+    #     lora_alpha = 32, 
+    #     lora_dropout = 0.1, 
+    #     target_modules = ["attn1.to_q", "attn2.to_k", "attn2.to_v"]
+    # )
+    
+    lora_conf = LoraConfig(**lora_conf)
     
     lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
     lora_unet.print_trainable_parameters()
@@ -205,7 +209,6 @@ def main(
     lora_unet.requires_grad_(False)
     for name, param in lora_unet.named_parameters():
         if 'lora' in name:
-            print(name)
             param.requires_grad = True
             param.data = param.data.float()
     
@@ -312,12 +315,12 @@ def main(
 
                         encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
                         
-                        if noise_scheduler.prediction_type == "epsilon":
+                        if noise_scheduler.config.prediction_type == "epsilon":
                             target = noise
-                        elif noise_scheduler.prediction_type == "v_prediction":
+                        elif noise_scheduler.config.prediction_type == "v_prediction":
                             target = noise_scheduler.get_velocity(latents, noise, timesteps)
                         else:
-                            raise ValueError(f"Unknown prediction type {noise_scheduler.prediction_type}")
+                            raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
 
                         model_pred = lora_unet(noisy_latents, timesteps, encoder_hidden_states).sample
                         
@@ -354,8 +357,8 @@ def main(
                         logger.info(f"Saved state to {save_path}")
 
                 if global_step % validation_steps == 0:
-                    torch.cuda.empty_cache()
                     with torch.no_grad(), accelerator.autocast():
+                        torch.cuda.empty_cache()
                         generator = torch.Generator(device=accelerator.device)
                         if seed is not None:
                             generator.manual_seed(seed)
@@ -408,7 +411,7 @@ def main(
                             save_videos_grid(samples, save_path, rescale=False)
                             logger.info(f"Saved samples to {save_path}")
 
-                    torch.cuda.empty_cache()
+                        torch.cuda.empty_cache()
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:

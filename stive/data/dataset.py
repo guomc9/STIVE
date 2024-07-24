@@ -254,6 +254,9 @@ class VideoEditPromptsDataset(Dataset):
             frames_list.append(frames)
                 
             return {'frames': torch.stack(frames_list), 'prompts': prompts, 'source_prompts': source_prompts}
+        
+    def get_source(self):
+        return {'frames': torch.stack([self._sample_frames(self.frames)[0]]), 'source_prompts': [self.source_prompt]}
 
 
 class LatentPromptCacheDataset(Dataset):

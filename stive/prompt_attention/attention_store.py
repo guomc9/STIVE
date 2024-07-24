@@ -90,6 +90,7 @@ class AttentionStore(AttentionControl):
                 self.step_store[key].append(copy.deepcopy(append_tensor))
                 # FIXME: Are these deepcopy all necessary?
                 # self.step_store[key].append(append_tensor)
+        # print(f'len(self.step_store[{key}])={len(self.step_store[key])}')
         return attn
 
     def between_steps(self):
@@ -107,6 +108,7 @@ class AttentionStore(AttentionControl):
         else:
             self.attention_store_all_step.append(copy.deepcopy(self.step_store))
         self.step_store = self.get_empty_store()
+        print('clear step_store !!!!')
 
     def get_average_attention(self):
         "divide the attention map value in attention store by denoising steps"

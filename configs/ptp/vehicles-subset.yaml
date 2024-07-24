@@ -15,25 +15,22 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 50
-  guidance_scale: 7.5
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 50
 
 ptp_conf:
   is_replace_controller: True
-  cross_replace_steps: 
-    begin: 0.1
-    end: 1.0
-  self_replace_steps: 
-    begin: 0.1
-    end: 1.0
+  cross_replace_steps: [0.5, 1.0]
+  self_replace_steps: [0.5, 1.0]
   blend_words: 
     sources:
-      - "jeep"
+      - "$JEEP"
     targets:
       - "$FERRARI"
   blend_self_attention: True
   use_inversion_attention: True
+  blend_th: [0.3, 0.3]
 
 seed: 33
 mixed_precision: 'fp16'

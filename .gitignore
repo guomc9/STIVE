@@ -6,3 +6,7 @@ wandb
 .log
 test*
 __pycache__
+docs
+attention_masks
+trash
+.log.txt

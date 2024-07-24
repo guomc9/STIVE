@@ -23,17 +23,18 @@ from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version
 from diffusers.utils.import_utils import is_xformers_available
 from diffusers.pipelines import TextToVideoSDPipeline
+from diffusers.models import UNet3DConditionModel
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
+from stive.pipelines.pipeline_ptp_ttv import PtpTextToVideoSDPipeline
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
-from stive.models.unet_3d_condition import UNet3DConditionModel
 from stive.data.dataset import VideoEditPromptsDataset
 from stive.utils.ddim_utils import ddim_inversion
+from stive.utils.pta_utils import save_gif_mp4_folder_type
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from einops import rearrange, repeat
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
-import os
-from stive.prompt_attention.attention_util import AttentionControlEdit, SpatialBlender, make_controller
+from stive.prompt_attention.attention_util import AttentionStore, make_controller
 from stive.prompt_attention.attention_register import register_attention_control
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -132,6 +133,8 @@ def main(
     concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
+    scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder='scheduler')
+    scheduler.set_timesteps(inference_conf.num_inv_steps)
     concepts_text_encoder.requires_grad_(False)
     add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
     del concepts_text_encoder
@@ -148,13 +151,12 @@ def main(
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=1
     )
-    validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
-    )
+    validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, scheduler=scheduler)
+    # validation_pipeline = TextToVideoSDPipeline.from_pretrained(
+    #     pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
+    # )
     validation_pipeline.enable_vae_slicing()
     
-    ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder='scheduler')
-    ddim_inv_scheduler.set_timesteps(inference_conf.num_inv_steps)
 
     unet, text_encoder, vae, val_dataloader = accelerator.prepare(
         unet, text_encoder, vae, val_dataloader
@@ -172,64 +174,67 @@ def main(
     unet.eval()
     text_encoder.eval()
     torch.cuda.empty_cache()
+    source = val_dataset.get_source()
+    
     with torch.no_grad(), accelerator.autocast():
+        source_text_embeddings = validation_pipeline._encode_prompt(
+            prompt=source['source_prompts'], 
+            device=accelerator.device, 
+            num_images_per_prompt=1, 
+            do_classifier_free_guidance=True, 
+            negative_prompt=None
+        )
+        
+        all_step_source_latents = validation_pipeline.prepare_ddim_source_latents(
+            frames=source['frames'].to(accelerator.device, dtype=weight_dtype), 
+            text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype), 
+            prompt=source['source_prompts'], 
+            store_attention=ptp_conf['use_inversion_attention'], 
+            LOW_RESOURCE=True, 
+            save_path=output_dir
+        )
+        source_init_latents = all_step_source_latents[-1]
+        
         generator = torch.Generator(device=accelerator.device)
         if seed is not None:
             generator.manual_seed(seed)
-        prompts_samples = {}
+        
+        samples = []
+        attention_all = []
         for i, batch in enumerate(val_dataloader):
-            pixel_values = batch["frames"].to(weight_dtype)             # [1, F, C, H, W]
-            prompts = batch['prompts']                                  # [1, T]
-            source_prompts = batch['source_prompts']                    # [1, T]
+            pixel_values = batch["frames"].to(weight_dtype)                 # [1, F, C, H, W]
+            target_prompts = batch['prompts'][0]                            # [T]
+            source_prompts = batch['source_prompts'][0]                     # [T]
             blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
             
-            controller = make_controller(
-                tokenizer=tokenizer,
-                prompts=[source_prompts[0], prompts[0]],
-                is_replace_controller=ptp_conf['is_replace_controller'],
-                cross_replace_steps={"default_": (ptp_conf['cross_replace_steps']['begin'], ptp_conf['cross_replace_steps']['end'])},
-                self_replace_steps=(ptp_conf['self_replace_steps']['begin'], ptp_conf['self_replace_steps']['end']),
-                blend_words=blend_word,
-                blend_self_attention=ptp_conf['blend_self_attention'],
-                use_inversion_attention=ptp_conf['use_inversion_attention'], 
-                NUM_DDIM_STEPS=inference_conf["num_inference_steps"],
-                save_path="./attention_masks"
-            )
-
-            register_attention_control(validation_pipeline, controller)
-            
-            video_length = pixel_values.shape[1]
-            pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
-
-            latents = vae.encode(pixel_values).latent_dist.sample()
-            latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
-            latents = latents * 0.18215
-            
-            noise = torch.randn_like(latents)
-            bsz = latents.shape[0]
-            timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
-            timesteps = timesteps.long()
-
-            noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-
-            ddim_inv_latent = None
-            
-            if inference_conf.use_inv_latent:
-                ddim_inv_latent = ddim_inversion(
-                    validation_pipeline, ddim_inv_scheduler, video_latent=latents,
-                    num_inv_steps=inference_conf.num_inv_steps, prompt="")[-1].to(weight_dtype)
-
-            samples = validation_pipeline(
-                prompt=prompts, 
+            edited_output = validation_pipeline.ptp_replace_edit(
+                latents=source_init_latents, 
+                source_prompt=source_prompts, 
+                target_prompt=target_prompts, 
+                num_inference_steps=inference_conf["num_inference_steps"], 
+                is_replace_controller=ptp_conf.get('is_replace_controller', True), 
+                cross_replace_steps=ptp_conf.get('cross_replace_steps', 0.5), 
+                self_replace_steps=ptp_conf.get('self_replace_steps', 0.5), 
+                blend_words=blend_word, 
+                equilizer_params=ptp_conf.get('eq_params', None), 
+                use_inversion_attention = ptp_conf.get('use_inversion_attention', None), 
+                blend_th = ptp_conf.get('blend_th', (0.3, 0.3)), 
+                blend_self_attention = ptp_conf.get('blend_self_attention', None), 
+                blend_latents=ptp_conf.get('blend_latents', None), 
+                save_path=output_dir, 
+                save_self_attention = ptp_conf.get('save_self_attention', True), 
+                guidance_scale=inference_conf["guidance_scale"], 
                 generator=generator, 
-                latents=ddim_inv_latent, 
-                num_inference_steps=inference_conf['num_inference_steps'], 
-                guidance_scale=inference_conf['guidance_scale'], 
-                num_frames=validation_data['num_frames'], 
-                output_type='pt', 
-            ).frames
+                disk_store = ptp_conf.get('disk_store', False), 
+            )
+            samples = edited_output['edited_frames']
+            attention_output = edited_output['attention_output']
             
-            for p, s in zip(prompts, samples):
+            save_path = os.path.join(output_dir, f"attn_prob")
+            os.makedirs(save_path, exist_ok=True)
+            save_gif_mp4_folder_type(attention_output, os.path.join(save_path, f'{target_prompts}-attn_prob.gif'))
+            
+            for p, s in zip(target_prompts, samples):
                 prompts_samples[p] = s
             
         if accelerator.is_main_process:

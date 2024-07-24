@@ -308,12 +308,12 @@ def main(
                         else:
                             encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
                         
-                        if noise_scheduler.prediction_type == "epsilon":
+                        if noise_scheduler.config.prediction_type == "epsilon":
                             target = noise
-                        elif noise_scheduler.prediction_type == "v_prediction":
+                        elif noise_scheduler.config.prediction_type == "v_prediction":
                             target = noise_scheduler.get_velocity(latents, noise, timesteps)
                         else:
-                            raise ValueError(f"Unknown prediction type {noise_scheduler.prediction_type}")
+                            raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
 
                         model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                         

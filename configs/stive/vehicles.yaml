@@ -1,6 +1,6 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-output_dir: ".log/concepts_clip/vehicles/base/"
-checkpoints_dir: "checkpoints/concepts_clip/vehicles/"
+output_dir: ".log/concepts/vehicles/base/"
+checkpoints_dir: "checkpoints/concepts/vehicles/"
 
 train_data:
   data_dir: "data/concepts/vehicles/"
@@ -34,6 +34,17 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 50
 
+lora_conf:
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
+  target_modules:
+    - "attn1.to_q"
+    - "attn2.to_k"
+    - "attn2.to_v"
+    # - "ff.net.0.proj"
+    # - "ff.net.2"
+  bias: "none"
 
 concepts_file: "data/concepts/vehicles/concepts.json"
 retain_position_embedding: True

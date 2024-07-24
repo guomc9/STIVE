@@ -25,10 +25,10 @@ from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version
 from diffusers.utils.import_utils import is_xformers_available
 from diffusers.pipelines import TextToVideoSDPipeline
+from diffusers.models import UNet3DConditionModel
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
-from stive.models.unet_3d_condition import UNet3DConditionModel
 from stive.data.dataset import VideoPromptTupleDataset, VideoEditPromptsDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
