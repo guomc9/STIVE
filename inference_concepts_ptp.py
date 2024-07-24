@@ -184,7 +184,7 @@ def main(
             do_classifier_free_guidance=True, 
             negative_prompt=None
         )
-        
+        print(f'source["frames"].shape: {source["frames"].shape}')
         all_step_source_latents = validation_pipeline.prepare_ddim_source_latents(
             frames=source['frames'].to(accelerator.device, dtype=weight_dtype), 
             text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype), 
@@ -194,6 +194,7 @@ def main(
             save_path=output_dir
         )
         source_init_latents = all_step_source_latents[-1]
+        print(f'source_init_latents.shape: {source_init_latents.shape}')
         
         generator = torch.Generator(device=accelerator.device)
         if seed is not None:
@@ -222,7 +223,7 @@ def main(
                 blend_self_attention = ptp_conf.get('blend_self_attention', None), 
                 blend_latents=ptp_conf.get('blend_latents', None), 
                 save_path=output_dir, 
-                save_self_attention = ptp_conf.get('save_self_attention', True), 
+                save_self_attention=ptp_conf.get('save_self_attention', True), 
                 guidance_scale=inference_conf["guidance_scale"], 
                 generator=generator, 
                 disk_store = ptp_conf.get('disk_store', False), 

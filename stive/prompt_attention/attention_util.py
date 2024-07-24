@@ -125,18 +125,18 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 clip_length = attn.shape[0] // (self.batch_size)
                 attn = attn.reshape(self.batch_size, clip_length, *attn.shape[1:])
                 # Replace att_replace with attn_base
-                attn_base, attn_repalce = attn_base, attn[0:]
+                attn_base, attn_replace = attn_base, attn[0:]
                 if is_cross:
                     alpha_words = self.cross_replace_alpha[self.cur_step]
-                    attn_repalce_new = self.replace_cross_attention(attn_base, attn_repalce) * alpha_words + (1 - alpha_words) * attn_repalce
-                    attn[0:] = attn_repalce_new # b t h p n = [1, 1, 8, 1024, 77]
+                    attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * alpha_words + (1 - alpha_words) * attn_replace
+                    attn[0:] = attn_replace_new # b t h p n = [1, 1, 8, 1024, 77]
                 else:
                     
                     # start of masked self-attention
-                    if self.attention_blend is not None and attn_repalce.shape[-2] <= 32 ** 2:
+                    if self.attention_blend is not None and attn_replace.shape[-2] <= 32 ** 2:
                         # ca_this_step = step_in_store_atten_dict
                         # query 1024, key 2048
-                        h = int(np.sqrt(attn_repalce.shape[-2]))
+                        h = int(np.sqrt(attn_replace.shape[-2]))
                         w = h
                         mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=step_in_store)
                         # reshape from ([ 1, 2, 32, 32]) -> [2, 1, 1024, 1]
@@ -148,7 +148,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                         # mask should be repeat.
                     else: 
                         reshaped_mask = None
-                    attn[0:] = self.replace_self_attention(attn_base, attn_repalce, reshaped_mask)
+                    attn[0:] = self.replace_self_attention(attn_base, attn_replace, reshaped_mask)
 
                 
                 

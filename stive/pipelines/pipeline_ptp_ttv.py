@@ -193,7 +193,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         eta: float = 0.0,
         generator: Optional[Union[torch.Generator, List[torch.Generator]]] = None,
         output_type: Optional[str] = "pt",
-        return_dict: bool = False,
+        return_dict: bool = True,
         callback: Optional[Callable[[int, int, torch.FloatTensor], None]] = None,
         callback_steps: Optional[int] = 1,
         controller: attention_util.AttentionControl = None,

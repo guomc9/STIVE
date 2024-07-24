@@ -11,20 +11,33 @@ import torch
 import torch.nn.functional as F
 from typing import Optional
 from diffusers.models.attention import Attention
+from diffusers.models.attention_processor import XFormersAttnProcessor
+from einops import rearrange
 
 def register_attention_control(model, controller):
     "Connect a model with a controller"
-    def attention_controlled_processor(place_in_unet):
-            
-        class AttnWithProbProcessor2_0:
+    def attention_controlled_processor(store, place_in_unet):
+        
+        def reshape_temporal_heads_to_batch_dim(tensor, head_size):
+            tensor = rearrange(tensor, " b h s t -> (b h) s t ", h = head_size)
+            return tensor
+
+        def reshape_batch_dim_to_temporal_heads(tensor, head_size):
+            tensor = rearrange(tensor, "(b h) s t -> b h s t", h = head_size)
+            return tensor    
+        
+        def reshape_batch_dim_to_heads(tensor, head_size):
+            batch_size, seq_len, dim = tensor.shape
+            return tensor.reshape(batch_size // head_size, head_size, seq_len, dim).transpose(1, 2).reshape(batch_size // head_size, seq_len, dim * head_size)
+        
+        class AttnWithProbProcessor:
             r"""
-            Processor for implementing scaled dot-product attention with attention score (enabled by default if you're using PyTorch 2.0).
+            Processor for implementing attention with attention probability.
             """
-
             def __init__(self):
-                if not hasattr(F, "scaled_dot_product_attention"):
-                    raise ImportError("AttnWithScoreProcessor2_0 requires PyTorch 2.0, to use it, please upgrade PyTorch to 2.0.")
+                pass
 
+            
             def __call__(
                 self,
                 attn: Attention,
@@ -35,9 +48,6 @@ def register_attention_control(model, controller):
                 *args,
                 **kwargs,
             ) -> torch.Tensor:
-                if len(args) > 0 or kwargs.get("scale", None) is not None:
-                    deprecation_message = "The `scale` argument is deprecated and will be ignored. Please remove it, as passing it will raise an error in the future. `scale` should directly be passed while calling the underlying pipeline component i.e., via `cross_attention_kwargs`."
-                    deprecate("scale", "1.0.0", deprecation_message)
                 is_cross = encoder_hidden_states is not None
                 residual = hidden_states
                 if attn.spatial_norm is not None:
@@ -76,36 +86,38 @@ def register_attention_control(model, controller):
                 head_dim = inner_dim // attn.heads
 
                 query = query.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, H, Q, C]
-
                 key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)        # [B, H, K, C]
                 value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, H, K, C]
                 
-                attention_scores = torch.einsum('bhqd,bhkd->bhqk', query, key) / np.sqrt(head_dim)
-
-                if attention_mask is not None:
-                    attention_scores = attention_scores + attention_mask
-
-                # if self.upcast_softmax:
-                #     attention_scores = attention_scores.float()
-
-                attention_probs = attention_scores.softmax(dim=-1)
-
-                # print(f'attention_probs.dtype: {attention_probs.dtype}')
-                # print(f'value.dtype: {value.dtype}')
-                # cast back to the original dtype
-                attention_probs = attention_probs.to(value.dtype)
-
-                # START OF CORE FUNCTION
-                # Record during inversion and edit the attention probs during editing
-                controller(attention_probs, is_cross=is_cross, place_in_unet=place_in_unet)
-
-                # the output of sdp = (batch, num_heads, seq_len, head_dim)
-                # TODO: add support for attn.scale when we move to Torch 2.1
-                hidden_states = F.scaled_dot_product_attention(
-                    query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
+                query = reshape_temporal_heads_to_batch_dim(query, attn.heads)
+                key = reshape_temporal_heads_to_batch_dim(key, attn.heads)
+                value = reshape_temporal_heads_to_batch_dim(value, attn.heads)
+                
+                attention_probs = torch.baddbmm(
+                    torch.empty(query.shape[0], query.shape[1], key.shape[1], dtype=query.dtype, device=query.device),
+                    query,
+                    key.transpose(-1, -2),
+                    beta=0,
+                    alpha=attn.scale,
                 )
 
-                hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+                if attention_mask is not None:
+                    attention_probs = attention_probs + attention_mask
+
+                print(f'attention_probs.dtype: {attention_probs.dtype}')
+                attention_probs = attention_probs.softmax(dim=-1)
+                print(f'attention_probs.dtype: {attention_probs.dtype}')
+
+                attention_probs = attention_probs.to(value.dtype)
+
+                print(f'attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')
+                attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet)
+                
+                attention_probs = reshape_temporal_heads_to_batch_dim(attention_probs, attn.heads)
+                
+                hidden_states = torch.bmm(attention_probs, value)   # [B * H, N, C]
+
+                hidden_states = reshape_batch_dim_to_heads(hidden_states, attn.heads)
                 hidden_states = hidden_states.to(query.dtype)
 
                 # linear proj
@@ -122,9 +134,11 @@ def register_attention_control(model, controller):
                 hidden_states = hidden_states / attn.rescale_output_factor
 
                 return hidden_states
-            
-        return AttnWithProbProcessor2_0()
-
+        
+        if store:
+            return AttnWithProbProcessor()
+        else:
+            return XFormersAttnProcessor()
 
     class DummyController:
 
@@ -137,31 +151,35 @@ def register_attention_control(model, controller):
     if controller is None:
         controller = DummyController()
     
-    def register_recr(net_, count, place_in_unet):
-        # print(f'net_[1].__class__.__name__: {net_[1].__class__.__name__}')
+    def register_recr(net_, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count):
         if net_[1].__class__.__name__ == 'Attention':
-            # print(f'net_: {net_[0], net_[1]}')
-            net_[1].processor = attention_controlled_processor(place_in_unet)
+            store = (place_in_unet == 'down' and down_tsfm_count > begin_store) or (place_in_unet == 'up' and up_tsfm_count < half_unet_len - begin_store) or (place_in_unet == 'mid')
+            net_[1].processor = attention_controlled_processor(store, place_in_unet)
             return count + 1
         elif hasattr(net_[1], 'children'):
             for net in net_[1].named_children():
-                # if net[0] !='temp_attentions':
                 if net[1].__class__.__name__ != 'TransformerTemporalModel':
-                    
-                    count = register_recr(net, count, place_in_unet)
+                    if net[1].__class__.__name__ == 'CrossAttnDownBlock3D':
+                        down_tsfm_count += 1
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
+                    elif net[1].__class__.__name__ == 'CrossAttnUpBlock3D':
+                        up_tsfm_count += 1
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
+                    else:
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
 
         return count
-
+    
+    half_unet_len = 4
+    begin_store = 1
     cross_att_count = 0
     sub_nets = model.unet.named_children()
-    for name, module in model.unet.named_children():
-        print(f"Module Name: {name}, Module: {module}")
     for net in sub_nets:
         if "down" in net[0]:
-            cross_att_count += register_recr(net, 0, "down")
+            cross_att_count += register_recr(net, 0, "down", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
         elif "up" in net[0]:
-            cross_att_count += register_recr(net, 0, "up")
+            cross_att_count += register_recr(net, 0, "up", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
         elif "mid" in net[0]:
-            cross_att_count += register_recr(net, 0, "mid")
+            cross_att_count += register_recr(net, 0, "mid", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
     print(f"Number of attention layer registered {cross_att_count}")
     controller.num_att_layers = cross_att_count
