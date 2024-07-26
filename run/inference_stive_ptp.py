@@ -1,8 +1,9 @@
+import sys
+sys.path.append('.')
 import argparse
 import datetime
 import logging
 import inspect
-import os
 from typing import Dict, Optional
 from omegaconf import OmegaConf
 import json
@@ -16,6 +17,7 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
+from peft import PeftModel
 from diffusers.models.attention_processor import AttnProcessor2_0
 from diffusers.models.attention import BasicTransformerBlock
 from diffusers import AutoencoderKL, DDIMScheduler
@@ -26,21 +28,21 @@ from diffusers.pipelines import TextToVideoSDPipeline
 from diffusers.models import UNet3DConditionModel
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
+from einops import rearrange, repeat
 from stive.pipelines.pipeline_ptp_ttv import PtpTextToVideoSDPipeline
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
 from stive.data.dataset import VideoEditPromptsDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.pta_utils import save_gif_mp4_folder_type
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
-from einops import rearrange, repeat
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
 from stive.prompt_attention.attention_util import AttentionStore, make_controller
 from stive.prompt_attention.attention_register import register_attention_control
-
+import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-check_min_version("0.10.0.dev0")
+check_min_version("0.28.0")
 
 logger = get_logger(__name__, log_level="INFO")
 
@@ -60,49 +62,9 @@ def accelerate_set_verbose(accelerator):
         transformers.utils.logging.set_verbosity_error()
         diffusers.utils.logging.set_verbosity_error()
 
-def set_processors(attentions):
-    for attn in attentions: attn.set_processor(AttnProcessor2_0())
-
-def is_attn(name):
-    return ('attn1' or 'attn2' == name.split('.')[-1])
-
-def set_torch_2_attn(unet):
-    optim_count = 0
-
-    for name, module in unet.named_modules():
-        if is_attn(name):
-            if isinstance(module, torch.nn.ModuleList):
-                for m in module:
-                    if isinstance(m, BasicTransformerBlock):
-                        set_processors([m.attn1, m.attn2])
-                        optim_count += 1
-    if optim_count > 0:
-        print(f"{optim_count} Attention layers using Scaled Dot Product Attention.")
-
-
-def handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet):
-    try:
-        is_torch_2 = hasattr(F, 'scaled_dot_product_attention')
-        enable_torch_2 = is_torch_2 and enable_torch_2_attn
-
-        if enable_xformers_memory_efficient_attention and not enable_torch_2:
-            if is_xformers_available():
-                from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
-                unet.enable_xformers_memory_efficient_attention(attention_op=MemoryEfficientAttentionFlashAttentionOp)
-            else:
-                raise ValueError("xformers is not available. Make sure it is installed correctly")
-
-        if enable_torch_2:
-            set_torch_2_attn(unet)
-            
-        if gradient_checkpointing:
-            unet._set_gradient_checkpointing(True)
-
-    except Exception as e:
-        print(f"Could not enable memory efficient attention for xformers or Torch 2.0: {e}.")
-
 def main(
     pretrained_t2v_model_path: str,
+    pretrained_lora_model_path: str, 
     pretrained_concepts_model_path: str,
     output_dir: str,
     checkpoints_dir: str, 
@@ -141,25 +103,17 @@ def main(
     torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
+    # unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
+    unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     unet.requires_grad_(False)
-    # handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
-
+    # set_torch_attn(unet)
+    lora_unet = PeftModel.from_pretrained(unet, os.path.join(pretrained_lora_model_path, 'lora'))
+    lora_unet.requires_grad_(False)
     val_dataset = VideoEditPromptsDataset(**validation_data)
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=1
-    )
-    validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, scheduler=scheduler)
-    # validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-    #     pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
-    # )
-    validation_pipeline.enable_vae_slicing()
-    
-
-    unet, text_encoder, vae, val_dataloader = accelerator.prepare(
-        unet, text_encoder, vae, val_dataloader
     )
     weight_dtype = torch.float32
     if accelerator.mixed_precision == "fp16":
@@ -169,12 +123,26 @@ def main(
         
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
-    unet.to(accelerator.device, dtype=weight_dtype)
+    lora_unet.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
-    unet.eval()
+    lora_unet.eval()
     text_encoder.eval()
     torch.cuda.empty_cache()
+    validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, scheduler=scheduler)
+    # validation_pipeline = TextToVideoSDPipeline.from_pretrained(
+    #     pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
+    # )
+    validation_pipeline.enable_vae_slicing()
+    
+
+    lora_unet, text_encoder, vae, val_dataloader = accelerator.prepare(
+        lora_unet, text_encoder, vae, val_dataloader
+    )
     source = val_dataset.get_source()
+
+    generator = torch.Generator(device=accelerator.device)
+    if seed is not None:
+        generator.manual_seed(seed)
     
     with torch.no_grad(), accelerator.autocast():
         source_text_embeddings = validation_pipeline._encode_prompt(
@@ -191,17 +159,15 @@ def main(
             prompt=source['source_prompts'], 
             store_attention=ptp_conf['use_inversion_attention'], 
             LOW_RESOURCE=True, 
+            generator=generator, 
             save_path=output_dir
         )
         source_init_latents = all_step_source_latents[-1]
         print(f'source_init_latents.shape: {source_init_latents.shape}')
         
-        generator = torch.Generator(device=accelerator.device)
-        if seed is not None:
-            generator.manual_seed(seed)
-        
         samples = []
         attention_all = []
+        prompts_samples = {}
         for i, batch in enumerate(val_dataloader):
             pixel_values = batch["frames"].to(weight_dtype)                 # [1, F, C, H, W]
             target_prompts = batch['prompts'][0]                            # [T]
@@ -253,5 +219,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="./configs/concepts_clip/vehicles.yaml")
     args = parser.parse_args()
-
+    
     main(**OmegaConf.load(args.config))

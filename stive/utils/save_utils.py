@@ -56,7 +56,7 @@ def save_video(video: torch.Tensor, path: str, rescale=False, fps=8):
     if rescale:
         video = (video / 2 + 0.5)
     video = video.clamp(0, 1)
-    video = (video * 255).cpu().numpy().astype(np.uint8)
+    video = (video * 255).detach().cpu().numpy().astype(np.uint8)
     frames = []
     os.makedirs(os.path.dirname(path), exist_ok=True)
     for i in range(video.shape[0]):

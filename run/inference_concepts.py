@@ -1,8 +1,9 @@
+import sys
+sys.path.append('.')
 import argparse
 import datetime
 import logging
 import inspect
-import os
 from typing import Dict, Optional
 from omegaconf import OmegaConf
 import json
@@ -26,11 +27,11 @@ from diffusers.pipelines import TextToVideoSDPipeline
 from diffusers.models import UNet3DConditionModel
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
+from einops import rearrange, repeat
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
 from stive.data.dataset import VideoPromptTupleDataset as VideoPromptValDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
-from einops import rearrange, repeat
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
 import os
 import wandb
@@ -38,7 +39,8 @@ import subprocess
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-check_min_version("0.10.0.dev0")
+check_min_version("0.28.0")
+
 
 logger = get_logger(__name__, log_level="INFO")
 

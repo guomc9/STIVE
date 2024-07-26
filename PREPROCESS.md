@@ -2,8 +2,6 @@ python scripts/extract_concepts.py -f data/concepts/vehicles/video_prompts.csv -
 python scripts/cache_latents.py -d data/concepts/vehicles
 CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_concepts.py --config configs/concepts/vehicles.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_concepts.py --config configs/concepts/vehicles.yaml
-
-
 CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_stive.py --config configs/stive/vehicles.yaml
 
 
@@ -15,3 +13,9 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_stive.py --config configs/stiv
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive.py --config configs/stive/vehicles-subset.yaml
 
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_concepts_ptp.py --config configs/ptp/vehicles-subset.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive_ptp.py --config configs/ptp/vehicles-subset.yaml
+
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_stive.py --config configs/stive/car-turn.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive.py --config configs/stive/car-turn.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive_ptp.py --config configs/ptp/car-turn.yaml

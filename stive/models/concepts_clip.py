@@ -75,9 +75,9 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
             all_replace_indices.append(replace_indices)
             all_concept_indices.append(concept_indices)
             
-        print(f'modified_text: {modified_text}')
-        print(f'all_replace_indices: {all_replace_indices}')
-        print(f'all_concept_indices: {all_concept_indices}')
+        # print(f'modified_text: {modified_text}')
+        # print(f'all_replace_indices: {all_replace_indices}')
+        # print(f'all_concept_indices: {all_concept_indices}')
 
         all_token_ids = torch.stack(all_token_ids)
 
@@ -150,11 +150,11 @@ class ConceptsCLIPTextModel(CLIPTextModel):
             output_hidden_states: Optional[bool] = None,
             return_dict: Optional[bool] = None,
     ):
-        print(f'input_ids: {input_ids}')
-        print(f'replace_indices: {replace_indices}')
-        print(f'concept_indices: {concept_indices}')
-        print(f'concepts_list: {self.concepts_list}')
-        print(f'concepts_embedder: {self.concepts_embedder.weight.data}')
+        # print(f'input_ids: {input_ids}')
+        # print(f'replace_indices: {replace_indices}')
+        # print(f'concept_indices: {concept_indices}')
+        # print(f'concepts_list: {self.concepts_list}')
+        # print(f'concepts_embedder: {self.concepts_embedder.weight.data}')
         
         assert input_ids is not None and len(input_ids) > 0, f"Invaild input_ids, input_ids is None or len(input_ids) == 0"
         

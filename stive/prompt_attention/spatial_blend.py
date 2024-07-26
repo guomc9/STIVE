@@ -89,7 +89,6 @@ class SpatialBlender:
                             # for item in maps]
         rearranged_maps = []
         for item in maps:
-            print(f'item.shape: {item.shape}')
             if len(item.shape) == 4: item = item[None, ...]
             ( p, c, heads, r, w)= item.shape
             res_h = int(np.sqrt(r))

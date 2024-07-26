@@ -13,6 +13,9 @@ from typing import Optional
 from diffusers.models.attention import Attention
 from diffusers.models.attention_processor import XFormersAttnProcessor
 from einops import rearrange
+import datetime
+from peft import PeftModel
+from ..utils.save_utils import save_video
 
 def register_attention_control(model, controller):
     "Connect a model with a controller"
@@ -104,14 +107,27 @@ def register_attention_control(model, controller):
                 if attention_mask is not None:
                     attention_probs = attention_probs + attention_mask
 
-                print(f'attention_probs.dtype: {attention_probs.dtype}')
+                # print(f'1 attention_probs.dtype: {attention_probs.dtype}')
                 attention_probs = attention_probs.softmax(dim=-1)
-                print(f'attention_probs.dtype: {attention_probs.dtype}')
+                # print(f'2 attention_probs.dtype: {attention_probs.dtype}')
 
                 attention_probs = attention_probs.to(value.dtype)
-
-                print(f'attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')
+                
+                # print(f'3 attention_probs.dtype: {attention_probs.dtype}')
+                # print(f'3 attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')
+                # import random
+                # res = np.sqrt(query.shape[-2])
                 attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet)
+                # if is_cross and res == 32:
+                #     # print(f'attention_probs.shape: {attention_probs.shape}')                                # [B * H, Q, K]
+                #     maps = rearrange(attention_probs, 'b f (h w) k -> b f h w k', h=32)[..., 2]             # [B, F, H, W]
+                #     f = maps.shape[1]
+                #     maps = torch.mean(maps, dim=0)                                                          # [F, H, W]
+                #     maps = rearrange(maps, 'f h w -> f h w').unsqueeze(-1).repeat(1, 1, 1, 3)
+                #     maps = rearrange(maps, 'f h w c -> f c h w')
+                #     save_path = f'trash/{datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}.png'
+                #     save_video(video=maps, path=f'trash/{place_in_unet}_{datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}_{random.randint(0, 8)}.png')
+                #     print(f'save {save_path}.')
                 
                 attention_probs = reshape_temporal_heads_to_batch_dim(attention_probs, attn.heads)
                 
@@ -174,6 +190,14 @@ def register_attention_control(model, controller):
     begin_store = 1
     cross_att_count = 0
     sub_nets = model.unet.named_children()
+    
+    print(f'unet is an instance of {type(model.unet)}')
+    if isinstance(model.unet, PeftModel):
+        sub_nets = model.unet.base_model.model.named_children()
+    else:
+        sub_nets = model.unet.named_children()
+        
+        
     for net in sub_nets:
         if "down" in net[0]:
             cross_att_count += register_recr(net, 0, "down", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)

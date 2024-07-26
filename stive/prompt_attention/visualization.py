@@ -24,7 +24,6 @@ def aggregate_attention(prompts, attention_store: AttentionStore, res: int, from
             elif item.dim() == 4:
                 t, h, res_sq, token = item.shape
                 if item.shape[2] == num_pixels:
-                    print(f'item.shape: {item.shape}')
                     cross_maps = item.reshape(len(prompts), t, -1, res, res, item.shape[-1])[select]
                     out.append(cross_maps)
                     
@@ -50,7 +49,7 @@ def show_cross_attention(tokenizer, prompts, attention_store: AttentionStore,
     decoder = tokenizer.decode
     
     attention_maps = aggregate_attention(prompts, attention_store, res, from_where, True, select)
-    os.makedirs('trash', exist_ok=True)
+    # os.makedirs('trash', exist_ok=True)
     attention_list = []
     if attention_maps.dim()==3: attention_maps=attention_maps[None, ...]
     for j in range(attention_maps.shape[0]):

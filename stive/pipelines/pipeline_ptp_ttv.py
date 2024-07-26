@@ -44,9 +44,9 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         self.store_controller.LOW_RESOURCE = LOW_RESOURCE  # in inversion, no CFG, record all latents attention
         b, f = frames.shape[:2]
         pixel_values = rearrange(frames, "b f h w c -> (b f) c h w", b=b)
-        init_latents = self.vae.encode(pixel_values).latent_dist.sample()
-        
-        init_latents = self.vae_scale_factor * init_latents
+        init_latents = self.vae.encode(pixel_values).latent_dist.sample(generator)
+        print(f'self.vae.config.scaling_factor: {self.vae.config.scaling_factor}')
+        init_latents = self.vae.config.scaling_factor * init_latents
         init_latents = rearrange(init_latents, "(b f) c h w -> b c f h w", b=b)
         
         ddim_latents_all_step = self.ddim_clean2noisy_loop(init_latents, text_embeddings, self.store_controller)
@@ -153,7 +153,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         else:
             mask_list = None
         if len(edit_controller.attention_store.keys()) > 0:
-            attention_output = show_cross_attention(self.tokenizer, target_prompt, edit_controller, 16, ["up", "down"])
+            attention_output = attention_util.show_cross_attention(self.tokenizer, target_prompt, edit_controller, 16, ["up", "down"], save_path=save_path)
         else:
             attention_output = None
             
