@@ -107,7 +107,7 @@ class AttentionStore(AttentionControl):
         else:
             self.attention_store_all_step.append(copy.deepcopy(self.step_store))
         self.step_store = self.get_empty_store()
-        print('clear step_store !!!!')
+        # print('clear step_store !!!!')
 
     def get_average_attention(self):
         "divide the attention map value in attention store by denoising steps"

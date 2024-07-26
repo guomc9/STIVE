@@ -62,7 +62,7 @@ def accelerate_set_verbose(accelerator):
         diffusers.utils.logging.set_verbosity_error()
 
 def set_processors(attentions):
-    for attn in attentions: attn.set_processor(AttnWithProbProcessor())
+    for attn in attentions: attn.set_processor(AttnProcessor2_0())
 
 def is_attn(name):
     return ('attn1' or 'attn2' == name.split('.')[-1])
@@ -78,7 +78,7 @@ def set_torch_attn(unet):
                         set_processors([m.attn1, m.attn2])
                         optim_count += 1
     if optim_count > 0:
-        print(f"{optim_count} Attention layers using AttnWithProbProcessor.")
+        print(f"{optim_count} Attention layers using AttnProcessor2_0.")
 
 
 def handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet):
@@ -193,20 +193,17 @@ def main(
         for _, batch in enumerate(val_dataloader):
             pixel_values = batch["frames"].to(weight_dtype)
             prompts = batch['prompts']
-            print(prompts)
+            
             video_length = pixel_values.shape[1]
             pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
 
-            latents = vae.encode(pixel_values).latent_dist.sample()
+            latents = vae.encode(pixel_values).latent_dist.sample(generator)
             latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
             latents = latents * 0.18215
             
-            noise = torch.randn_like(latents)
             bsz = latents.shape[0]
             timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
             timesteps = timesteps.long()
-
-            noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
             ddim_inv_latent = None
             

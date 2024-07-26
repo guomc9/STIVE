@@ -30,10 +30,11 @@ from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
 from diffusers.models import UNet3DConditionModel
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
-from stive.data.dataset import VideoPromptTupleDataset, VideoEditPromptsDataset
+from stive.data.dataset import VideoEditPromptsDataset, LatentPromptTupleCacheDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
+from stive.utils.cache_latents_utils import encode_videos_latents
 from einops import rearrange, repeat
 import wandb
 import subprocess
@@ -236,7 +237,12 @@ def main(
         eps=adam_epsilon,
     )
     
-    train_dataset = VideoPromptTupleDataset(**train_data)
+    latents = encode_videos_latents(video_paths=train_data['sources'], height=train_data['height'], width=train_data['width'])
+    train_data = OmegaConf.to_container(train_data, resolve=True)
+    train_data.pop('sources')
+    train_data['latents'] = latents
+    train_dataset = LatentPromptTupleCacheDataset(**train_data)
+    
     val_dataset = VideoEditPromptsDataset(**validation_data)
 
     train_dataloader = torch.utils.data.DataLoader(
@@ -292,15 +298,20 @@ def main(
             for step, batch in enumerate(progress_bar):
                 with accelerator.autocast():
                     with accelerator.accumulate(lora_unet):
-                        pixel_values = batch["frames"].to(weight_dtype)
-                        prompts = batch['prompts']
+                        # pixel_values = batch["frames"].to(weight_dtype)
+                        # prompts = batch['prompts']
                         
-                        video_length = pixel_values.shape[1]
-                        pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
+                        # video_length = pixel_values.shape[1]
+                        # pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
 
-                        latents = vae.encode(pixel_values).latent_dist.sample()
-                        latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
-                        latents = latents * 0.18215
+                        # latents = vae.encode(pixel_values).latent_dist.sample()
+                        # latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
+                        # latents = latents * 0.18215
+                        latents = batch["latents"]
+                        prompts = batch['prompts']
+                        video_length = latents.shape[1]
+                        
+                        latents = rearrange(latents, "b f c h w -> b c f h w")
 
                         noise = torch.randn_like(latents)
                         bsz = latents.shape[0]

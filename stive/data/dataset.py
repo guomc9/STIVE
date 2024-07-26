@@ -317,3 +317,100 @@ class LatentPromptCacheDataset(Dataset):
 
     def __len__(self):
         return len(self.prompts)
+    
+class LatentPromptTupleCacheDataset(Dataset):
+    def __init__(self, latents, prompts, num_frames=12, sample_stride=1, height=512, width=512, rand_slice=False):
+        self.latents = latents
+        self.prompts = prompts
+        self.num_frames = num_frames
+        self.sample_stride = sample_stride
+        self.height = height
+        self.width = width
+        self.rand_slice = rand_slice
+
+    def _sample_latents(self, latents: torch.FloatTensor):
+        if self.rand_slice:
+            sample_stride = self.sample_stride if len(latents) // self.num_frames >= self.sample_stride else len(latents) // self.num_frames
+            F = latents.shape[0]
+            max_start_frame = F - (self.num_frames - 1) * sample_stride
+            start_frame = random.randint(0, max_start_frame - 1)
+            sample_indices = torch.arange(start_frame, start_frame + self.num_frames * sample_stride, sample_stride)[:self.num_frames]
+            latents = latents[sample_indices]
+        else:
+            sample_stride = self.sample_stride if len(latents) // self.num_frames >= self.sample_stride else len(latents) // self.num_frames
+            sample_indices = torch.arange(0, len(latents), sample_stride)[:self.num_frames]
+            latents = latents[sample_indices]
+        
+        return latents
+
+    def __getitem__(self, idx):
+        if isinstance(idx, (list, tuple, torch.Tensor)):
+            latents = torch.stack([self._sample_latents(self.latents[i]) for i in idx])
+            prompts = [self.prompts[i] for i in idx]
+        else:
+            latents = torch.stack([self._sample_latents(self.latents[idx])])
+            prompts = [self.prompts[idx]]
+        
+        return {'latents': latents, 'prompts': prompts}
+
+    def __len__(self):
+        return len(self.prompts)
+
+from einops import rearrange
+
+class VideoSliceEditPromptDataset(Dataset):
+    def __init__(self, source, source_prompt, edit_prompt=None, num_slice=8, sample_stride=1, height=512, width=512):
+        self.source = source
+        self.source_prompt = source_prompt
+        self.edit_prompt = edit_prompt
+        self.num_slice = num_slice
+        self.sample_stride = sample_stride
+        self.resolution = (height, width)
+        self.frames = self._load_data()
+
+    def _preprocess(self, frames):
+        frames = (frames / 255.0 * 2) - 1
+        return frames
+
+    def _load_data(self):
+        cap = cv2.VideoCapture(self.source)
+        frames = []
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+            frames.append(frame)
+        cap.release()
+        
+        frames = torch.from_numpy(np.array(frames))
+        frames = self._sample_frames(frames)
+        return frames
+
+    def _sample_frames(self, video: torch.FloatTensor):
+        sample_indices = torch.arange(0, len(video), self.sample_stride)
+        frames = video[sample_indices]
+        clip_length = len(frames) - len(frames) % self.num_slice
+        assert clip_length >= self.num_slice
+        frames = frames[:clip_length]
+        frames = rearrange(frames, '(b s) h w c -> b s h w c', s=self.num_slice)
+        return frames
+
+    def __len__(self):
+        return self.frames.shape[0]
+
+    def __getitem__(self, idx):
+        source_prompts = []
+        prompts = []                            # [B]
+        frames_list = []                        # [B, S, H, W, 3]
+        if isinstance(idx, list):
+            for i in idx:
+                source_prompts.append(self.source_prompt)
+                prompts.append(self.edit_prompt)
+                frames_list.append(self.frames[i])
+                
+            return {'frames': torch.stack(frames_list), 'prompts': prompts, 'source_prompts': source_prompts}
+        else:
+            return {'frames': torch.stack(self.frames[idx]), 'prompts': [self.edit_prompt], 'source_prompts': [self.source_prompt]}
+        

@@ -23,6 +23,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         disk_store: bool = False, 
     ):
         super().__init__(text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, vae=vae, scheduler=scheduler)
+        self.disk_store = disk_store
         self.store_controller = attention_util.AttentionStore(disk_store=disk_store)
         self.empty_controller = attention_util.EmptyControl()
     
@@ -163,6 +164,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                 "mask_list" : mask_list,
             }
         attention_util.register_attention_control(self, self.empty_controller)
+        del edit_controller
         return dict_output
         
     def prepare_before_train_loop(self, params_to_optimize=None):
@@ -273,3 +275,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
             return (video,)
 
         return TextToVideoSDPipelineOutput(frames=video)
+
+    def clear_store_controller(self):
+        del self.store_controller
+        self.store_controller = attention_util.AttentionStore(disk_store=self.disk_store)

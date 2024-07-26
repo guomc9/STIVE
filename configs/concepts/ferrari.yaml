@@ -23,14 +23,14 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 30
-  guidance_scale: 10
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 30
 
 concepts_file: "data/concepts/ferrari/concepts.json"
 learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 250
+num_train_epoch: 300
 checkpointing_steps: 1000
 validation_steps: 50
 

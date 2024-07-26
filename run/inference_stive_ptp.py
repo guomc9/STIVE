@@ -103,12 +103,10 @@ def main(
     torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
-    # unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
     unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     unet.requires_grad_(False)
-    # set_torch_attn(unet)
     lora_unet = PeftModel.from_pretrained(unet, os.path.join(pretrained_lora_model_path, 'lora'))
     lora_unet.requires_grad_(False)
     val_dataset = VideoEditPromptsDataset(**validation_data)
@@ -129,9 +127,6 @@ def main(
     text_encoder.eval()
     torch.cuda.empty_cache()
     validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, scheduler=scheduler)
-    # validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-    #     pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, 
-    # )
     validation_pipeline.enable_vae_slicing()
     
 
@@ -201,7 +196,7 @@ def main(
             os.makedirs(save_path, exist_ok=True)
             save_gif_mp4_folder_type(attention_output, os.path.join(save_path, f'{target_prompts}-attn_prob.gif'))
             
-            for p, s in zip(target_prompts, samples):
+            for p, s in zip([target_prompts], samples):
                 prompts_samples[p] = s
             
         if accelerator.is_main_process:
