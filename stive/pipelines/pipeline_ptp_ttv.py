@@ -64,6 +64,38 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         return ddim_latents_all_step
     
     @torch.no_grad()
+    def prepare_ddim_source_latents_with_latents(
+        self, 
+        init_latents, 
+        text_embeddings,
+        store_attention=False, 
+        prompt=None,
+        generator=None,
+        LOW_RESOURCE=True,
+        save_path = None
+    ):
+        self.prepare_before_train_loop()
+        if store_attention:
+            attention_util.register_attention_control(self, self.store_controller)
+        resource_default_value = self.store_controller.LOW_RESOURCE
+        self.store_controller.LOW_RESOURCE = LOW_RESOURCE  # in inversion, no CFG, record all latents attention
+        b, f = init_latents.shape[:2]
+        init_latents = rearrange(init_latents, "b f c h w -> b c f h w", b=b)
+        
+        ddim_latents_all_step = self.ddim_clean2noisy_loop(init_latents, text_embeddings, self.store_controller)
+        if store_attention and (save_path is not None):
+            os.makedirs(save_path+'/cross_attention', exist_ok=True)
+            attention_output = attention_util.show_cross_attention(self.tokenizer, prompt, 
+                                                                   self.store_controller, 16, ["up", "down"],
+                                                                   save_path = save_path+'/cross_attention')
+
+            # Detach the controller for safety
+            attention_util.register_attention_control(self, self.empty_controller)
+        self.store_controller.LOW_RESOURCE = resource_default_value
+        
+        return ddim_latents_all_step
+    
+    @torch.no_grad()
     def ddim_clean2noisy_loop(self, latents, text_embeddings, controller:attention_util.AttentionControl=None):
         weight_dtype = latents.dtype
         uncond_embeddings, cond_embeddings = text_embeddings.chunk(2)
@@ -104,6 +136,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         equilizer_params=None, 
         use_inversion_attention=None, 
         blend_th=(0.3, 0.3), 
+        fuse_th=0.3, 
         blend_self_attention=None, 
         blend_latents=None, 
         save_path=None, 
@@ -130,6 +163,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                             additional_attention_store=self.store_controller,
                             use_inversion_attention=use_inversion_attention, 
                             blend_th=blend_th, 
+                            fuse_th=fuse_th, 
                             blend_self_attention=blend_self_attention,
                             blend_latents=blend_latents,
                             save_path=save_path,

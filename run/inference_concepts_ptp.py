@@ -129,17 +129,20 @@ def main(
     if accelerator.is_main_process:
         os.makedirs(os.path.join(checkpoints_dir, 'inferences'), exist_ok=True)
         output_dir = checkpoints_dir
-
-    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
+        
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
+
+    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_concepts_model_path):
+        concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
+        concepts_text_encoder.requires_grad_(False)
+        add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
+        del concepts_text_encoder
+        torch.cuda.empty_cache()
+        
     scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder='scheduler')
     scheduler.set_timesteps(inference_conf.num_inv_steps)
-    concepts_text_encoder.requires_grad_(False)
-    add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
-    del concepts_text_encoder
-    torch.cuda.empty_cache()
+
     
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
     unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
@@ -222,6 +225,7 @@ def main(
                 equilizer_params=ptp_conf.get('eq_params', None), 
                 use_inversion_attention = ptp_conf.get('use_inversion_attention', None), 
                 blend_th = ptp_conf.get('blend_th', (0.3, 0.3)), 
+                fuse_th = ptp_conf.get('fuse_th', 0.3), 
                 blend_self_attention = ptp_conf.get('blend_self_attention', None), 
                 blend_latents=ptp_conf.get('blend_latents', None), 
                 save_path=output_dir, 

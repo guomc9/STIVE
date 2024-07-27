@@ -359,58 +359,37 @@ class LatentPromptTupleCacheDataset(Dataset):
 from einops import rearrange
 
 class VideoSliceEditPromptDataset(Dataset):
-    def __init__(self, source, source_prompt, edit_prompt=None, num_slice=8, sample_stride=1, height=512, width=512):
-        self.source = source
+    def __init__(self, latents, source_prompt, edit_prompt=None, num_slice=8, sample_stride=1):
+        self.latents = latents
         self.source_prompt = source_prompt
         self.edit_prompt = edit_prompt
         self.num_slice = num_slice
         self.sample_stride = sample_stride
-        self.resolution = (height, width)
-        self.frames = self._load_data()
+        self.latents = self._sample_latents(self.latents)
 
-    def _preprocess(self, frames):
-        frames = (frames / 255.0 * 2) - 1
-        return frames
-
-    def _load_data(self):
-        cap = cv2.VideoCapture(self.source)
-        frames = []
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
-            frames.append(frame)
-        cap.release()
-        
-        frames = torch.from_numpy(np.array(frames))
-        frames = self._sample_frames(frames)
-        return frames
-
-    def _sample_frames(self, video: torch.FloatTensor):
-        sample_indices = torch.arange(0, len(video), self.sample_stride)
-        frames = video[sample_indices]
-        clip_length = len(frames) - len(frames) % self.num_slice
+    def _sample_latents(self, latents: torch.FloatTensor):
+        sample_indices = torch.arange(0, len(latents), self.sample_stride)
+        latents = latents[sample_indices]
+        clip_length = len(latents) - len(latents) % self.num_slice
         assert clip_length >= self.num_slice
-        frames = frames[:clip_length]
-        frames = rearrange(frames, '(b s) h w c -> b s h w c', s=self.num_slice)
-        return frames
+        latents = latents[:clip_length]
+        latents = rearrange(latents, '(b s) h w c -> b s h w c', s=self.num_slice)
+        return latents
 
     def __len__(self):
-        return self.frames.shape[0]
+        return self.latents.shape[0]
 
     def __getitem__(self, idx):
         source_prompts = []
         prompts = []                            # [B]
-        frames_list = []                        # [B, S, H, W, 3]
+        latents_list = []                       # [B, S, H, W, 3]
         if isinstance(idx, list):
             for i in idx:
                 source_prompts.append(self.source_prompt)
                 prompts.append(self.edit_prompt)
-                frames_list.append(self.frames[i])
+                latents_list.append(self.latents[i])
                 
-            return {'frames': torch.stack(frames_list), 'prompts': prompts, 'source_prompts': source_prompts}
+            return {'latents': torch.stack(latents_list), 'prompts': prompts, 'source_prompts': source_prompts}
         else:
-            return {'frames': torch.stack(self.frames[idx]), 'prompts': [self.edit_prompt], 'source_prompts': [self.source_prompt]}
+            return {'latents': torch.stack(self.latents[idx]), 'prompts': [self.edit_prompt], 'source_prompts': [self.source_prompt]}
         

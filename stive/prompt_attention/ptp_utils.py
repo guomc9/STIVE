@@ -175,8 +175,46 @@ def update_alpha_time_word(alpha, bounds: Union[float, Tuple[float, float]], pro
     alpha[end:, prompt_ind, word_inds] = 0
     return alpha
 
+
+# #################################################################
+# #                                                               #
+# #    Inconsistent with the M_cross/edit in FateZero Paper       #
+# #  Appendix.A.ImplementationDetails.pseudo algorithm code       #
+# #                 Editedindex=(psrc!= pedit)                    #
+# #                  Mcross[Editedindex]=1                        #
+# #################################################################
+
+# import omegaconf
+# def get_time_words_attention_alpha(prompts, num_steps,
+#                                    cross_replace_steps: Union[float, Dict[str, Tuple[float, float]]],
+#                                    tokenizer, max_num_words=77):
+#     # Not understand
+#     if (type(cross_replace_steps) is not dict) and \
+#         (type(cross_replace_steps) is not omegaconf.dictconfig.DictConfig):
+#         cross_replace_steps = {"default_": cross_replace_steps}
+#     if "default_" not in cross_replace_steps:
+#         cross_replace_steps["default_"] = (0., 1.)
+#     alpha_time_words = torch.zeros(num_steps + 1, len(prompts) - 1, max_num_words)
+#     for i in range(len(prompts) - 1):
+#         alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"],
+#                                                   i)
+#     for key, item in cross_replace_steps.items():
+#         if key != "default_":
+#              inds = [get_word_inds(prompts[i], key, tokenizer) for i in range(1, len(prompts))]
+#              for i, ind in enumerate(inds):
+#                  if len(ind) > 0:
+#                     alpha_time_words = update_alpha_time_word(alpha_time_words, item, i, ind)
+#     alpha_time_words = alpha_time_words.reshape(num_steps + 1, len(prompts) - 1, 1, 1, max_num_words)
+#     return alpha_time_words
+
+
+################################
+#                              #
+#       Re-implementation      #
+#                              #
+################################
 import omegaconf
-def get_time_words_attention_alpha(prompts, num_steps,
+def get_time_words_attention_alpha(prompts, num_steps, 
                                    cross_replace_steps: Union[float, Dict[str, Tuple[float, float]]],
                                    tokenizer, max_num_words=77):
     # Not understand
@@ -186,14 +224,42 @@ def get_time_words_attention_alpha(prompts, num_steps,
     if "default_" not in cross_replace_steps:
         cross_replace_steps["default_"] = (0., 1.)
     alpha_time_words = torch.zeros(num_steps + 1, len(prompts) - 1, max_num_words)
-    for i in range(len(prompts) - 1):
-        alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"],
-                                                  i)
-    for key, item in cross_replace_steps.items():
-        if key != "default_":
-             inds = [get_word_inds(prompts[i], key, tokenizer) for i in range(1, len(prompts))]
-             for i, ind in enumerate(inds):
-                 if len(ind) > 0:
-                    alpha_time_words = update_alpha_time_word(alpha_time_words, item, i, ind)
+    diff_indices = []
+    src_prompt = prompts[0]
+    tgt_prompt = prompts[1]
+    src_words = src_prompt.split(" ")
+    tgt_words = tgt_prompt.split(" ")
+    
+    for i in range(len(src_words)):
+        if src_words[i] != tgt_words[i]:
+            diff_indices.append(i+1)
+            alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"], 0, i+1)
+            
+    begin, end = int(cross_replace_steps["default_"][0] * alpha_time_words.shape[0]), int(cross_replace_steps["default_"][1] * alpha_time_words.shape[0])
+    alpha_time_words[:begin] = 1
+    alpha_time_words[end:] = 1
+    
     alpha_time_words = alpha_time_words.reshape(num_steps + 1, len(prompts) - 1, 1, 1, max_num_words)
-    return alpha_time_words
+    return alpha_time_words, torch.as_tensor(diff_indices)
+
+
+# from einops import rearrange
+
+# @torch.no_grad()
+# def relax_attention(attn, steps: int = 1, kernel_size: int = 5, scale: float = 5):
+#     """
+#     attn: [F, M, H * W, D]
+#     """
+#     dtype = attn.dtype
+#     device = attn.device
+#     f, m, r, d = attn.shape
+#     h = w = int(np.sqrt(r))
+#     attn = rearrange(attn, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
+#     kernel = torch.ones((1, 1, kernel_size, kernel_size), dtype=dtype, device=device)
+#     kernel = kernel / torch.sum(kernel) * scale
+#     for _ in range(steps):
+#         attn = torch.nn.functional.conv2d(attn, kernel, stride=1, padding=kernel_size // 2)
+    
+#     attn = rearrange(attn.squeeze(-3), '(f m d) h w -> f m (h w) d', f=f, m=m, d=d)
+    
+#     return attn

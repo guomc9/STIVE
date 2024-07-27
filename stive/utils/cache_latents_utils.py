@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from einops import rearrange
 from diffusers import AutoencoderKL
+import gc
 
 PRETRAINED_T2V_CHECKPOINT_PATH = 'checkpoints/zeroscope_v2_576w'
 
@@ -45,5 +46,7 @@ def encode_videos_latents(video_paths, height=512, width=512):
             print(f'Encoding {video_path}')
             latents.append(encode_video_to_latents(video_path, vae, height, width, device))
     del vae
+    gc.collect()
     torch.cuda.empty_cache()
+    
     return latents

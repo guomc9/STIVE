@@ -142,15 +142,17 @@ def main(
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
         
-    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
-    text_encoder.requires_grad_(False)
-    concepts_text_encoder.requires_grad_(False)
-    add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
-    del concepts_text_encoder
-    torch.cuda.empty_cache()
+
+    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_concepts_model_path):    
+        concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
+        text_encoder.requires_grad_(False)
+        concepts_text_encoder.requires_grad_(False)
+        add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
+        del concepts_text_encoder
+        gc.collect()
+        torch.cuda.empty_cache()
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
     unet = UNet3DConditionModel.from_pretrained(checkpoints_dir, subfolder="unet")
     vae.requires_grad_(False)
@@ -201,10 +203,6 @@ def main(
             latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
             latents = latents * 0.18215
             
-            bsz = latents.shape[0]
-            timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
-            timesteps = timesteps.long()
-
             ddim_inv_latent = None
             
             if inference_conf.use_inv_latent:

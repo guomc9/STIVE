@@ -111,13 +111,13 @@ def register_attention_control(model, controller):
                 attention_probs = attention_probs.softmax(dim=-1)
                 # print(f'2 attention_probs.dtype: {attention_probs.dtype}')
 
-                attention_probs = attention_probs.to(value.dtype)
+                attention_probs = attention_probs.to(value.dtype)   # [B * H, Q, K]
                 
                 # print(f'3 attention_probs.dtype: {attention_probs.dtype}')
-                # print(f'3 attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')
+                # print(f'3 attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')   
                 # import random
                 # res = np.sqrt(query.shape[-2])
-                attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet)
+                attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet) # [B, H, Q, K]
                 # if is_cross and res == 32:
                 #     # print(f'attention_probs.shape: {attention_probs.shape}')                                # [B * H, Q, K]
                 #     maps = rearrange(attention_probs, 'b f (h w) k -> b f h w k', h=32)[..., 2]             # [B, F, H, W]

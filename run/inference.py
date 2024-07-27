@@ -36,6 +36,7 @@ from stive.data.dataset import VideoSliceEditPromptDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.pta_utils import save_gif_mp4_folder_type
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
+from stive.utils.cache_latents_utils import encode_videos_latents
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
 from stive.prompt_attention.attention_util import AttentionStore, make_controller
 from stive.prompt_attention.attention_register import register_attention_control
@@ -139,7 +140,7 @@ def main(
     edit_prompts = validation_data['edit_prompts']
     width = validation_data['width']
     height = validation_data['height']
-    
+    latents = encode_videos_latents([source], height=height, width=width)
     generator = torch.Generator(device=accelerator.device)
     if seed is not None:
         generator.manual_seed(seed)
@@ -149,13 +150,11 @@ def main(
     )
     for i, edit_prompt in enumerate(edit_prompts):
         val_dataset = VideoSliceEditPromptDataset(
-            source=source, 
+            latents=latents, 
             source_prompt=source_prompt, 
             edit_prompt=edit_prompt, 
             num_slice=num_slice, 
             sample_stride=sample_stride, 
-            height=height, 
-            width=width, 
         )
         val_dataloader = torch.utils.data.DataLoader(
             val_dataset, batch_size=1
@@ -175,9 +174,10 @@ def main(
                     do_classifier_free_guidance=True, 
                     negative_prompt=None
                 )
-                print(f"batch['frames'].shape: {batch['frames'].shape}")
-                source_init_latents = validation_pipeline.prepare_ddim_source_latents(
-                    frames=batch['frames'].to(accelerator.device, dtype=weight_dtype), 
+                print(f"batch['latents'].shape: {batch['latents'].shape}")
+                
+                source_init_latents = validation_pipeline.prepare_ddim_source_latents_with_latents(
+                    init_latents=batch['latents'].to(accelerator.device, dtype=weight_dtype), 
                     text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype), 
                     prompt=batch['source_prompts'], 
                     store_attention=ptp_conf['use_inversion_attention'], 
@@ -185,11 +185,11 @@ def main(
                     generator=generator, 
                     save_path=output_dir
                 )[-1]
+                
                 torch.cuda.empty_cache()
                 gc.collect()
                 print(f'source_init_latents.shape: {source_init_latents.shape}')
             
-                pixel_values = batch["frames"].to(weight_dtype)                 # [1, F, C, H, W]
                 target_prompts = batch['prompts'][0]                            # [T]
                 source_prompts = batch['source_prompts'][0]                     # [T]
                 blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
@@ -225,13 +225,19 @@ def main(
                 
                 for p, s in zip([target_prompts], samples):
                     if p in prompts_samples:
-                        pre_samples = prompts_samples[p]
-                        prompts_samples[p] = torch.cat([pre_samples, samples], dim=0)   # [F, C, H, W]
+                        pre_s = prompts_samples[p]
+                        s = torch.cat([pre_s, s], dim=0)   # [F, C, H, W]
+                        prompts_samples[p] = s
+                        print(f's.shape: {s.shape}')
+                        save_path = f'{output_dir}/inferences/{p}-{s.shape[0]}-frames.gif'
+                        save_video(s, save_path, rescale=False)
+                        logger.info(f"Saved {p} to {save_path}")
                     else:
-                        prompts_samples[p] = samples
-                    save_path = f'{output_dir}/inferences/{p}-{samples.shape[0]}-frames.gif'
-                    save_video(samples, save_path, rescale=False)
-                    logger.info(f"Saved {prompt} to {save_path}")
+                        prompts_samples[p] = s
+                        print(f's.shape: {s.shape}')
+                        save_path = f'{output_dir}/inferences/{p}-{s.shape[0]}-frames.gif'
+                        save_video(s, save_path, rescale=False)
+                        logger.info(f"Saved {p} to {save_path}")
                 
             if accelerator.is_main_process:
                 prompts_samples = accelerator.gather(prompts_samples)
