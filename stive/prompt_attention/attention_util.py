@@ -151,9 +151,12 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 
                 print(f'1 alpha_words.shape: {alpha_words.shape}')
                 attn_base = attn_base.to(dtype=attn_replace.dtype, device=attn_replace.device)
-                alpha_words = torch.gt(alpha_words * (attn_base * 0.8 + attn_replace * 0.2), self.fuse_th).to(attn_replace.dtype)        # [8, 10, 1024, 77]
-                print(f'2 alpha_words.shape: {alpha_words.shape}')
+                alpha_words = torch.gt(alpha_words * attn_base, self.fuse_th).to(attn_replace.dtype)            # [8, 10, 1024, 77]
+                alpha_words[..., self.diff_indices] = ptp_utils.relax_mask(alpha_words[..., self.diff_indices], steps=1)
                 
+                # alpha_words = torch.gt(alpha_words * (attn_base * 0.7 + attn_replace * 0.3), self.fuse_th).to(attn_replace.dtype)        # [8, 10, 1024, 77]
+                print(f'2 alpha_words.shape: {alpha_words.shape}')
+                # alpha_words = ptp_utils.
                 from ..utils.save_utils import save_video
                 import time
                 import gc
@@ -162,7 +165,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 save_video(test, f'trash/{time.time_ns()}.gif')
                 del test
                 gc.collect()
-                attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * (1 - alpha_words) + alpha_words * attn_replace
+                attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * (1 - alpha_words) + 2.0 * alpha_words * attn_replace
                 attn[0:] = attn_replace_new # b t h p n = [1, 8, 10, 1024, 77]
             elif self.num_self_replace[0] <= self.cur_step < self.num_self_replace[1]:
                 
@@ -172,7 +175,8 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                     # query 1024, key 2048
                     h = int(np.sqrt(attn_replace.shape[-2]))
                     w = h
-                    mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=step_in_store)
+                    # mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=step_in_store)
+                    mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=self.cur_step)
                     # reshape from ([ 1, 2, 32, 32]) -> [2, 1, 1024, 1]
                     reshaped_mask = rearrange(mask, "d c h w -> c d (h w)")[..., None]
                     

@@ -243,23 +243,40 @@ def get_time_words_attention_alpha(prompts, num_steps,
     return alpha_time_words, torch.as_tensor(diff_indices)
 
 
-# from einops import rearrange
+from einops import rearrange
+@torch.no_grad()
+def relax_mask(mask, steps: int = 1, kernel_size: int = 3, scale: float = 5):
+    """
+    attn: [F, M, H * W, D]
+    """
+    dtype = mask.dtype
+    device = mask.device
+    f, m, r, d = mask.shape
+    h = w = int(np.sqrt(r))
+    mask = rearrange(mask, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
+    for _ in range(steps):
+        mask = torch.nn.functional.max_pool2d(mask, kernel_size, stride=1, padding=kernel_size // 2)
+    
+    mask = rearrange(mask.squeeze(-3), '(f m d) h w -> f m (h w) d', f=f, m=m, d=d)
+    
+    return mask
 
-# @torch.no_grad()
-# def relax_attention(attn, steps: int = 1, kernel_size: int = 5, scale: float = 5):
-#     """
-#     attn: [F, M, H * W, D]
-#     """
-#     dtype = attn.dtype
-#     device = attn.device
-#     f, m, r, d = attn.shape
-#     h = w = int(np.sqrt(r))
-#     attn = rearrange(attn, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
-#     kernel = torch.ones((1, 1, kernel_size, kernel_size), dtype=dtype, device=device)
-#     kernel = kernel / torch.sum(kernel) * scale
-#     for _ in range(steps):
-#         attn = torch.nn.functional.conv2d(attn, kernel, stride=1, padding=kernel_size // 2)
+
+@torch.no_grad()
+def relax_attention(attn, steps: int = 1, kernel_size: int = 5, scale: float = 5):
+    """
+    attn: [F, M, H * W, D]
+    """
+    dtype = attn.dtype
+    device = attn.device
+    f, m, r, d = attn.shape
+    h = w = int(np.sqrt(r))
+    attn = rearrange(attn, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
+    kernel = torch.ones((1, 1, kernel_size, kernel_size), dtype=dtype, device=device)
+    kernel = kernel / torch.sum(kernel) * scale
+    for _ in range(steps):
+        attn = torch.nn.functional.conv2d(attn, kernel, stride=1, padding=kernel_size // 2)
     
-#     attn = rearrange(attn.squeeze(-3), '(f m d) h w -> f m (h w) d', f=f, m=m, d=d)
+    attn = rearrange(attn.squeeze(-3), '(f m d) h w -> f m (h w) d', f=f, m=m, d=d)
     
-#     return attn
+    return attn
