@@ -1,16 +1,16 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-pretrained_concepts_model_path: "./checkpoints/concepts/ferrari"
-output_dir: ".log/stive/ferrari/base/"
-checkpoints_dir: "checkpoints/stive/ferrari/"
+pretrained_concepts_model_path: "./checkpoints/concepts/cybertrunk"
+output_dir: ".log/stive/cybertrunk/base/"
+checkpoints_dir: "checkpoints/stive/cybertrunk/"
 
 train_data:
   sources:
     - "data/targets/car-turn/videos/car-turn.mp4"
-    - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/concepts/cybertrunk/videos/cybertrunk.mp4"
   prompts:
     - "a jeep driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    - "a $FERRARI is driving through the forest"
+    - "a $CYBERTRUNK is driving through the forest"
   num_frames: 8
   sample_stride: 3
   width: 512
@@ -23,9 +23,9 @@ validation_data:
   # source_prompt: "a jeep driving on the road"
   edit_prompts:
     - "a jeep driving down a curvy road in the countryside"
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $CYBERTRUNK driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    # - "a $FERRARI driving on the road"
+    # - "a $CYBERTRUNK driving on the road"
   num_frames: 8
   sample_stride: 3
   width: 512
@@ -36,15 +36,15 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
     # - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
     - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 
-extra_trainable_modules:
-  - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-  - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
+# extra_trainable_modules:
+#   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
+#   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
 
 
 
@@ -54,9 +54,9 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 30
 
-learning_rate: 1.0e-5
+learning_rate: 3.0e-5
 batch_size: 1
-num_train_epoch: 100
+num_train_epoch: 300
 checkpointing_steps: 2000
 validation_steps: 50
 

@@ -160,9 +160,9 @@ def main(
     
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name="concepts_clip-fine-tune", 
+            project_name="stive-concepts-fine-tune", 
             config={'train_data': train_data, 'inference_conf': inference_conf, 'validation_data': validation_data},
-            init_kwargs={"wandb": {"name": f"{os.path.basename(checkpoints_dir)}"}}
+            init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
     
     create_logging(logging, logger, accelerator)
@@ -380,11 +380,9 @@ def main(
                             ddim_inv_latent = None
                             
                             if inference_conf.use_inv_latent:
-                                # inv_latents_path = os.path.join(output_dir, f"inv_latents/ddim_latent-{global_step}.pt")
                                 ddim_inv_latent = ddim_inversion(
                                     validation_pipeline, ddim_inv_scheduler, video_latent=latents,
                                     num_inv_steps=inference_conf.num_inv_steps, prompt="")[-1].to(weight_dtype)
-                                # torch.save(ddim_inv_latent, inv_latents_path)
 
                             samples = validation_pipeline(
                                 prompt=prompts, 

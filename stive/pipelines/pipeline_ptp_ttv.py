@@ -144,6 +144,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         guidance_scale=7.5, 
         generator=None, 
         disk_store=False, 
+        cond_mask=None
     ):
         len_source = {len(source_prompt.split(' '))}
         len_target = {len(target_prompt.split(' '))}
@@ -168,7 +169,8 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                             blend_latents=blend_latents,
                             save_path=save_path,
                             save_self_attention=save_self_attention,
-                            disk_store=disk_store
+                            disk_store=disk_store, 
+                            cond_mask=cond_mask
                         )
         
         attention_util.register_attention_control(self, edit_controller)
@@ -269,11 +271,13 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                 latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
                 latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
 
+                print(f'latent_model_input: {latent_model_input.shape}')
                 # predict the noise residual
                 noise_pred = self.unet(
                     latent_model_input, t, encoder_hidden_states=text_embeddings
                 ).sample.to(dtype=latents_dtype)
-
+                
+                print(f'noise_pred: {noise_pred.shape}')
                 # perform guidance
                 if do_classifier_free_guidance:
                     noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)

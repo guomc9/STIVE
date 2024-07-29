@@ -1,21 +1,24 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
 output_dir: ".log/concepts/ferrari/base/"
-checkpoints_dir: "checkpoints/concepts/ferrari/"
+checkpoints_dir: "checkpoints/concepts/lambo/"
 
 train_data:
-  data_dir: "data/concepts/ferrari/"
+  data_dir: "data/concepts/lambo/"
   width: 512
   height: 512
   num_frames: 8
   sample_stride: 1
   rand_slice: True
   concepts_prompt: True
+  target_video_path: "data/targets/car-turn/videos/car-turn.mp4"
+  target_mask_path: "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
 
+concepts_file: "data/concepts/lambo/concepts.json"
 validation_data:
   sources:
-    - "data/concepts/ferrari/videos/car-turn.mp4"
+    - "data/targets/car-turn/videos/car-turn.mp4"
   prompts:
-    - "a $FERRARI driving down a curvy road in the countryside."
+    - "a $LAMBO driving down a curvy road in the countryside"
   num_frames: 8
   sample_stride: 1
   width: 512
@@ -27,10 +30,11 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 30
 
-concepts_file: "data/concepts/ferrari/concepts.json"
-learning_rate: 3.0e-3
+use_attn_mask_loss: False
+attn_mask_weight: 1.0e-1
+learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 300
+num_train_epoch: 500
 checkpointing_steps: 1000
 validation_steps: 50
 

@@ -392,4 +392,103 @@ class VideoSliceEditPromptDataset(Dataset):
             return {'latents': torch.stack(latents_list), 'prompts': prompts, 'source_prompts': source_prompts}
         else:
             return {'latents': torch.stack(self.latents[idx]), 'prompts': [self.edit_prompt], 'source_prompts': [self.source_prompt]}
+
+from stive.utils.cache_latents_utils import encode_videos_latents
+class LatentPromptTupleDataset(Dataset):
+    def __init__(self, data_dir, num_frames=12, sample_stride=1, height=512, width=512, rand_slice=False, concepts_prompt=False):
+        self.data_dir = data_dir
+        self.num_frames = num_frames
+        self.sample_stride = sample_stride
+        self.resolution = (height, width)
+        self.rand_slice = rand_slice
+        self.concepts_prompt = concepts_prompt
+        self.videos = self._load_data()
+
+    def _preprocess(self, frames, resize=False, rescale=False, to_float=False):
+        resized_frames = []
+        for i, frame in enumerate(frames):
+            if resize:
+                resized_frames.append(cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4))
+            else:
+                resized_frames.append(frame)
+
+        resized_frames = np.stack(resized_frames)
+        if len(resized_frames.shape) == 3:
+            resized_frames = resized_frames[..., np.newaxis]
+        if rescale and to_float:
+            resized_frames = (resized_frames / 255.0 * 2) - 1
+        elif to_float:
+            resized_frames = resized_frames / 255.0
+
+        return resized_frames
+
+    def _load_data(self):
+        df = pd.read_csv(os.path.join(self.data_dir, 'video_prompts.csv'))
+        video_dir = os.path.join(self.data_dir, 'videos')
+        videos = {}
+        for _, row in df.iterrows():
+            video_name = row['Video name']
+            prompt = row['Our GT caption'] if not self.concepts_prompt else row['Concepts Prompt']
+            video_path = os.path.join(video_dir, video_name)
+            if os.path.exists(video_path):
+                videos[video_name] = {}
+                cap = cv2.VideoCapture(video_path)
+                if len(cap) >= self.num_frames:
+                    frames = []
+                    while True:
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        if self.resolution[0] != int(frame.shape[0]) or self.resolution[1] != int(frame.shape[1]):
+                            frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4)
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        frames.append(frame)
+                    cap.release()
+                    frames = torch.from_numpy(np.array(self._preprocess(frames, rescale=True, to_float=True)))
+                    videos[video_name]['frames'] = frames
+                    videos[video_name]['prompt'] = prompt
+
+        return videos
+
+    def _sample_frames(self, video: torch.FloatTensor):
+        if self.rand_slice:
+            sample_stride = self.sample_stride if len(video) // self.num_frames >= self.sample_stride else len(video) // self.num_frames
+            F = video.shape[0]
+            max_start_frame = F - (self.num_frames - 1) * sample_stride
+            start_frame = random.randint(0, max_start_frame - 1)
+            sample_indices = torch.arange(start_frame, start_frame + self.num_frames * sample_stride, sample_stride)[:self.num_frames]
+            frames = video[sample_indices]
+        else:
+            sample_stride = self.sample_stride if len(video) // self.num_frames >= self.sample_stride else len(video) // self.num_frames
+            sample_indices = torch.arange(0, len(video), sample_stride)[:self.num_frames]
+            frames = video[sample_indices]
         
+        return frames, sample_indices
+    
+    def __len__(self):
+        return len(self.videos)
+
+    def __getitem__(self, idx):
+        prompts = []                            # [B]
+        frames_list = []                        # [B, F, H, W, 3]
+        if isinstance(idx, list):
+            for i in idx:
+                video_name = list(self.videos.keys())[i]
+                video = self.videos[video_name]
+                frames = video['frames']
+                prompt = video['prompt']
+                frames, sample_indices = self._sample_frames(frames)                    # [F, H, W, 3]
+                prompts.append(prompt)
+                frames_list.append(frames)
+                
+            return {'frames': torch.stack(frames_list), 'prompts': prompts}
+        else:
+            video_name = list(self.videos.keys())[idx]
+            video = self.videos[video_name]
+            frames = video['frames']
+            prompt = video['prompt']
+            frames, sample_indices = self._sample_frames(frames)                    # [F, H, W, 3]
+            prompts.append(prompt)
+            frames_list.append(frames)
+                
+            return {'frames': torch.stack(frames_list), 'prompts': prompts}

@@ -19,3 +19,27 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive_ptp.py --config configs
 CUDA_VISIBLE_DEVICES=0 accelerate launch finetune_stive.py --config configs/stive/car-turn.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive.py --config configs/stive/car-turn.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive_ptp.py --config configs/ptp/car-turn.yaml
+
+
+python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s jeep
+
+
+
+python scripts/extract_concepts.py -f data/concepts/cybertrunk/video_prompts.csv -o data/concepts/cybertrunk/concepts.json
+python scripts/extract_concepts.py -f data/concepts/bmw/video_prompts.csv -o data/concepts/bmw/concepts.json
+python scripts/extract_concepts.py -f data/concepts/lambo/video_prompts.csv -o data/concepts/lambo/concepts.json
+python scripts/extract_concepts.py -f data/concepts/ferrari/video_prompts.csv -o data/concepts/ferrari/concepts.json
+
+
+
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/ferrari.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/cybertrunk.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/lambo.yaml
+
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/ferrari.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/cybertrunk.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/lambo.yaml

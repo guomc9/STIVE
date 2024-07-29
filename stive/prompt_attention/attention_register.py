@@ -107,27 +107,12 @@ def register_attention_control(model, controller):
                 if attention_mask is not None:
                     attention_probs = attention_probs + attention_mask
 
-                # print(f'1 attention_probs.dtype: {attention_probs.dtype}')
                 attention_probs = attention_probs.softmax(dim=-1)
-                # print(f'2 attention_probs.dtype: {attention_probs.dtype}')
 
                 attention_probs = attention_probs.to(value.dtype)   # [B * H, Q, K]
                 
-                # print(f'3 attention_probs.dtype: {attention_probs.dtype}')
-                # print(f'3 attention_probs.shape: {reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads).shape}')   
-                # import random
-                # res = np.sqrt(query.shape[-2])
                 attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet) # [B, H, Q, K]
-                # if is_cross and res == 32:
-                #     # print(f'attention_probs.shape: {attention_probs.shape}')                                # [B * H, Q, K]
-                #     maps = rearrange(attention_probs, 'b f (h w) k -> b f h w k', h=32)[..., 2]             # [B, F, H, W]
-                #     f = maps.shape[1]
-                #     maps = torch.mean(maps, dim=0)                                                          # [F, H, W]
-                #     maps = rearrange(maps, 'f h w -> f h w').unsqueeze(-1).repeat(1, 1, 1, 3)
-                #     maps = rearrange(maps, 'f h w c -> f c h w')
-                #     save_path = f'trash/{datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}.png'
-                #     save_video(video=maps, path=f'trash/{place_in_unet}_{datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}_{random.randint(0, 8)}.png')
-                #     print(f'save {save_path}.')
+        
                 
                 attention_probs = reshape_temporal_heads_to_batch_dim(attention_probs, attn.heads)
                 

@@ -5,15 +5,16 @@ output_dir: ".log/ptp/car-turn/to-ferrari/"
 checkpoints_dir: "checkpoints/ptp/car-turn/to-ferrari"
 
 validation_data:
-  source: "data/targets/videos/car-turn.mp4"
-  # source_prompt: "a jeep driving down a curvy road in the countryside."
-  source_prompt: "a jeep driving on the road"
+  source: "data/targets/car-turn/videos/car-turn.mp4"
+  source_prompt: "a jeep driving down a curvy road in the countryside"
+  # source_prompt: "a jeep driving on the road"
 
   edit_prompts:
-    # - "a $FERRARI driving down a curvy road in the countryside."
-    - "a $FERRARI driving on the road"
+    - "a $FERRARI driving down a curvy road in the countryside"
+    # - "a $FERRARI driving on the road"
+    # - "a car driving on the road"
   num_frames: 8
-  sample_stride: 1
+  sample_stride: 2
   width: 512
   height: 512
 
@@ -24,18 +25,20 @@ inference_conf:
   num_inv_steps: 30
 
 ptp_conf:
+  source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.5]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.0]
+  self_replace_steps: [0.0, 0.5]
   blend_words: 
     sources:
       - "jeep"
     targets:
       - "$FERRARI"
+      # - "car"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.2, 0.2]
-  fuse_th: 0.05
+  blend_th: [0.3, 0.3]
+  fuse_th: 0.01
   # fuse_scale: 1.5
 
 seed: 33

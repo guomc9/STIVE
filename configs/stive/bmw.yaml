@@ -1,16 +1,16 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-pretrained_concepts_model_path: "./checkpoints/concepts/ferrari"
-output_dir: ".log/stive/ferrari/base/"
-checkpoints_dir: "checkpoints/stive/ferrari/"
+pretrained_concepts_model_path: "./checkpoints/concepts/bmw"
+output_dir: ".log/stive/bmw/base/"
+checkpoints_dir: "checkpoints/stive/bmw/"
 
 train_data:
   sources:
     - "data/targets/car-turn/videos/car-turn.mp4"
-    - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/concepts/bmw/videos/bmw.mp4"
   prompts:
     - "a jeep driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    - "a $FERRARI is driving through the forest"
+    - "a $BMW is driving through the forest"
   num_frames: 8
   sample_stride: 3
   width: 512
@@ -23,9 +23,9 @@ validation_data:
   # source_prompt: "a jeep driving on the road"
   edit_prompts:
     - "a jeep driving down a curvy road in the countryside"
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $BMW driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    # - "a $FERRARI driving on the road"
+    # - "a $BMW driving on the road"
   num_frames: 8
   sample_stride: 3
   width: 512
@@ -54,9 +54,9 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 30
 
-learning_rate: 1.0e-5
+learning_rate: 1.0e-4
 batch_size: 1
-num_train_epoch: 100
+num_train_epoch: 300
 checkpointing_steps: 2000
 validation_steps: 50
 

@@ -178,7 +178,7 @@ def update_alpha_time_word(alpha, bounds: Union[float, Tuple[float, float]], pro
 
 # #################################################################
 # #                                                               #
-# #    Inconsistent with the M_cross/edit in FateZero Paper       #
+# #    Some difference with the M_cross/edit in FateZero Paper    #
 # #  Appendix.A.ImplementationDetails.pseudo algorithm code       #
 # #                 Editedindex=(psrc!= pedit)                    #
 # #                  Mcross[Editedindex]=1                        #
@@ -243,17 +243,17 @@ def get_time_words_attention_alpha(prompts, num_steps,
     return alpha_time_words, torch.as_tensor(diff_indices)
 
 
-from einops import rearrange
+from einops import rearrange, repeat
 @torch.no_grad()
-def relax_mask(mask, steps: int = 1, kernel_size: int = 3, scale: float = 5):
+def relax_mask(mask, steps: int = 1, kernel_size: int = 3):
     """
-    attn: [F, M, H * W, D]
+    mask: [F, M, H * W, D]
     """
     dtype = mask.dtype
     device = mask.device
     f, m, r, d = mask.shape
     h = w = int(np.sqrt(r))
-    mask = rearrange(mask, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
+    mask = rearrange(mask, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [F * M * D, 1, H, W]
     for _ in range(steps):
         mask = torch.nn.functional.max_pool2d(mask, kernel_size, stride=1, padding=kernel_size // 2)
     
@@ -261,22 +261,37 @@ def relax_mask(mask, steps: int = 1, kernel_size: int = 3, scale: float = 5):
     
     return mask
 
+@torch.no_grad()
+def relax_flat_mask(mask, steps: int = 1, kernel_size: int = 3):
+    """
+    mask: [F, H, W, C]
+    """
+    dtype = mask.dtype
+    device = mask.device
+    f, h, w, c = mask.shape
+    mask = rearrange(mask, 'f h w c -> f c h w')        # [F, 1, H, W]
+    for _ in range(steps):
+        mask = torch.nn.functional.max_pool2d(mask, kernel_size, stride=1, padding=kernel_size // 2)
+    
+    mask = rearrange(mask, 'f c h w -> f h w c')        # [F, H, W, 1]
+    
+    return mask
 
 @torch.no_grad()
-def relax_attention(attn, steps: int = 1, kernel_size: int = 5, scale: float = 5):
+def pool_mask(mask, target_shape):
     """
-    attn: [F, M, H * W, D]
+    mask: [F, H, W, C]
     """
-    dtype = attn.dtype
-    device = attn.device
-    f, m, r, d = attn.shape
-    h = w = int(np.sqrt(r))
-    attn = rearrange(attn, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [B * F * M * D, 1, H, W]
-    kernel = torch.ones((1, 1, kernel_size, kernel_size), dtype=dtype, device=device)
-    kernel = kernel / torch.sum(kernel) * scale
-    for _ in range(steps):
-        attn = torch.nn.functional.conv2d(attn, kernel, stride=1, padding=kernel_size // 2)
+    dtype = mask.dtype
+    device = mask.device
+    f, h, w, c = mask.shape
+    target_H, target_W = target_shape
+    mask = rearrange(mask, 'f h w c -> f c h w')
+    kernel_size_H = h // target_H
+    kernel_size_W = w // target_W
+    stride_H = h // target_H
+    stride_W = w // target_W
+    mask = torch.nn.functional.max_pool2d(mask, kernel_size=(kernel_size_H, kernel_size_W), stride=(stride_H, stride_W))
+    mask = rearrange(mask, 'f c h w -> f h w c')
     
-    attn = rearrange(attn.squeeze(-3), '(f m d) h w -> f m (h w) d', f=f, m=m, d=d)
-    
-    return attn
+    return mask

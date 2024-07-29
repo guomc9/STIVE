@@ -4,7 +4,6 @@ import argparse
 import datetime
 import logging
 import inspect
-import re
 from typing import Dict, Optional
 from omegaconf import OmegaConf
 import json
@@ -18,7 +17,6 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
-from peft import LoraConfig, get_peft_model
 from diffusers.models.attention_processor import AttnProcessor2_0
 from diffusers.models.attention import BasicTransformerBlock
 from diffusers import AutoencoderKL, DDIMScheduler
@@ -27,19 +25,17 @@ from diffusers.utils import check_min_version
 from diffusers.utils.import_utils import is_xformers_available
 from diffusers.pipelines import TextToVideoSDPipeline
 from tqdm.auto import tqdm
-from transformers import CLIPTokenizer, CLIPTextModel
 from diffusers.models import UNet3DConditionModel
+from transformers import CLIPTokenizer, CLIPTextModel
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
-from stive.data.dataset import VideoEditPromptsDataset, LatentPromptTupleCacheDataset
+from stive.data.dataset import VideoPromptTupleDataset as VideoPromptValDataset, LatentPromptCacheDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
-from stive.utils.cache_latents_utils import encode_videos_latents
 from einops import rearrange, repeat
+import os
 import wandb
 import subprocess
-import os
-import gc
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
@@ -62,7 +58,7 @@ def accelerate_set_verbose(accelerator):
     else:
         transformers.utils.logging.set_verbosity_error()
         diffusers.utils.logging.set_verbosity_error()
-   
+
 def set_processors(attentions):
     for attn in attentions: attn.set_processor(AttnProcessor2_0())
 
@@ -114,14 +110,15 @@ def create_output_folders(output_dir, config):
 
 def main(
     pretrained_t2v_model_path: str,
-    pretrained_concepts_model_path: str, 
     output_dir: str,
     checkpoints_dir: str, 
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
-    lora_conf: Dict, 
     validation_steps: int = 200,
+    concepts_file: str = None, 
+    concepts_num_embedding: int = 1, 
+    retain_position_embedding: bool = True, 
     batch_size: int = 1,
     warmup_epoch_rate: float = 0.1, 
     num_train_epoch: int = 200,
@@ -141,10 +138,20 @@ def main(
     enable_xformers_memory_efficient_attention: bool = True,
     enable_torch_2_attn: bool = True, 
     seed: Optional[int] = None, 
-    extra_trainable_modules = None, 
 ):
     *_, config = inspect.getargvalues(inspect.currentframe())
 
+    result = subprocess.run([
+        'python', 
+        'scripts/cache_latents.py', 
+        '-d', f"{train_data['data_dir']}", 
+        '-H', f"{train_data['height']}", 
+        '-W', f"{train_data['width']}", 
+        '-s', f"{seed}", 
+    ], capture_output=True, text=True)
+    print("scripts/cache_latents.py stdout:", result.stdout)
+    print("scripts/cache_latents.py stderr:", result.stderr)
+    
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps,
         mixed_precision=mixed_precision,
@@ -153,9 +160,9 @@ def main(
     
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name="stive-fine-tune", 
+            project_name="stive-concepts-fine-tune", 
             config={'train_data': train_data, 'inference_conf': inference_conf, 'validation_data': validation_data},
-            init_kwargs={"wandb": {"name": f"{os.path.basename(checkpoints_dir)}"}}
+            init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
     
     create_logging(logging, logger, accelerator)
@@ -167,57 +174,29 @@ def main(
     if accelerator.is_main_process:
         output_dir = create_output_folders(output_dir, config)
 
-    weight_dtype = torch.float32
-    if accelerator.mixed_precision == "fp16":
-        weight_dtype = torch.float16
-    elif accelerator.mixed_precision == "bf16":
-        weight_dtype = torch.bfloat16
-        
+    if concepts_file is None and os.path.exists(concepts_file):
+        raise Exception(f"concepts_file is None or not exists.")
+    else:
+        with open(concepts_file, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            concepts_list = data['concepts']
+
     noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
-    text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
+    tokenizer = ConceptsCLIPTokenizer.from_pretrained_clip(pretrained_t2v_model_path, subfolder="tokenizer", concepts_list=concepts_list, concepts_num_embedding=concepts_num_embedding)
+    text_encoder = ConceptsCLIPTextModel.from_pretrained_clip(pretrained_t2v_model_path, subfolder="text_encoder", concepts_list=concepts_list, concepts_num_embedding=concepts_num_embedding, retain_position_embedding=retain_position_embedding)
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
-    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_concepts_model_path):
-        concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
-        add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
-        del concepts_text_encoder
-        gc.collect()
-        torch.cuda.empty_cache()
     unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
-    handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
-    unet.to(dtype=weight_dtype)
-    lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
-    target_modules = []
-    patterns = lora_conf['target_modules']
-    for name, param in unet.named_parameters():
-        for pattern in patterns:
-            if re.match(pattern, name):
-                target_modules.append(name.rstrip('.weight').rstrip('.bias'))
-    lora_conf['target_modules'] = target_modules
-    lora_conf = LoraConfig(**lora_conf)
-    lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
-    
-    lora_unet.print_trainable_parameters()
     vae.requires_grad_(False)
-    unet.requires_grad_(False)
     text_encoder.requires_grad_(False)
-    lora_unet.requires_grad_(False)
-    for name, param in lora_unet.named_parameters():
-        if 'lora' in name:
-            print(f'lora trainable param: {name}')
-            param.requires_grad = True
-            param.data = param.data.float()
-        elif extra_trainable_modules is not None:
-            for extra_trainable_module in extra_trainable_modules:
-                if re.match(extra_trainable_module, name):
-                    print(f'extra trainable param: {name}')
-                    param.requires_grad = True
-                    param.data = param.data.float()
-            
+    text_encoder.concepts_embedder.requires_grad_(True)
+    unet.requires_grad_(False)
+    handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
+
     if scale_lr:
         learning_rate = (
             learning_rate * gradient_accumulation_steps * batch_size * accelerator.num_processes
         )
+
 
     if use_8bit_adam:
         try:
@@ -231,22 +210,16 @@ def main(
     else:
         optimizer_cls = torch.optim.AdamW
 
-    optim_params = [p for p in lora_unet.parameters() if p.requires_grad]
     optimizer = optimizer_cls(
-        optim_params, 
+        [text_encoder.concepts_embedder.weight],
         lr=learning_rate,
         betas=(adam_beta1, adam_beta2),
         weight_decay=adam_weight_decay,
         eps=adam_epsilon,
     )
     
-    latents = encode_videos_latents(video_paths=train_data['sources'], height=train_data['height'], width=train_data['width'])
-    train_data = OmegaConf.to_container(train_data, resolve=True)
-    train_data.pop('sources')
-    train_data['latents'] = latents
-    train_dataset = LatentPromptTupleCacheDataset(**train_data)
-    
-    val_dataset = VideoEditPromptsDataset(**validation_data)
+    train_dataset = LatentPromptCacheDataset(**train_data)
+    val_dataset = VideoPromptValDataset(**validation_data)
 
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset, batch_size=batch_size
@@ -256,8 +229,12 @@ def main(
         val_dataset, batch_size=batch_size
     )
     
+    clip_tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
+    clip_text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
+    clip_text_encoder.requires_grad_(False)
+    add_concepts_embeddings(clip_tokenizer, clip_text_encoder, concept_tokens=concepts_list, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
+        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=clip_text_encoder, tokenizer=clip_tokenizer, unet=unet, 
     )
     validation_pipeline.enable_vae_slicing()
     
@@ -272,15 +249,25 @@ def main(
         num_training_steps=num_train_steps, 
     )
     
-    lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler = accelerator.prepare(
-        lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler
+    text_encoder, optimizer, train_dataloader, val_dataloader, lr_scheduler = accelerator.prepare(
+        text_encoder, optimizer, train_dataloader, val_dataloader, lr_scheduler
     )
-        
-    text_encoder.to(accelerator.device, dtype=weight_dtype)
+
+    weight_dtype = torch.float32
+    if accelerator.mixed_precision == "fp16":
+        weight_dtype = torch.float16
+    elif accelerator.mixed_precision == "bf16":
+        weight_dtype = torch.bfloat16
+
+    text_encoder.to(dtype=weight_dtype)
+    text_encoder.concepts_embedder.to(dtype=torch.float)
+    clip_text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
-    text_encoder.eval()
+    unet.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
     unet.eval()
+    clip_text_encoder.eval()
+        
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
     logger.info("***** Running training *****")
@@ -290,26 +277,18 @@ def main(
     logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
     logger.info(f"  Gradient Accumulation steps = {gradient_accumulation_steps}")
     logger.info(f"  Total optimization steps = {num_train_steps}")
+    logger.info(f"  Concepts list = {concepts_list}")
     global_step = 0
     first_epoch = 0
 
     for epoch in range(first_epoch, num_train_epoch):
-        lora_unet.train()
+        text_encoder.train()
         train_loss = 0.0
         optimizer.zero_grad()
         with tqdm(train_dataloader) as progress_bar:
             for step, batch in enumerate(progress_bar):
                 with accelerator.autocast():
-                    with accelerator.accumulate(lora_unet):
-                        # pixel_values = batch["frames"].to(weight_dtype)
-                        # prompts = batch['prompts']
-                        
-                        # video_length = pixel_values.shape[1]
-                        # pixel_values = rearrange(pixel_values, "b f h w c -> (b f) c h w")
-
-                        # latents = vae.encode(pixel_values).latent_dist.sample()
-                        # latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
-                        # latents = latents * 0.18215
+                    with accelerator.accumulate(text_encoder):
                         latents = batch["latents"]
                         prompts = batch['prompts']
                         video_length = latents.shape[1]
@@ -325,7 +304,10 @@ def main(
 
                         tokens = tokenizer(prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
 
-                        encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
+                        if hasattr(tokens, 'replace_indices') and hasattr(tokens, 'concept_indices'):
+                            encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device), tokens.replace_indices, tokens.concept_indices)[0]
+                        else:
+                            encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
                         
                         if noise_scheduler.config.prediction_type == "epsilon":
                             target = noise
@@ -334,7 +316,7 @@ def main(
                         else:
                             raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
 
-                        model_pred = lora_unet(noisy_latents, timesteps, encoder_hidden_states).sample
+                        model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                         
                         loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
 
@@ -344,10 +326,12 @@ def main(
 
                         accelerator.backward(loss)
                         if accelerator.sync_gradients:
-                            accelerator.clip_grad_norm_(optim_params, max_grad_norm)
-                            for param in optim_params:
-                                if param.grad is None:
-                                    print(f"Epoch {epoch}, Parameter: {param}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
+                            accelerator.clip_grad_norm_(text_encoder.parameters(), max_grad_norm)
+                            for name, module in text_encoder.named_modules():
+                                if name.endswith(tuple(['concepts_embedder'])):
+                                    for param in module.parameters():
+                                        if param.grad is None:
+                                            print(f"Epoch {epoch}, Parameter: {name}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
 
             
                             if (global_step + 1) % gradient_accumulation_steps == 0:
@@ -370,8 +354,8 @@ def main(
 
                 if global_step % validation_steps == 0:
                     with torch.no_grad(), accelerator.autocast():
-                        torch.cuda.empty_cache()
-                        generator = torch.Generator(device=accelerator.device)
+                        update_concepts_embedding(clip_tokenizer, clip_text_encoder, concept_tokens=concepts_list, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
+                        generator = torch.Generator(device=latents.device)
                         if seed is not None:
                             generator.manual_seed(seed)
                         prompts_samples = {}
@@ -394,10 +378,12 @@ def main(
                             noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
                             ddim_inv_latent = None
+                            
                             if inference_conf.use_inv_latent:
                                 ddim_inv_latent = ddim_inversion(
                                     validation_pipeline, ddim_inv_scheduler, video_latent=latents,
                                     num_inv_steps=inference_conf.num_inv_steps, prompt="")[-1].to(weight_dtype)
+
                             samples = validation_pipeline(
                                 prompt=prompts, 
                                 generator=generator, 
@@ -423,17 +409,13 @@ def main(
                             save_videos_grid(samples, save_path, rescale=False)
                             logger.info(f"Saved samples to {save_path}")
 
-                        torch.cuda.empty_cache()
+                    torch.cuda.empty_cache()
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        lora_unet = accelerator.unwrap_model(lora_unet)
-        save_path = os.path.join(output_dir, 'lora')
-        lora_unet.save_pretrained(save_path)
-        save_path = os.path.join(output_dir, 'unet')
-        unet = lora_unet.unload()
-        unet.save_pretrained(save_path)
-        logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
+        text_encoder = accelerator.unwrap_model(text_encoder)
+        text_encoder.save_pretrained(os.path.join(output_dir, 'text_encoder'))
+        tokenizer.save_pretrained(os.path.join(output_dir, 'tokenizer'))
 
     accelerator.end_training()
     if os.path.exists(checkpoints_dir):

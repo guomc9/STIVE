@@ -107,3 +107,27 @@ def save_gif_mp4_folder_type(images, save_path, save_gif=True):
     if save_gif: save_images_as_gif(images, save_path)
     save_images_as_mp4(images, save_path_mp4)
     save_images_as_folder(images, save_path_folder)
+    
+    
+import torch
+import numpy as np
+def load_masks(video_path, sample_stride=1, num_frames=None, height=None, width=None):
+    cap = cv2.VideoCapture(video_path)
+    frames = []
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    sample_indices = range(0, frame_count, sample_stride)
+    
+    for idx in sample_indices:
+        if num_frames is not None and len(frames) >= num_frames:
+            break
+        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+        success, frame = cap.read()
+        if not success:
+            break
+        if height is not None and width is not None:
+            frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_LANCZOS4)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frames.append(frame)
+    
+    cap.release()
+    return (torch.from_numpy(np.asarray(frames)) / 255.).mean(dim=-1, keepdim=True)

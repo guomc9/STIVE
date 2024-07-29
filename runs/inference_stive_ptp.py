@@ -33,7 +33,7 @@ from stive.pipelines.pipeline_ptp_ttv import PtpTextToVideoSDPipeline
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
 from stive.data.dataset import VideoEditPromptsDataset
 from stive.utils.ddim_utils import ddim_inversion
-from stive.utils.pta_utils import save_gif_mp4_folder_type
+from stive.utils.pta_utils import save_gif_mp4_folder_type, load_masks
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
 from stive.prompt_attention.attention_util import AttentionStore, make_controller
@@ -172,6 +172,8 @@ def main(
             source_prompts = batch['source_prompts'][0]                     # [T]
             blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
             
+            mask = load_masks(ptp_conf['source_mask'], sample_stride=validation_data['sample_stride'], num_frames=validation_data['num_frames'])    # [f, h, w]
+            print(f'mask.shape: {mask.shape}')
             edited_output = validation_pipeline.ptp_replace_edit(
                 latents=source_init_latents, 
                 source_prompt=source_prompts, 
@@ -192,6 +194,7 @@ def main(
                 guidance_scale=inference_conf["guidance_scale"], 
                 generator=generator, 
                 disk_store = ptp_conf.get('disk_store', False), 
+                cond_mask = mask
             )
             samples = edited_output['edited_frames']
             attention_output = edited_output['attention_output']

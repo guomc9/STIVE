@@ -120,11 +120,6 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             attn_base = step_in_store_atten_dict[key][current_pos]          
             
             self.update_attention_position_dict(key)
-            # save in format of [temporal, head, resolution, text_embedding]
-            
-            # if is_cross or (self.num_self_replace[0] <= self.cur_step < self.num_self_replace[1]):
-            # if self.num_self_replace[0] <= self.cur_step < self.num_self_replace[1]:
-            
             clip_length = attn.shape[0] // (self.batch_size)
             attn = attn.reshape(self.batch_size, clip_length, *attn.shape[1:])      # [B, F, HEAD, H*W, T] / [B, F, HEAD, H*W, H*W]
             # Replace att_replace with attn_base
@@ -132,58 +127,17 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             if is_cross and self.num_cross_replace[0] <= self.cur_step < self.num_cross_replace[1]:
                 alpha_words = self.cross_replace_alpha[self.cur_step]           # [1, 1, 1, 77]
                 
-                # ## !!!
-                # ## it's Mcross · Csrc + (1 − Mcross) · Cedit, rather than Mcross · Cedit + (1 − Mcross) · Csrc
-                # print(f'alpha_words: {alpha_words}')
-                # attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * alpha_words + (1 - alpha_words) * attn_replace
-                
-                # from ..utils.save_utils import save_video
-                # import time
-                # import gc
-                # print(f'attn_replace.shape: {attn_replace.shape}')                                          # [8, 10, 1024, 77]
-                # alpha_words = torch.gt(alpha_words * attn_replace, self.fuse_th).to(attn_replace.dtype)     # [8, 10, 1024, 77]
-                # print(f'2 alpha_words: {alpha_words}')
-                # test = alpha_words.squeeze(0).mean(1)[..., 2].unsqueeze(-1).repeat(1, 1, 3).detach().cpu()
-                # test = rearrange(test, 'f (h w) c -> f c h w', h=int(np.sqrt(test.shape[1])))
-                # save_video(test, f'trash/{time.time_ns()}.gif')
-                # del test
-                # gc.collect()
-                
-                print(f'1 alpha_words.shape: {alpha_words.shape}')
-                attn_base = attn_base.to(dtype=attn_replace.dtype, device=attn_replace.device)
-                alpha_words = torch.gt(alpha_words * attn_base, self.fuse_th).to(attn_replace.dtype)            # [8, 10, 1024, 77]
-                alpha_words[..., self.diff_indices] = ptp_utils.relax_mask(alpha_words[..., self.diff_indices], steps=1)
-                
-                # alpha_words = torch.gt(alpha_words * (attn_base * 0.7 + attn_replace * 0.3), self.fuse_th).to(attn_replace.dtype)        # [8, 10, 1024, 77]
-                print(f'2 alpha_words.shape: {alpha_words.shape}')
-                # alpha_words = ptp_utils.
-                from ..utils.save_utils import save_video
-                import time
-                import gc
-                test = alpha_words.squeeze(0).mean(1)[..., 2].unsqueeze(-1).repeat(1, 1, 3).detach().cpu()
-                test = rearrange(test, 'f (h w) c -> f c h w', h=int(np.sqrt(test.shape[1])))
-                save_video(test, f'trash/{time.time_ns()}.gif')
-                del test
-                gc.collect()
-                attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * (1 - alpha_words) + 2.0 * alpha_words * attn_replace
+                attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * alpha_words + (1 - alpha_words) * attn_replace
+            
                 attn[0:] = attn_replace_new # b t h p n = [1, 8, 10, 1024, 77]
+                    
             elif self.num_self_replace[0] <= self.cur_step < self.num_self_replace[1]:
-                
-                # start of masked self-attention
                 if self.attention_blend is not None and attn_replace.shape[-2] <= 32 ** 2:
-                    # ca_this_step = step_in_store_atten_dict
-                    # query 1024, key 2048
                     h = int(np.sqrt(attn_replace.shape[-2]))
                     w = h
-                    # mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=step_in_store)
                     mask = self.attention_blend(target_h = h, target_w =w, attention_store= step_in_store_atten_dict, step_in_store=self.cur_step)
-                    # reshape from ([ 1, 2, 32, 32]) -> [2, 1, 1024, 1]
                     reshaped_mask = rearrange(mask, "d c h w -> c d (h w)")[..., None]
                     
-                    # input has shape  (h) c res words
-                    # one meens using target self-attention, zero is using source
-                    # Previous implementation us all zeros
-                    # mask should be repeat.
                 else: 
                     reshaped_mask = None
                 attn[0:] = self.replace_self_attention(attn_base, attn_replace, reshaped_mask)     # [B, F, HEAD, H*W, H*W], [B, F, HEAD, H*W, H*W]
@@ -217,7 +171,8 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                  attention_blend: SpatialBlender= None,
                  save_self_attention: bool=True,
                  fuse_th: float = 0.3, 
-                 disk_store=False
+                 disk_store=False, 
+                 cond_mask = None
                  ):
         super(AttentionControlEdit, self).__init__(
             save_self_attention=save_self_attention,
@@ -230,12 +185,16 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             self.batch_size = len(prompts) //2
             assert self.batch_size==1, 'Only support single video editing with additional attention_store'
 
+        
+        # self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
         self.cross_replace_alpha, self.diff_indices = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer)
         self.cross_replace_alpha = self.cross_replace_alpha.to(device)
+        
         if type(self_replace_steps) is float:
             self_replace_steps = 0, self_replace_steps
         self.num_cross_replace = int(num_steps * cross_replace_steps[0]), int(num_steps * cross_replace_steps[1])
         self.num_self_replace = int(num_steps * self_replace_steps[0]), int(num_steps * self_replace_steps[1])
+        self.cond_mask = cond_mask              # [F, H, W]
         self.latent_blend = latent_blend
         self.fuse_th = fuse_th
         # We need to know the current position in attention
@@ -270,14 +229,16 @@ class AttentionReplace(AttentionControlEdit):
                  attention_blend: SpatialBlender=None,
                  save_self_attention: bool = True,
                  fuse_th: float = 0.3, 
-                 disk_store=False):
+                 disk_store=False, 
+                 cond_mask=None):
         super(AttentionReplace, self).__init__(
             prompts, num_steps, cross_replace_steps, self_replace_steps, latent_blend, tokenizer=tokenizer,
             additional_attention_store=additional_attention_store, use_inversion_attention = use_inversion_attention,
             attention_blend=attention_blend,
             save_self_attention = save_self_attention,
             fuse_th=fuse_th, 
-            disk_store=disk_store
+            disk_store=disk_store, 
+            cond_mask=cond_mask
             )
         self.mapper = seq_aligner.get_replacement_mapper(prompts, tokenizer).to(device)
 
@@ -369,7 +330,8 @@ def make_controller(tokenizer, prompts: List[str], is_replace_controller: bool,
                     blend_self_attention=False,
                     save_path = None,
                     save_self_attention = True,
-                    disk_store = False
+                    disk_store = False, 
+                    cond_mask = None
                     ) -> AttentionControlEdit:
     if (blend_words is None) or (blend_words == 'None'):
         latent_blend = None
@@ -404,7 +366,8 @@ def make_controller(tokenizer, prompts: List[str], is_replace_controller: bool,
                                       attention_blend=attention_blend,
                                       fuse_th=fuse_th, 
                                       save_self_attention = save_self_attention,
-                                      disk_store=disk_store
+                                      disk_store=disk_store, 
+                                      cond_mask=cond_mask
                                       )
     else:
         print('use refine controller')
