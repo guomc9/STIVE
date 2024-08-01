@@ -206,10 +206,11 @@ class StepAttentionSupervisor(StepAttentionStore):
                 
                 adapt_mask = pool_mask(mask, target_size=(h, w))                                            # [B, F, 1, H, W]
                 adapt_mask = rearrange(adapt_mask, 'b f c h w -> b f (h w) c').squeeze(-1)                  # [B, F, Q]
-                adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m)                                  # [B, F * M, Q]
+                adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m).detach_()                        # [B, F * M, Q]
                 if sub_sot:
                     adapt_mask = adapt_mask - adapt_mask * attn[..., 0]                                     # [B, F * M, Q]
-                    adapt_mask.detach_()
+                    # SUPERISE NO DETACH
+                    # adapt_mask.detach_()
                     
                 for i in range(b):
                     mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]

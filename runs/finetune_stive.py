@@ -275,12 +275,11 @@ def main(
     lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler = accelerator.prepare(
         lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler
     )
-        
+    
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     text_encoder.eval()
     vae.eval()
-    unet.eval()
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
     logger.info("***** Running training *****")
@@ -416,7 +415,7 @@ def main(
                             prompts_samples = accelerator.gather(prompts_samples)
                             for prompt, sample in prompts_samples.items():
                                 save_video(sample, f"{output_dir}/samples/sample-{global_step}/{prompt}.gif", rescale=False)
-                                accelerator.log({f"sample/{prompt}": wandb.Video((255 * sample.permute(1, 0, 2, 3)).to(torch.uint8).detach().cpu().numpy())}, step=global_step)
+                                accelerator.log({f"sample/{prompt}": wandb.Video((255 * sample).to(torch.uint8).detach().cpu().numpy())}, step=global_step)
                                 samples.append(sample)
                             samples = torch.stack(samples)
                             save_path = f"{output_dir}/samples/sample-{global_step}.gif"

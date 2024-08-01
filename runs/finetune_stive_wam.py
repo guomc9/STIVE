@@ -17,6 +17,7 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
+from peft import LoraConfig, get_peft_model
 from diffusers.models.attention_processor import AttnProcessor2_0
 from diffusers.models.attention import BasicTransformerBlock
 from diffusers import AutoencoderKL, DDIMScheduler
@@ -28,7 +29,7 @@ from tqdm.auto import tqdm
 from diffusers.models import UNet3DConditionModel
 from transformers import CLIPTokenizer, CLIPTextModel
 from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokenizer
-from stive.data.dataset import VideoPromptTupleDataset as VideoPromptValDataset, LatentPromptDataset
+from stive.data.dataset import VideoEditPromptsDataset as VideoPromptValDataset, LatentPromptDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
 from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
@@ -36,12 +37,14 @@ from stive.prompt_attention.attention_register import register_attention_control
 from stive.prompt_attention.attention_store import StepAttentionSupervisor
 from einops import rearrange, repeat
 import os
+import gc
+import re
 import wandb
 import random
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-check_min_version("0.10.0.dev0")
+check_min_version("0.28.0")
 
 logger = get_logger(__name__, log_level="INFO")
 
@@ -189,14 +192,13 @@ def log_cross_attention_mask(accelerator, masks_dict, save_path, step, log_prefi
 
 def main(
     pretrained_t2v_model_path: str,
+    pretrained_concepts_model_path: str, 
     output_dir: str,
     checkpoints_dir: str, 
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
-    concepts: List[str] = None, 
-    concepts_num_embedding: int = 1, 
-    retain_position_embedding: bool = True, 
+    lora_conf: Dict, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
@@ -224,6 +226,7 @@ def main(
     enable_xformers_memory_efficient_attention: bool = True,
     enable_torch_2_attn: bool = True, 
     seed: Optional[int] = None, 
+    extra_trainable_modules = None, 
 ):
     *_, config = inspect.getargvalues(inspect.currentframe())
 
@@ -235,7 +238,7 @@ def main(
     
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name="stive-concepts-fine-tune", 
+            project_name="stive-unet-fine-tune", 
             config={'train_data': train_data, 'inference_conf': inference_conf, 'validation_data': validation_data},
             init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
@@ -248,20 +251,56 @@ def main(
 
     if accelerator.is_main_process:
         output_dir = create_output_folders(output_dir, config)
-    concepts = OmegaConf.to_container(concepts, resolve=True)
     
+    weight_dtype = torch.float32
+    if accelerator.mixed_precision == "fp16":
+        weight_dtype = torch.float16
+    elif accelerator.mixed_precision == "bf16":
+        weight_dtype = torch.bfloat16
+
     noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    tokenizer = ConceptsCLIPTokenizer.from_pretrained_clip(pretrained_t2v_model_path, subfolder="tokenizer", concepts_list=concepts, concepts_num_embedding=concepts_num_embedding)
-    text_encoder = ConceptsCLIPTextModel.from_pretrained_clip(pretrained_t2v_model_path, subfolder="text_encoder", concepts_list=concepts, concepts_num_embedding=concepts_num_embedding, retain_position_embedding=retain_position_embedding)
+    tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
     vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
     unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
-    vae.requires_grad_(False)
-    text_encoder.requires_grad_(False)
-    text_encoder.concepts_embedder.requires_grad_(True)
-    unet.requires_grad_(False)
+    
+    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_concepts_model_path):
+        concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
+        add_concepts_embeddings(tokenizer, text_encoder, concept_tokens=concepts_text_encoder.concepts_list, concept_embeddings=concepts_text_encoder.concepts_embedder.weight.detach().clone())
+        del concepts_text_encoder
+        gc.collect()
+        torch.cuda.empty_cache()
+        
     if not enable_scam_loss and not enable_tcam_loss:
         handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
 
+    unet.to(dtype=weight_dtype)
+    lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+    target_modules = []
+    patterns = lora_conf['target_modules']
+    for name, param in unet.named_parameters():
+        for pattern in patterns:
+            if re.match(pattern, name):
+                target_modules.append(name.rstrip('.weight').rstrip('.bias'))
+    lora_conf['target_modules'] = target_modules
+    lora_conf = LoraConfig(**lora_conf)
+    lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
+    lora_unet.print_trainable_parameters()
+    vae.requires_grad_(False)
+    unet.requires_grad_(False)
+    text_encoder.requires_grad_(False)
+    lora_unet.requires_grad_(False)
+    for name, param in lora_unet.named_parameters():
+        if 'lora' in name:
+            print(f'lora trainable param: {name}')
+            param.requires_grad = True
+            param.data = param.data.float()
+        elif extra_trainable_modules is not None:
+            for extra_trainable_module in extra_trainable_modules:
+                if re.match(extra_trainable_module, name):
+                    print(f'extra trainable param: {name}')
+                    param.requires_grad = True
+                    param.data = param.data.float()
     if scale_lr:
         learning_rate = (
             learning_rate * gradient_accumulation_steps * batch_size * accelerator.num_processes
@@ -280,14 +319,17 @@ def main(
     else:
         optimizer_cls = torch.optim.AdamW
 
+    optim_params = [p for p in lora_unet.parameters() if p.requires_grad]
     optimizer = optimizer_cls(
-        [text_encoder.concepts_embedder.weight],
+        optim_params, 
         lr=learning_rate,
         betas=(adam_beta1, adam_beta2),
         weight_decay=adam_weight_decay,
         eps=adam_epsilon,
     )
-    
+    replace_indices = validation_data['replace_indices']
+    validation_data.pop('replace_indices')
+    replace_indices = [torch.as_tensor(replace_inds, device=accelerator.device, dtype=torch.int64) for replace_inds in replace_indices]
     train_dataset = LatentPromptDataset(**train_data)
     val_dataset = VideoPromptValDataset(**validation_data)
 
@@ -299,13 +341,8 @@ def main(
         val_dataset, batch_size=batch_size
     )
     
-    clip_tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
-    clip_text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
-    clip_text_encoder.requires_grad_(False)
-    add_concepts_embeddings(clip_tokenizer, clip_text_encoder, concept_tokens=concepts, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
-    
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=clip_text_encoder, tokenizer=clip_tokenizer, unet=unet, 
+        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
     )
     validation_pipeline.enable_vae_slicing()
     
@@ -320,28 +357,18 @@ def main(
         num_training_steps=num_train_steps, 
     )
     
-    text_encoder, optimizer, train_dataloader, val_dataloader, lr_scheduler = accelerator.prepare(
-        text_encoder, optimizer, train_dataloader, val_dataloader, lr_scheduler
+    lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler = accelerator.prepare(
+        lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler
     )
 
-    weight_dtype = torch.float32
-    if accelerator.mixed_precision == "fp16":
-        weight_dtype = torch.float16
-    elif accelerator.mixed_precision == "bf16":
-        weight_dtype = torch.bfloat16
-
-    text_encoder.to(dtype=weight_dtype)
-    text_encoder.concepts_embedder.to(dtype=torch.float)
-    clip_text_encoder.to(accelerator.device, dtype=weight_dtype)
+    text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
-    unet.to(accelerator.device, dtype=weight_dtype)
+    text_encoder.eval()
     vae.eval()
-    unet.eval()
-    clip_text_encoder.eval()
     
     if enable_scam_loss or enable_tcam_loss:
         supervisor = StepAttentionSupervisor()
-        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False)
+        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False)
     
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
@@ -352,12 +379,11 @@ def main(
     logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
     logger.info(f"  Gradient Accumulation steps = {gradient_accumulation_steps}")
     logger.info(f"  Total optimization steps = {num_train_steps}")
-    logger.info(f"  Concepts list = {concepts}")
     global_step = 0
     first_epoch = 0
 
     for epoch in range(first_epoch, num_train_epoch):
-        text_encoder.train()
+        lora_unet.train()
         train_loss = 0.0
         train_mse_loss = 0.0
         train_scam_loss = 0.0
@@ -366,7 +392,7 @@ def main(
         with tqdm(train_dataloader) as progress_bar:
             for step, batch in enumerate(progress_bar):
                 with accelerator.autocast():
-                    with accelerator.accumulate(text_encoder):
+                    with accelerator.accumulate(lora_unet):
                         latents = batch["latents"]          # [B, F, C, H, W]
                         prompts = batch['prompts']
                         masks = batch['masks']              # [B, F, 1, H, W]
@@ -383,11 +409,7 @@ def main(
 
                         tokens = tokenizer(prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
 
-                        # if hasattr(tokens, 'replace_indices') and hasattr(tokens, 'concept_indices'):
-                        #     encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device), tokens.replace_indices, tokens.concept_indices)[0]
-                        # else:
-                        #     encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
-                        encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device), tokens.replace_indices, tokens.concept_indices)[0]
+                        encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device))[0]
                         
                         if noise_scheduler.config.prediction_type == "epsilon":
                             target = noise
@@ -396,14 +418,14 @@ def main(
                         else:
                             raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
 
-                        model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
+                        model_pred = lora_unet(noisy_latents, timesteps, encoder_hidden_states).sample
                         torch.cuda.empty_cache()
                         
                         mse_loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
                         scam_loss = 0.0
                         tcam_loss = 0.0
-                        if enable_scam_loss and tokens.replace_indices is not None:
-                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
+                        if enable_scam_loss and replace_indices is not None:
+                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
                             if global_step % attn_check_steps == 0:
                                 save_path = os.path.join(output_dir, 'source-cross-attn')
                                 prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), prompts, video_length=video_length)
@@ -417,15 +439,15 @@ def main(
                         if enable_tcam_loss and batch.get('target_latents') is not None and batch.get('target_masks') is not None:
                             target_prompts = batch['target_prompts']            # [B]
                             target_tokens = tokenizer(target_prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
-                            target_encoder_hidden_states = encoder_hidden_states = text_encoder(target_tokens.input_ids.to(latents.device), target_tokens.replace_indices, target_tokens.concept_indices)[0]
-                            if target_tokens.replace_indices is not None:
+                            target_encoder_hidden_states = text_encoder(target_tokens.input_ids.to(latents.device))[0]
+                            if replace_indices is not None:
                                 timesteps = ddim_inv_scheduler.timesteps
                                 t = timesteps[random.randint(0, len(timesteps)-1)].long()
                                 target_latents = batch['target_latents']            # [B, F, C, H, W]
                                 target_masks = batch['target_masks']                # [B, F, 1, H, W]
                                 target_latents = rearrange(target_latents, "b f c h w -> b c f h w")
                                 unet(target_latents, t, target_encoder_hidden_states)
-                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
+                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
                                 if global_step % attn_check_steps == 0:
                                     save_path = os.path.join(output_dir, 'target-cross-attn')
                                     prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), target_prompts, video_length=video_length)
@@ -446,12 +468,10 @@ def main(
 
                         accelerator.backward(loss)
                         if accelerator.sync_gradients:
-                            accelerator.clip_grad_norm_(text_encoder.parameters(), max_grad_norm)
-                            for name, module in text_encoder.named_modules():
-                                if name.endswith(tuple(['concepts_embedder'])):
-                                    for param in module.parameters():
-                                        if param.grad is None:
-                                            print(f"Epoch {epoch}, Parameter: {name}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
+                            accelerator.clip_grad_norm_(optim_params, max_grad_norm)
+                            for param in optim_params:
+                                if param.grad is None:
+                                    print(f"Epoch {epoch}, Parameter: {param}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
 
             
                             if (global_step + 1) % gradient_accumulation_steps == 0:
@@ -485,7 +505,7 @@ def main(
                     if enable_scam_loss and enable_tcam_loss:
                         unregister_attention_control(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
                     with torch.no_grad(), accelerator.autocast():
-                        update_concepts_embedding(clip_tokenizer, clip_text_encoder, concept_tokens=concepts, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
+                        torch.cuda.empty_cache()
                         generator = torch.Generator(device=latents.device)
                         if seed is not None:
                             generator.manual_seed(seed)
@@ -541,9 +561,13 @@ def main(
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        text_encoder = accelerator.unwrap_model(text_encoder)
-        text_encoder.save_pretrained(os.path.join(output_dir, 'text_encoder'))
-        tokenizer.save_pretrained(os.path.join(output_dir, 'tokenizer'))
+        lora_unet = accelerator.unwrap_model(lora_unet)
+        save_path = os.path.join(output_dir, 'lora')
+        lora_unet.save_pretrained(save_path)
+        save_path = os.path.join(output_dir, 'unet')
+        unet = lora_unet.unload()
+        unet.save_pretrained(save_path)
+        logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
 
     accelerator.end_training()
     if os.path.exists(checkpoints_dir):
@@ -552,7 +576,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="./configs/concepts_clip/vehicles.yaml")
+    parser.add_argument("--config", type=str, default="./configs/stive/lambo.yaml")
     args = parser.parse_args()
 
     main(**OmegaConf.load(args.config))

@@ -41,7 +41,7 @@ import random
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-check_min_version("0.10.0.dev0")
+check_min_version("0.28.0")
 
 logger = get_logger(__name__, log_level="INFO")
 

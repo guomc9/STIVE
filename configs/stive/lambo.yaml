@@ -1,7 +1,7 @@
 pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
 pretrained_concepts_model_path: "./checkpoints/concepts/lambo"
 output_dir: ".log/stive/lambo/base/"
-checkpoints_dir: "checkpoints/stive/lambo/"
+checkpoints_dir: "checkpoints/stive/lambo"
 
 train_data:
   video_paths:
@@ -11,7 +11,9 @@ train_data:
     # - "a jeep driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
     - "a $LAMBO is driving along a road"
-  num_frames: 8
+  mask_paths:
+    - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
+  num_frames: 4
   sample_stride: 2
   width: 512
   height: 512
@@ -21,7 +23,7 @@ train_data:
   target_mask_paths:
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
   target_prompts:
-    - "a $ LAMBO driving down a curvy road in the countryside"
+    - "a $LAMBO driving down a curvy road in the countryside"
 
 validation_data:
   source: "data/targets/car-turn/videos/car-turn.mp4"
@@ -32,10 +34,11 @@ validation_data:
     - "a $LAMBO driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
     # - "a $LAMBO driving on the road"
-  num_frames: 8
-  sample_stride: 3
+  num_frames: 4
+  sample_stride: 2
   width: 512
   height: 512
+  replace_indices: [[2]]    # jeep -> '$LAMBO'
 
 lora_conf:
   r: 8
@@ -61,14 +64,14 @@ inference_conf:
   num_inv_steps: 30
 
 
-# # CHECK
-# sub_sot: True
-# cam_loss_type: 'mae'
-# enable_scam_loss: True
-# scam_weight: 0.0
-# enable_tcam_loss: True
-# tcam_weight: 0.0
-# attn_check_steps: 10
+# CHECK
+sub_sot: True
+cam_loss_type: 'mae'
+enable_scam_loss: True
+scam_weight: 0.0
+enable_tcam_loss: True
+tcam_weight: 0.0
+attn_check_steps: 10
 
 learning_rate: 1.0e-4
 batch_size: 1
