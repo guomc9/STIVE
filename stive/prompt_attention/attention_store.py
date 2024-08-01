@@ -136,3 +136,93 @@ class AttentionStore(AttentionControl):
         self.save_self_attention = save_self_attention
         self.latents_store = []
         self.attention_store_all_step = []
+
+
+class StepAttentionControl(abc.ABC):
+    def __init__(self):
+        self.cur_att_layer = 0
+
+    @abc.abstractmethod
+    def forward(self, attn, is_cross: bool, place_in_unet: str):
+        raise NotImplementedError
+
+    def __call__(self, attn, is_cross: bool, place_in_unet: str):
+        self.forward(attn, is_cross, place_in_unet)
+        self.cur_att_layer += 1
+
+    def reset(self):
+        self.cur_att_layer = 0
+
+import gc
+class StepAttentionStore(StepAttentionControl):
+    def __init__(self):
+        super().__init__()
+        self.attention_store = {}       # {'down-cross-1024': attn_prob}, attn_prob.shape: [B * F, M, Q, K]
+
+    def forward(self, attn, is_cross: bool, place_in_unet: str):
+        key = f"{place_in_unet}-{'cross' if is_cross else 'self'}-{attn.shape[-2]}"
+        if key not in self.attention_store:
+            self.attention_store[key] = []
+        self.attention_store[key].append(attn)
+
+    def reset(self):
+        super().reset()
+        self.attention_store.clear()
+        gc.collect()
+
+    def get_mean_head_attns(self):
+        attns = {}
+        for key, attn_list in self.attention_store.items():      # [B * F, M, Q, K]
+            if attn_list:
+                attns[key]  = attn_list[0].mean(1).detach().cpu()
+        return attns                                        # [B * F, Q, K]
+
+import numpy as np
+from einops import rearrange, repeat
+from stive.prompt_attention.ptp_utils import pool_mask
+class StepAttentionSupervisor(StepAttentionStore):
+    def get_cross_attn_mask_loss(self, mask, target_indices, sub_sot=True, loss_type='mae'):
+        """
+        mask: [B, F, 1, H, W]
+        target_indices: [B, T]
+        attn: [B * F, M, Q, K]
+        """
+        losses = []
+        b = len(target_indices)
+        mask_check = {}
+        for key, attns in self.attention_store.items():
+            if 'cross' not in key:
+                continue
+            for i in range(b):
+                mask_check[f'batch-{i}-{key}'] = {}
+                
+            for attn in attns:
+                m, q = attn.shape[1:3]                                                                      # [B * F, M, Q, K]
+                
+                h = w = int(np.sqrt(q))
+                f = mask.shape[1]
+                
+                attn = rearrange(attn, '(b f) m q k -> b (f m) q k', f=f)                                   # [B, F * M, Q, K]
+                
+                adapt_mask = pool_mask(mask, target_size=(h, w))                                            # [B, F, 1, H, W]
+                adapt_mask = rearrange(adapt_mask, 'b f c h w -> b f (h w) c').squeeze(-1)                  # [B, F, Q]
+                adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m)                                  # [B, F * M, Q]
+                if sub_sot:
+                    adapt_mask = adapt_mask - adapt_mask * attn[..., 0]                                     # [B, F * M, Q]
+                    adapt_mask.detach_()
+                    
+                for i in range(b):
+                    mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                    inds = torch.as_tensor(target_indices[i]).to(attn.device)
+                    t = inds.shape[0]
+                    if loss_type == 'mae':
+                        losses.append((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]).abs().mean())      # [F * M, Q, T]
+                    elif loss_type == 'bce':
+                        losses.append(torch.nn.functional.binary_cross_entropy(attn[i, ..., inds], adapt_mask[i].unsqueeze(-1).repeat(1, 1, t), reduction='mean'))
+                    else:
+                        raise ValueError(f"Unsupported loss type: {loss_type}")
+        
+        return torch.mean(torch.stack(losses)), mask_check
+    
+    def forward(self, attn, is_cross: bool, place_in_unet: str):
+        super().forward(attn, is_cross, place_in_unet)

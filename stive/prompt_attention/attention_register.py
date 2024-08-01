@@ -12,14 +12,15 @@ import torch.nn.functional as F
 from typing import Optional
 from diffusers.models.attention import Attention
 from diffusers.models.attention_processor import XFormersAttnProcessor
+from diffusers.pipelines import DiffusionPipeline
 from einops import rearrange
 import datetime
 from peft import PeftModel
 from ..utils.save_utils import save_video
 
-def register_attention_control(model, controller):
+def register_attention_control(model, controller, only_cross=False, replace_attn_prob=False):
     "Connect a model with a controller"
-    def attention_controlled_processor(store, place_in_unet):
+    def attention_controlled_processor(store, place_in_unet, replace_attn_prob):
         
         def reshape_temporal_heads_to_batch_dim(tensor, head_size):
             tensor = rearrange(tensor, " b h s t -> (b h) s t ", h = head_size)
@@ -37,8 +38,8 @@ def register_attention_control(model, controller):
             r"""
             Processor for implementing attention with attention probability.
             """
-            def __init__(self):
-                pass
+            def __init__(self, replace_attn_prob):
+                self.replace_attn_prob = replace_attn_prob
 
             
             def __call__(
@@ -88,9 +89,9 @@ def register_attention_control(model, controller):
                 inner_dim = key.shape[-1]
                 head_dim = inner_dim // attn.heads
 
-                query = query.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, H, Q, C]
-                key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)        # [B, H, K, C]
-                value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, H, K, C]
+                query = query.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, M, Q, C]
+                key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)        # [B, M, K, C]
+                value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)    # [B, M, K, C]
                 
                 query = reshape_temporal_heads_to_batch_dim(query, attn.heads)
                 key = reshape_temporal_heads_to_batch_dim(key, attn.heads)
@@ -109,14 +110,15 @@ def register_attention_control(model, controller):
 
                 attention_probs = attention_probs.softmax(dim=-1)
 
-                attention_probs = attention_probs.to(value.dtype)   # [B * H, Q, K]
+                attention_probs = attention_probs.to(value.dtype)   # [B * M, Q, K]
                 
-                attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet) # [B, H, Q, K]
-        
+                if self.replace_attn_prob:
+                    attention_probs = controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet) # [B, M, Q, K]
+                    attention_probs = reshape_temporal_heads_to_batch_dim(attention_probs, attn.heads)                                      # [B * M, Q, K]
+                else:
+                    controller(reshape_batch_dim_to_temporal_heads(attention_probs, attn.heads), is_cross, place_in_unet)                   # [B, M, Q, K]
                 
-                attention_probs = reshape_temporal_heads_to_batch_dim(attention_probs, attn.heads)
-                
-                hidden_states = torch.bmm(attention_probs, value)   # [B * H, N, C]
+                hidden_states = torch.bmm(attention_probs, value)   # [B * M, Q, C]
 
                 hidden_states = reshape_batch_dim_to_heads(hidden_states, attn.heads)
                 hidden_states = hidden_states.to(query.dtype)
@@ -137,7 +139,7 @@ def register_attention_control(model, controller):
                 return hidden_states
         
         if store:
-            return AttnWithProbProcessor()
+            return AttnWithProbProcessor(replace_attn_prob=replace_attn_prob)
         else:
             return XFormersAttnProcessor()
 
@@ -152,43 +154,50 @@ def register_attention_control(model, controller):
     if controller is None:
         controller = DummyController()
     
-    def register_recr(net_, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count):
+    def register_recr(net_, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count, only_cross=False):
         if net_[1].__class__.__name__ == 'Attention':
             store = (place_in_unet == 'down' and down_tsfm_count > begin_store) or (place_in_unet == 'up' and up_tsfm_count < half_unet_len - begin_store) or (place_in_unet == 'mid')
-            net_[1].processor = attention_controlled_processor(store, place_in_unet)
+            store = store and (net_[1].is_cross_attention or not only_cross)
+            # print(f'net_[0]: {net_[0]}, store: {store}, is_cross_attention: {net_[1].is_cross_attention}')
+            net_[1].processor = attention_controlled_processor(store, place_in_unet, replace_attn_prob=replace_attn_prob)
             return count + 1
         elif hasattr(net_[1], 'children'):
             for net in net_[1].named_children():
                 if net[1].__class__.__name__ != 'TransformerTemporalModel':
                     if net[1].__class__.__name__ == 'CrossAttnDownBlock3D':
                         down_tsfm_count += 1
-                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count, only_cross)
                     elif net[1].__class__.__name__ == 'CrossAttnUpBlock3D':
                         up_tsfm_count += 1
-                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count, only_cross)
                     else:
-                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count)
+                        count = register_recr(net, count, place_in_unet, begin_store, down_tsfm_count, up_tsfm_count, only_cross)
 
         return count
     
     half_unet_len = 4
     begin_store = 1
     cross_att_count = 0
-    sub_nets = model.unet.named_children()
-    
-    print(f'unet is an instance of {type(model.unet)}')
-    if isinstance(model.unet, PeftModel):
-        sub_nets = model.unet.base_model.model.named_children()
+    if isinstance(model, DiffusionPipeline):
+        print(f'unet is an instance of {type(model.unet)}')
+        if isinstance(model.unet, PeftModel):
+            sub_nets = model.unet.base_model.model.named_children()
+        else:
+            sub_nets = model.unet.named_children()
     else:
-        sub_nets = model.unet.named_children()
+        print(f'unet is an instance of {type(model)}')
+        if isinstance(model, PeftModel):
+            sub_nets = model.base_model.model.named_children()
+        else:
+            sub_nets = model.named_children()
         
         
     for net in sub_nets:
         if "down" in net[0]:
-            cross_att_count += register_recr(net, 0, "down", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
+            cross_att_count += register_recr(net, 0, "down", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0, only_cross=only_cross)
         elif "up" in net[0]:
-            cross_att_count += register_recr(net, 0, "up", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
+            cross_att_count += register_recr(net, 0, "up", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0, only_cross=only_cross)
         elif "mid" in net[0]:
-            cross_att_count += register_recr(net, 0, "mid", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0)
+            cross_att_count += register_recr(net, 0, "mid", begin_store=begin_store, down_tsfm_count=0, up_tsfm_count=0, only_cross=only_cross)
     print(f"Number of attention layer registered {cross_att_count}")
     controller.num_att_layers = cross_att_count

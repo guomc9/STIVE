@@ -4,25 +4,31 @@ output_dir: ".log/stive/lambo/base/"
 checkpoints_dir: "checkpoints/stive/lambo/"
 
 train_data:
-  sources:
-    - "data/targets/car-turn/videos/car-turn.mp4"
+  video_paths:
+    # - "data/targets/car-turn/videos/car-turn.mp4"
     - "data/concepts/lambo/videos/lambo.mp4"
   prompts:
-    - "a jeep driving down a curvy road in the countryside"
+    # - "a jeep driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    - "a $LAMBO is driving through the forest"
+    - "a $LAMBO is driving along a road"
   num_frames: 8
-  sample_stride: 3
+  sample_stride: 2
   width: 512
   height: 512
   rand_slice: True
+  target_video_paths:
+    - "data/targets/car-turn/videos/car-turn.mp4"
+  target_mask_paths:
+    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+  target_prompts:
+    - "a $ LAMBO driving down a curvy road in the countryside"
 
 validation_data:
   source: "data/targets/car-turn/videos/car-turn.mp4"
   source_prompt: "a jeep driving down a curvy road in the countryside"
   # source_prompt: "a jeep driving on the road"
   edit_prompts:
-    - "a jeep driving down a curvy road in the countryside"
+    # - "a jeep driving down a curvy road in the countryside"
     - "a $LAMBO driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
     # - "a $LAMBO driving on the road"
@@ -53,6 +59,16 @@ inference_conf:
   guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 30
+
+
+# # CHECK
+# sub_sot: True
+# cam_loss_type: 'mae'
+# enable_scam_loss: True
+# scam_weight: 0.0
+# enable_tcam_loss: True
+# tcam_weight: 0.0
+# attn_check_steps: 10
 
 learning_rate: 1.0e-4
 batch_size: 1

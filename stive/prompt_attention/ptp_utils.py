@@ -176,45 +176,16 @@ def update_alpha_time_word(alpha, bounds: Union[float, Tuple[float, float]], pro
     return alpha
 
 
-# #################################################################
-# #                                                               #
-# #    Some difference with the M_cross/edit in FateZero Paper    #
-# #  Appendix.A.ImplementationDetails.pseudo algorithm code       #
-# #                 Editedindex=(psrc!= pedit)                    #
-# #                  Mcross[Editedindex]=1                        #
-# #################################################################
+#################################################################
+#                                                               #
+#    Some difference with the M_cross/edit in FateZero Paper    #
+#  Appendix.A.ImplementationDetails.pseudo algorithm code       #
+#                 Editedindex=(psrc!= pedit)                    #
+#                  Mcross[Editedindex]=1                        #
+#################################################################
 
-# import omegaconf
-# def get_time_words_attention_alpha(prompts, num_steps,
-#                                    cross_replace_steps: Union[float, Dict[str, Tuple[float, float]]],
-#                                    tokenizer, max_num_words=77):
-#     # Not understand
-#     if (type(cross_replace_steps) is not dict) and \
-#         (type(cross_replace_steps) is not omegaconf.dictconfig.DictConfig):
-#         cross_replace_steps = {"default_": cross_replace_steps}
-#     if "default_" not in cross_replace_steps:
-#         cross_replace_steps["default_"] = (0., 1.)
-#     alpha_time_words = torch.zeros(num_steps + 1, len(prompts) - 1, max_num_words)
-#     for i in range(len(prompts) - 1):
-#         alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"],
-#                                                   i)
-#     for key, item in cross_replace_steps.items():
-#         if key != "default_":
-#              inds = [get_word_inds(prompts[i], key, tokenizer) for i in range(1, len(prompts))]
-#              for i, ind in enumerate(inds):
-#                  if len(ind) > 0:
-#                     alpha_time_words = update_alpha_time_word(alpha_time_words, item, i, ind)
-#     alpha_time_words = alpha_time_words.reshape(num_steps + 1, len(prompts) - 1, 1, 1, max_num_words)
-#     return alpha_time_words
-
-
-################################
-#                              #
-#       Re-implementation      #
-#                              #
-################################
 import omegaconf
-def get_time_words_attention_alpha(prompts, num_steps, 
+def get_time_words_attention_alpha(prompts, num_steps,
                                    cross_replace_steps: Union[float, Dict[str, Tuple[float, float]]],
                                    tokenizer, max_num_words=77):
     # Not understand
@@ -224,33 +195,60 @@ def get_time_words_attention_alpha(prompts, num_steps,
     if "default_" not in cross_replace_steps:
         cross_replace_steps["default_"] = (0., 1.)
     alpha_time_words = torch.zeros(num_steps + 1, len(prompts) - 1, max_num_words)
-    diff_indices = []
-    src_prompt = prompts[0]
-    tgt_prompt = prompts[1]
-    src_words = src_prompt.split(" ")
-    tgt_words = tgt_prompt.split(" ")
-    
-    for i in range(len(src_words)):
-        if src_words[i] != tgt_words[i]:
-            diff_indices.append(i+1)
-            alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"], 0, i+1)
-            
-    begin, end = int(cross_replace_steps["default_"][0] * alpha_time_words.shape[0]), int(cross_replace_steps["default_"][1] * alpha_time_words.shape[0])
-    alpha_time_words[:begin] = 1
-    alpha_time_words[end:] = 1
-    
+    for i in range(len(prompts) - 1):
+        alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"],
+                                                  i)
+    for key, item in cross_replace_steps.items():
+        if key != "default_":
+             inds = [get_word_inds(prompts[i], key, tokenizer) for i in range(1, len(prompts))]
+             for i, ind in enumerate(inds):
+                 if len(ind) > 0:
+                    alpha_time_words = update_alpha_time_word(alpha_time_words, item, i, ind)
     alpha_time_words = alpha_time_words.reshape(num_steps + 1, len(prompts) - 1, 1, 1, max_num_words)
-    return alpha_time_words, torch.as_tensor(diff_indices)
+    return alpha_time_words
 
 
+# ################################
+# #                              #
+# #       Re-implementation      #
+# #                              #
+# ################################
+# import omegaconf
+# def get_time_words_attention_alpha(prompts, num_steps, 
+#                                    cross_replace_steps: Union[float, Dict[str, Tuple[float, float]]],
+#                                    tokenizer, max_num_words=77):
+#     # Not understand
+#     if (type(cross_replace_steps) is not dict) and \
+#         (type(cross_replace_steps) is not omegaconf.dictconfig.DictConfig):
+#         cross_replace_steps = {"default_": cross_replace_steps}
+#     if "default_" not in cross_replace_steps:
+#         cross_replace_steps["default_"] = (0., 1.)
+#     alpha_time_words = torch.zeros(num_steps + 1, len(prompts) - 1, max_num_words)
+#     diff_indices = []
+#     src_prompt = prompts[0]
+#     tgt_prompt = prompts[1]
+#     src_words = src_prompt.split(" ")
+#     tgt_words = tgt_prompt.split(" ")
+    
+#     for i in range(len(src_words)):
+#         if src_words[i] != tgt_words[i]:
+#             diff_indices.append(i+1)
+#             alpha_time_words = update_alpha_time_word(alpha_time_words, cross_replace_steps["default_"], 0, i+1)
+            
+#     begin, end = int(cross_replace_steps["default_"][0] * alpha_time_words.shape[0]), int(cross_replace_steps["default_"][1] * alpha_time_words.shape[0])
+#     alpha_time_words[:begin] = 1
+#     alpha_time_words[end:] = 1
+    
+#     alpha_time_words = alpha_time_words.reshape(num_steps + 1, len(prompts) - 1, 1, 1, max_num_words)
+#     return alpha_time_words, torch.as_tensor(diff_indices)
+
+import math
 from einops import rearrange, repeat
 @torch.no_grad()
 def relax_mask(mask, steps: int = 1, kernel_size: int = 3):
     """
     mask: [F, M, H * W, D]
     """
-    dtype = mask.dtype
-    device = mask.device
     f, m, r, d = mask.shape
     h = w = int(np.sqrt(r))
     mask = rearrange(mask, 'f m (h w) d -> (f m d) h w', h=h, w=w).unsqueeze(-3)        # [F * M * D, 1, H, W]
@@ -266,9 +264,6 @@ def relax_flat_mask(mask, steps: int = 1, kernel_size: int = 3):
     """
     mask: [F, H, W, C]
     """
-    dtype = mask.dtype
-    device = mask.device
-    f, h, w, c = mask.shape
     mask = rearrange(mask, 'f h w c -> f c h w')        # [F, 1, H, W]
     for _ in range(steps):
         mask = torch.nn.functional.max_pool2d(mask, kernel_size, stride=1, padding=kernel_size // 2)
@@ -278,20 +273,34 @@ def relax_flat_mask(mask, steps: int = 1, kernel_size: int = 3):
     return mask
 
 @torch.no_grad()
-def pool_mask(mask, target_shape):
+def pool_mask(mask, target_size):
     """
-    mask: [F, H, W, C]
-    """
-    dtype = mask.dtype
-    device = mask.device
-    f, h, w, c = mask.shape
-    target_H, target_W = target_shape
-    mask = rearrange(mask, 'f h w c -> f c h w')
-    kernel_size_H = h // target_H
-    kernel_size_W = w // target_W
-    stride_H = h // target_H
-    stride_W = w // target_W
-    mask = torch.nn.functional.max_pool2d(mask, kernel_size=(kernel_size_H, kernel_size_W), stride=(stride_H, stride_W))
-    mask = rearrange(mask, 'f c h w -> f h w c')
+    Pool the mask to match the target size using max pooling.
     
-    return mask
+    Args:
+    mask (torch.Tensor): Input mask of shape [B, F, 1, H, W] or [B*F, 1, H, W]
+    target_size (tuple): The target size (assuming square output)
+    
+    Returns:
+    torch.Tensor: Pooled mask with the same number of dimensions as input
+    """
+    original_shape = mask.shape
+    original_dim = mask.dim()
+
+    if original_dim == 5:
+        b, f, _, h, w = original_shape
+        mask = mask.view(b*f, 1, h, w)
+    else:
+        _, _, h, w = original_shape
+    
+    pool_size = (math.ceil(h / target_size[0]), math.ceil(w / target_size[1]))
+    
+    pool_mask = torch.nn.functional.max_pool2d(mask, kernel_size=pool_size, stride=pool_size)
+    
+    if pool_mask.shape[-1] != int(target_size[1]) or pool_mask.shape[-2] != int(target_size[0]):
+        pool_mask = torch.nn.functional.interpolate(pool_mask, size=(int(math.sqrt(target_size)), int(math.sqrt(target_size))), mode='nearest')
+    
+    if original_dim == 5:
+        pool_mask = pool_mask.view(b, f, 1, target_size[0], target_size[1])
+    
+    return pool_mask

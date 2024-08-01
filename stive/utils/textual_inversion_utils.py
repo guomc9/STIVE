@@ -19,3 +19,4 @@ def update_concepts_embedding(tokenizer: CLIPTokenizer, text_encoder: CLIPTextMo
     with torch.no_grad():
         for i, (token_id, embedding) in enumerate(token_ids_and_embeddings):
             text_encoder.get_input_embeddings().weight.data[token_id] = embedding
+            

@@ -186,9 +186,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             assert self.batch_size==1, 'Only support single video editing with additional attention_store'
 
         
-        # self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
-        self.cross_replace_alpha, self.diff_indices = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer)
-        self.cross_replace_alpha = self.cross_replace_alpha.to(device)
+        self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
         
         if type(self_replace_steps) is float:
             self_replace_steps = 0, self_replace_steps

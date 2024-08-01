@@ -51,12 +51,18 @@ def save_images(images, rescale=True, save_path=None):
     
     return horizontal_image
 
-def save_video(video: torch.Tensor, path: str, rescale=False, fps=8):
+def save_video(video: torch.Tensor, path: str, rescale=False, fps=8, to_uint8=True):
     video = rearrange(video, "t c h w -> t h w c")
     if rescale:
         video = (video / 2 + 0.5)
-    video = video.clamp(0, 1)
-    video = (video * 255).detach().cpu().numpy().astype(np.uint8)
+    if to_uint8:
+        video = video.clamp(0, 1)
+        # video = video.clip(0, 1)
+        video = (video * 255).detach().cpu().numpy().astype(np.uint8)
+    else:
+        video = video.clamp(0, 255)
+        # video = video.clip(0, 255)
+        video = video.detach().cpu().numpy().astype(np.uint8)
     frames = []
     os.makedirs(os.path.dirname(path), exist_ok=True)
     for i in range(video.shape[0]):

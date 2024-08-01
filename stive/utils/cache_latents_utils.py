@@ -7,6 +7,7 @@ import gc
 
 PRETRAINED_T2V_CHECKPOINT_PATH = 'checkpoints/zeroscope_v2_576w'
 
+@torch.no_grad()
 def encode_video_to_latents(video_path, vae, height, width, device):
     cap = cv2.VideoCapture(video_path)
     frames = []
@@ -35,7 +36,7 @@ def encode_video_to_latents(video_path, vae, height, width, device):
         latents = rearrange(latents, '(b f) c h w -> b f c h w', f=video_length).squeeze(0)
     return latents.detach().cpu()
 
-
+@torch.no_grad()
 def encode_videos_latents(video_paths, height=512, width=512):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     vae = AutoencoderKL.from_pretrained(PRETRAINED_T2V_CHECKPOINT_PATH, subfolder='vae').to(device)

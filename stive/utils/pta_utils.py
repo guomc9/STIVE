@@ -6,6 +6,9 @@ from typing import Sequence
 from PIL import Image, ImageDraw, ImageFont
 import cv2
 from torchvision import transforms
+import math
+import requests
+import textwrap
 
 def get_time_string() -> str:
     x = datetime.datetime.now()

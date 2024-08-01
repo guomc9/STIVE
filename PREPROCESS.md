@@ -23,6 +23,8 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch inference_stive_ptp.py --config configs
 
 python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s jeep
 
+python scripts/extract_masks.py -v data/concepts/lambo/videos/lambo.mp4 -s car
+
 
 
 python scripts/extract_concepts.py -f data/concepts/cybertrunk/video_prompts.csv -o data/concepts/cybertrunk/concepts.json
@@ -33,13 +35,17 @@ python scripts/extract_concepts.py -f data/concepts/ferrari/video_prompts.csv -o
 
 
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/ferrari.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/bmw.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/cybertrunk.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_concepts.py --config configs/concepts/lambo.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts.py --config configs/concepts/ferrari.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts.py --config configs/concepts/bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts.py --config configs/concepts/cybertrunk.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts.py --config configs/concepts/lambo.yaml
 
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/ferrari.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/bmw.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/cybertrunk.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch run/finetune_stive.py --config configs/stive/lambo.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive.py --config configs/stive/ferrari.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive.py --config configs/stive/bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive.py --config configs/stive/cybertrunk.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive.py --config configs/stive/lambo.yaml
+
+
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts_wam.py --config configs/concepts/lambo.yaml
