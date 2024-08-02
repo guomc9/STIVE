@@ -181,7 +181,7 @@ import numpy as np
 from einops import rearrange, repeat
 from stive.prompt_attention.ptp_utils import pool_mask
 class StepAttentionSupervisor(StepAttentionStore):
-    def get_cross_attn_mask_loss(self, mask, target_indices, sub_sot=True, loss_type='mae'):
+    def get_cross_attn_mask_loss(self, mask, target_indices, sub_sot=True, only_neg=False, loss_type='mae', reduction='mean'):
         """
         mask: [B, F, 1, H, W]
         target_indices: [B, T]
@@ -207,23 +207,39 @@ class StepAttentionSupervisor(StepAttentionStore):
                 adapt_mask = pool_mask(mask, target_size=(h, w))                                            # [B, F, 1, H, W]
                 adapt_mask = rearrange(adapt_mask, 'b f c h w -> b f (h w) c').squeeze(-1)                  # [B, F, Q]
                 adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m).detach_()                        # [B, F * M, Q]
-                if sub_sot:
+                if sub_sot and not only_neg:
                     adapt_mask = adapt_mask - adapt_mask * attn[..., 0]                                     # [B, F * M, Q]
-                    # SUPERISE NO DETACH
+                    # NO DETACH IS BETTER SINCE WEAKER SUPERVISE
                     # adapt_mask.detach_()
                     
                 for i in range(b):
-                    mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                    neg_mask = None
+                    if only_neg:
+                        neg_mask = (adapt_mask[i] < 1e-8).to(adapt_mask.dtype)
+                        mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask * adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                    else:
+                        mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                        
                     inds = torch.as_tensor(target_indices[i]).to(attn.device)
                     t = inds.shape[0]
                     if loss_type == 'mae':
-                        losses.append((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]).abs().mean())      # [F * M, Q, T]
+                        if neg_mask is None:
+                            losses.append((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]).abs().mean())                  # [F * M, Q, T]
+                        else:
+                            losses.append((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds])).abs().mean())     # [F * M, Q, T]
+                    elif loss_type == 'mse':
+                        if neg_mask is None:
+                            losses.append(((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds])**2).mean())                  # [F * M, Q, T]
+                        else:
+                            losses.append(((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]))**2).mean())     # [F * M, Q, T]
                     elif loss_type == 'bce':
                         losses.append(torch.nn.functional.binary_cross_entropy(attn[i, ..., inds], adapt_mask[i].unsqueeze(-1).repeat(1, 1, t), reduction='mean'))
                     else:
                         raise ValueError(f"Unsupported loss type: {loss_type}")
-        
-        return torch.mean(torch.stack(losses)), mask_check
+        if reduction == 'mean':
+            return torch.mean(torch.stack(losses)), mask_check
+        else:
+            return torch.sum(torch.stack(losses)), mask_check
     
     def forward(self, attn, is_cross: bool, place_in_unet: str):
         super().forward(attn, is_cross, place_in_unet)

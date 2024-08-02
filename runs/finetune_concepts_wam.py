@@ -31,7 +31,7 @@ from stive.models.concepts_clip import ConceptsCLIPTextModel, ConceptsCLIPTokeni
 from stive.data.dataset import VideoPromptTupleDataset as VideoPromptValDataset, LatentPromptDataset
 from stive.utils.ddim_utils import ddim_inversion
 from stive.utils.save_utils import save_videos_grid, save_video, save_images
-from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding
+from stive.utils.textual_inversion_utils import add_concepts_embeddings, update_concepts_embedding, init_concepts_embedding
 from stive.prompt_attention.attention_register import register_attention_control
 from stive.prompt_attention.attention_store import StepAttentionSupervisor
 from einops import rearrange, repeat
@@ -195,14 +195,18 @@ def main(
     validation_data: Dict,
     inference_conf: Dict, 
     concepts: List[str] = None, 
+    pseudo_words: List[str] = None, 
     concepts_num_embedding: int = 1, 
     retain_position_embedding: bool = True, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
     scam_weight: float = 1.0e-1, 
+    scam_only_neg: bool = False, 
     enable_tcam_loss: bool = False, 
     tcam_weight: float = 5.0e-2, 
+    tcam_only_neg: bool = False, 
+    cam_loss_reduction: str = 'mean', 
     attn_check_steps: int = 10, 
     validation_steps: int = 200,
     batch_size: int = 1,
@@ -302,6 +306,9 @@ def main(
     clip_tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
     clip_text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
     clip_text_encoder.requires_grad_(False)
+    if pseudo_words is not None:
+        init_concepts_embedding(tokenizer=clip_tokenizer, text_encoder=clip_text_encoder, pseudo_tokens=pseudo_words, concept_tokens=concepts, concept_text_encoder=text_encoder)
+        text_encoder.concepts_embedder.requires_grad_(True)
     add_concepts_embeddings(clip_tokenizer, clip_text_encoder, concept_tokens=concepts, concept_embeddings=text_encoder.concepts_embedder.weight.detach().clone())
     
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
@@ -403,7 +410,7 @@ def main(
                         scam_loss = 0.0
                         tcam_loss = 0.0
                         if enable_scam_loss and tokens.replace_indices is not None:
-                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
+                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, only_neg=scam_only_neg, loss_type=cam_loss_type, reduction=cam_loss_reduction)
                             if global_step % attn_check_steps == 0:
                                 save_path = os.path.join(output_dir, 'source-cross-attn')
                                 prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), prompts, video_length=video_length)
@@ -425,7 +432,7 @@ def main(
                                 target_masks = batch['target_masks']                # [B, F, 1, H, W]
                                 target_latents = rearrange(target_latents, "b f c h w -> b c f h w")
                                 unet(target_latents, t, target_encoder_hidden_states)
-                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type)
+                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, only_neg=tcam_only_neg, loss_type=cam_loss_type, reduction=cam_loss_reduction)
                                 if global_step % attn_check_steps == 0:
                                     save_path = os.path.join(output_dir, 'target-cross-attn')
                                     prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), target_prompts, video_length=video_length)
