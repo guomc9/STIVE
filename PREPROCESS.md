@@ -25,7 +25,7 @@ python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s 
 
 python scripts/extract_masks.py -v data/concepts/lambo/videos/lambo.mp4 -s car
 
-
+python scripts/extract_masks.py -v data/concepts/ferrari/videos/ferrari.mp4 -s car
 
 python scripts/extract_concepts.py -f data/concepts/cybertrunk/video_prompts.csv -o data/concepts/cybertrunk/concepts.json
 python scripts/extract_concepts.py -f data/concepts/bmw/video_prompts.csv -o data/concepts/bmw/concepts.json

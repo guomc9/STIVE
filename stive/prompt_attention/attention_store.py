@@ -216,7 +216,8 @@ class StepAttentionSupervisor(StepAttentionStore):
                     neg_mask = None
                     if only_neg:
                         neg_mask = (adapt_mask[i] < 1e-8).to(adapt_mask.dtype)
-                        mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask * adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                        # mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask * adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                        mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask, '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
                     else:
                         mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
                         
@@ -226,12 +227,12 @@ class StepAttentionSupervisor(StepAttentionStore):
                         if neg_mask is None:
                             losses.append((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]).abs().mean())                  # [F * M, Q, T]
                         else:
-                            losses.append((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds])).abs().mean())     # [F * M, Q, T]
+                            losses.append((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds])).abs().sum() / neg_mask.sum())     # [F * M, Q, T]
                     elif loss_type == 'mse':
                         if neg_mask is None:
                             losses.append(((adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds])**2).mean())                  # [F * M, Q, T]
                         else:
-                            losses.append(((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]))**2).mean())     # [F * M, Q, T]
+                            losses.append(((neg_mask.unsqueeze(-1) * (adapt_mask[i].unsqueeze(-1) - attn[i, ..., inds]))**2).sum() / neg_mask.sum())     # [F * M, Q, T]
                     elif loss_type == 'bce':
                         losses.append(torch.nn.functional.binary_cross_entropy(attn[i, ..., inds], adapt_mask[i].unsqueeze(-1).repeat(1, 1, t), reduction='mean'))
                     else:

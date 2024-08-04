@@ -10,7 +10,8 @@ train_data:
   prompts:
     # - "a jeep driving down a curvy road in the countryside"
     # - "a jeep driving on the road"
-    - "a $LAMBO is driving along a road"
+    - "a $LAMBO driving along a road"
+    # - "a video of $LAMBO"
   mask_paths:
     - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
   num_frames: 4
@@ -69,7 +70,9 @@ sub_sot: True
 cam_loss_type: 'mae'
 enable_scam_loss: True
 scam_weight: 0.0
+scam_only_neg: False
 enable_tcam_loss: True
+tcam_only_neg: True
 tcam_weight: 0.0
 attn_check_steps: 10
 
