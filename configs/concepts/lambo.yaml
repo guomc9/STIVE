@@ -68,20 +68,20 @@ cam_loss_type: 'mae'
 
 enable_scam_loss: True
 scam_weight: 0.1
-scam_only_neg: True
+scam_only_neg: false
 
 enable_tcam_loss: True
-tcam_weight: 0.0
+tcam_weight: 0.2
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 10
 
 
-learning_rate: 3.0e-3
+learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 500
+num_train_epoch: 700
 checkpointing_steps: 5000
-validation_steps: 10
+validation_steps: 50
 
 seed: 33
 mixed_precision: 'fp16'
