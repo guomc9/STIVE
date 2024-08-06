@@ -16,9 +16,9 @@ train_data:
     - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
   num_frames: 4
   sample_stride: 2
-  width: 512
-  height: 512
-  rand_slice: True
+  width: 384
+  height: 384
+  rand_slice: False
   target_video_paths:
     - "data/targets/car-turn/videos/car-turn.mp4"
   target_mask_paths:
@@ -37,18 +37,20 @@ validation_data:
     # - "a $LAMBO driving on the road"
   num_frames: 4
   sample_stride: 2
-  width: 512
-  height: 512
+  width: 384
+  height: 384
   replace_indices: [[2]]    # jeep -> '$LAMBO'
 
 lora_conf:
-  r: 8
+  r: 6
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
     - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
     - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
+    # - "^.*\\.resnets\\..*\\.conv1\\..*$"
+    # - "^.*\\.temp_convs\\..*\\.conv1\\..*$"
+    - "^.*\\.temp_attentions\\..*\\.attn1\\.to_q\\..*$"
     - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 
@@ -69,16 +71,16 @@ inference_conf:
 sub_sot: True
 cam_loss_type: 'mae'
 enable_scam_loss: True
-scam_weight: 0.0
+scam_weight: 0.1
 scam_only_neg: False
 enable_tcam_loss: True
 tcam_only_neg: True
-tcam_weight: 0.0
+tcam_weight: 0.1
 attn_check_steps: 10
 
-learning_rate: 1.0e-4
+learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 300
+num_train_epoch: 1000
 checkpointing_steps: 2000
 validation_steps: 50
 

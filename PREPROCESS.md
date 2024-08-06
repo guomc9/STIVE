@@ -49,3 +49,6 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive.py --config configs
 
 
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_concepts_wam.py --config configs/concepts/lambo.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_stive_wam.py --config configs/stive/lambo.yaml
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_concepts_ptp.py --config configs/ptp/lambo.yaml

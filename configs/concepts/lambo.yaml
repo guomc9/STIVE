@@ -9,8 +9,8 @@ train_data:
     - "a $LAMBO driving along a road"
   mask_paths:
     - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
-  width: 512
-  height: 512
+  width: 384
+  height: 384
   num_frames: 4
   sample_stride: 1
   rand_slice: False
@@ -30,8 +30,8 @@ validation_data:
     - "a $LAMBO driving down a curvy road in the countryside"
   num_frames: 4
   sample_stride: 1
-  width: 512
-  height: 512
+  width: 384
+  height: 384
 
 inference_conf:
   num_inference_steps: 30
@@ -68,7 +68,7 @@ cam_loss_type: 'mae'
 
 enable_scam_loss: True
 scam_weight: 0.1
-scam_only_neg: False
+scam_only_neg: True
 
 enable_tcam_loss: True
 tcam_weight: 0.0
@@ -77,9 +77,9 @@ cam_loss_reduction: 'mean'
 attn_check_steps: 10
 
 
-learning_rate: 5.0e-3
+learning_rate: 3.0e-3
 batch_size: 1
-num_train_epoch: 1000
+num_train_epoch: 500
 checkpointing_steps: 5000
 validation_steps: 10
 

@@ -215,8 +215,7 @@ class StepAttentionSupervisor(StepAttentionStore):
                 for i in range(b):
                     neg_mask = None
                     if only_neg:
-                        neg_mask = (adapt_mask[i] < 1e-8).to(adapt_mask.dtype)
-                        # mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask * adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
+                        neg_mask = (adapt_mask[i] < 1e-8).to(adapt_mask.dtype).detach()
                         mask_check[f'batch-{i}-{key}'] = rearrange(neg_mask, '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
                     else:
                         mask_check[f'batch-{i}-{key}'] = rearrange(adapt_mask[i], '(f m) (h w) -> f m h w', f=f, m=m, h=h, w=w).mean(dim=1).detach().cpu()  # [F, H, W]
