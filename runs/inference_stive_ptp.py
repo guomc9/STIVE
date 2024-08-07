@@ -154,6 +154,8 @@ def main(
         all_step_source_latents = validation_pipeline.prepare_ddim_source_latents(
             frames=source['frames'].to(accelerator.device, dtype=weight_dtype), 
             text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype), 
+            only_cross=False,
+            self_to_st_attn=False, 
             prompt=source['source_prompts'], 
             store_attention=ptp_conf['use_inversion_attention'], 
             LOW_RESOURCE=True, 
@@ -178,6 +180,8 @@ def main(
                 latents=source_init_latents, 
                 source_prompt=source_prompts, 
                 target_prompt=target_prompts, 
+                only_cross=False,
+                self_to_st_attn=False, 
                 num_inference_steps=inference_conf["num_inference_steps"], 
                 is_replace_controller=ptp_conf.get('is_replace_controller', True), 
                 cross_replace_steps=ptp_conf.get('cross_replace_steps', 0.5), 

@@ -33,6 +33,8 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         frames, 
         text_embeddings,
         store_attention=False, 
+        only_cross=True, 
+        self_to_st_attn=False, 
         prompt=None,
         generator=None,
         LOW_RESOURCE=True,
@@ -40,7 +42,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
     ):
         self.prepare_before_train_loop()
         if store_attention:
-            attention_util.register_attention_control(self, self.store_controller)
+            attention_util.register_attention_control(self, self.store_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=False)
         resource_default_value = self.store_controller.LOW_RESOURCE
         self.store_controller.LOW_RESOURCE = LOW_RESOURCE  # in inversion, no CFG, record all latents attention
         b, f = frames.shape[:2]
@@ -58,7 +60,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                                                                    save_path = save_path+'/cross_attention')
 
             # Detach the controller for safety
-            attention_util.register_attention_control(self, self.empty_controller)
+            attention_util.register_attention_control(self, self.empty_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=False)
         self.store_controller.LOW_RESOURCE = resource_default_value
         
         return ddim_latents_all_step
@@ -69,6 +71,8 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         init_latents, 
         text_embeddings,
         store_attention=False, 
+        only_cross=True, 
+        self_to_st_attn=False, 
         prompt=None,
         generator=None,
         LOW_RESOURCE=True,
@@ -76,7 +80,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
     ):
         self.prepare_before_train_loop()
         if store_attention:
-            attention_util.register_attention_control(self, self.store_controller)
+            attention_util.register_attention_control(self, self.store_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=False)
         resource_default_value = self.store_controller.LOW_RESOURCE
         self.store_controller.LOW_RESOURCE = LOW_RESOURCE  # in inversion, no CFG, record all latents attention
         b, f = init_latents.shape[:2]
@@ -90,7 +94,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                                                                    save_path = save_path+'/cross_attention')
 
             # Detach the controller for safety
-            attention_util.register_attention_control(self, self.empty_controller)
+            attention_util.register_attention_control(self, self.empty_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=False)
         self.store_controller.LOW_RESOURCE = resource_default_value
         
         return ddim_latents_all_step
@@ -129,6 +133,8 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         source_prompt, 
         target_prompt, 
         num_inference_steps, 
+        only_cross=False, 
+        self_to_st_attn=False, 
         is_replace_controller=True, 
         cross_replace_steps=None, 
         self_replace_steps=None, 
@@ -173,7 +179,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                             cond_mask=cond_mask
                         )
         
-        attention_util.register_attention_control(self, edit_controller)
+        attention_util.register_attention_control(self, edit_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=True)
         
         frames = self.ptp_replace_ddim(
             prompt=target_prompt, 
@@ -199,7 +205,7 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
                 "attention_output" : attention_output,
                 "mask_list" : mask_list,
             }
-        attention_util.register_attention_control(self, self.empty_controller)
+        attention_util.register_attention_control(self, self.empty_controller, only_cross=only_cross, self_to_st_attn=self_to_st_attn, replace_attn_prob=True)
         del edit_controller
         return dict_output
         
