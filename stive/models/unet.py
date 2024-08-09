@@ -275,6 +275,25 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
         if isinstance(module, (CrossAttnDownBlock3D, DownBlock3D, CrossAttnUpBlock3D, UpBlock3D)):
             module.gradient_checkpointing = value
 
+    def _reset_temporal_modules(self, enable: bool=True):
+        for name, module in self.named_modules():
+            if "BasicTransformerBlock" in str(type(module)):
+                # print(f"Found BasicTransformerBlock: {name}")
+                # print(f"Type: {type(module)}")
+                module.reset_temp_attn(enable)
+
+            if "InflatedConv3d" in str(type(module)):
+                # print(f"Found InflatedConv3d: {name}")
+                # print(f"Type: {type(module)}")
+                module.reset_enable_temp_lora_conv(enable)
+
+    def enable_temporal_modules(self):
+        self._reset_temporal_modules(enable=True)
+    
+    def disable_temporal_modules(self):
+        self._reset_temporal_modules(enable=False)
+    
+
     def forward(
         self,
         sample: torch.FloatTensor,

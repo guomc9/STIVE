@@ -326,6 +326,7 @@ class BasicTransformerBlock(nn.Module):
         )
 
         # Temp-Attn
+        self.enable_temp_attn = True
         self.attn_temp = Attention(
             query_dim=dim,
             heads=num_attention_heads,
@@ -356,6 +357,9 @@ class BasicTransformerBlock(nn.Module):
         # Sets chunk feed-forward
         self._chunk_size = chunk_size
         self._chunk_dim = dim
+
+    def reset_temp_attn(self, enable:bool=True):
+        self.enable_temp_attn = enable
 
     def forward(
         self,
@@ -476,16 +480,18 @@ class BasicTransformerBlock(nn.Module):
         elif self.norm_type == "ada_norm_single":
             ff_output = gate_mlp * ff_output
 
-        # Temporal-Attention
-        d = hidden_states.shape[1]
-        hidden_states = rearrange(hidden_states, "(b f) d c -> (b d) f c", f=video_length)
-        norm_hidden_states = (
-            self.norm_temp(hidden_states, timestep) if self.use_ada_layer_norm else self.norm_temp(hidden_states)
-        )
-        hidden_states = self.attn_temp(norm_hidden_states) + hidden_states
-        hidden_states = rearrange(hidden_states, "(b d) f c -> (b f) d c", d=d)
-
         hidden_states = ff_output + hidden_states
+
+        # Temporal-Attention
+        if self.enable_temp_attn:
+            d = hidden_states.shape[1]
+            hidden_states = rearrange(hidden_states, "(b f) d c -> (b d) f c", f=video_length)
+            norm_hidden_states = (
+                self.norm_temp(hidden_states, timestep) if self.use_ada_layer_norm else self.norm_temp(hidden_states)
+            )
+            hidden_states = self.attn_temp(norm_hidden_states) + hidden_states
+            hidden_states = rearrange(hidden_states, "(b d) f c -> (b f) d c", d=d)
+
         if hidden_states.ndim == 4:
             hidden_states = hidden_states.squeeze(1)
 

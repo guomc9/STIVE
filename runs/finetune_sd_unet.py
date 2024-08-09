@@ -532,9 +532,13 @@ def main(
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        text_encoder = accelerator.unwrap_model(text_encoder)
-        text_encoder.save_pretrained(os.path.join(output_dir, 'text_encoder'))
-        tokenizer.save_pretrained(os.path.join(output_dir, 'tokenizer'))
+        lora_unet = accelerator.unwrap_model(lora_unet)
+        save_path = os.path.join(output_dir, 'lora')
+        lora_unet.save_pretrained(save_path)
+        save_path = os.path.join(output_dir, 'unet')
+        unet = lora_unet.unload()
+        unet.save_pretrained(save_path, safe_serialization=False)
+        logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
 
     accelerator.end_training()
     if os.path.exists(checkpoints_dir):

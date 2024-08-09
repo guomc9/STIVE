@@ -1,11 +1,14 @@
-pretrained_t2v_model_path: "./checkpoints/zeroscope_v2_576w"
-output_dir: ".log/full/lambo/base/"
-checkpoints_dir: "checkpoints/full/lambo"
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/lambo"
+output_dir: ".log/sd_unet/lambo/base/"
+checkpoints_dir: "checkpoints/sd_unet/lambo"
 
 train_data:
   video_paths:
+    - "data/targets/car-turn/videos/car-turn.mp4"
     - "data/concepts/lambo/videos/lambo.mp4"
   prompts:
+    - "a jeep driving down a curvy road in the countryside"
     - "a $LAMBO driving along a road"
   mask_paths:
     - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
@@ -22,38 +25,31 @@ train_data:
     - "a $LAMBO driving down a curvy road in the countryside"
 
 validation_data:
-  sources:
-    - "data/concepts/lambo/videos/lambo.mp4"
-    - "data/targets/car-turn/videos/car-turn.mp4"
-  prompts:
-    - "a $LAMBO driving along a road"
+  source: "data/targets/car-turn/videos/car-turn.mp4"
+  source_prompt: "a jeep driving down a curvy road in the countryside"
+  edit_prompts:
     - "a $LAMBO driving down a curvy road in the countryside"
   num_frames: 4
-  sample_stride: 1
+  sample_stride: 2
   width: 512
   height: 512
+  replace_indices: [[2]]    # jeep -> '$LAMBO'
 
 lora_conf:
   r: 6
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"\
-    - "^.*\\.resnets\\..*\\.conv1\\..*$"
-    # - "^.*\\.resnets\\..*\\.conv2\\..*$"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 
-# extra_trainable_modules:
-#   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-#   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-
-
-concepts: ['$LAMBO']
-concepts_num_embedding: 1
-retain_position_embedding: True
+extra_trainable_modules:
+  - "^.*\\.temp_lora_conv\\..*"
+  - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
+  - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
+  - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
 
 inference_conf:
   num_inference_steps: 30
@@ -61,22 +57,21 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 30
 
-
 # CHECK
 sub_sot: True
 cam_loss_type: 'mae'
 enable_scam_loss: True
-scam_weight: 0.0
-scam_only_neg: False
+scam_weight: 0.1
+scam_only_neg: True
 enable_tcam_loss: True
-tcam_only_neg: False
-tcam_weight: 0.00
+tcam_only_neg: True
+tcam_weight: 0.1
 attn_check_steps: 10
 
-learning_rate: 1.0e-4
+learning_rate: 1.0e-5
 batch_size: 1
 num_train_epoch: 1000
-checkpointing_steps: 3000
+checkpointing_steps: 2000
 validation_steps: 10
 
 seed: 33

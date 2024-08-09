@@ -1,17 +1,49 @@
 import os
 import json
 import torch
+import random
 from torch import nn
 from typing import Optional
 from transformers import CLIPTextModel, CLIPTokenizer, CLIPConfig
 from transformers.modeling_outputs import BaseModelOutputWithPooling
 from transformers.modeling_attn_mask_utils import _create_4d_causal_attention_mask, _prepare_4d_attention_mask
 
+imagenet_templates_small = [
+    "a photo of a {}",
+    "a rendering of a {}",
+    "a cropped photo of the {}",
+    "the photo of a {}",
+    "a photo of a clean {}",
+    "a photo of a dirty {}",
+    "a dark photo of the {}",
+    "a photo of my {}",
+    "a photo of the cool {}",
+    "a close-up photo of a {}",
+    "a bright photo of the {}",
+    "a cropped photo of a {}",
+    "a photo of the {}",
+    "a good photo of the {}",
+    "a photo of one {}",
+    "a close-up photo of the {}",
+    "a rendition of the {}",
+    "a photo of the clean {}",
+    "a rendition of a {}",
+    "a photo of a nice {}",
+    "a good photo of a {}",
+    "a photo of the nice {}",
+    "a photo of the small {}",
+    "a photo of the weird {}",
+    "a photo of the large {}",
+    "a photo of a cool {}",
+    "a photo of a small {}",
+]
+
 class ConceptsCLIPTokenizerOutput:
-    def __init__(self, input_ids, replace_indices, concept_indices):
+    def __init__(self, input_ids, replace_indices, concept_indices, prefix_texts):
         self.input_ids = input_ids
         self.replace_indices = replace_indices
         self.concept_indices = concept_indices
+        self.prefix_texts = prefix_texts
 
 
 class ConceptsCLIPTokenizer(CLIPTokenizer):
@@ -24,7 +56,7 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
         self.concepts_list = concepts_list
         self.concepts_num_embedding = concepts_num_embedding
 
-    def __call__(self, text, prefix: str=None, **kwargs):
+    def __call__(self, text, enable_prefix: bool=True, **kwargs):
         # Process single text or multiple texts
         if isinstance(text, str):
             texts = [text]
@@ -37,16 +69,15 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
         all_concept_indices = []
 
         # Process each text individually
+        prefix_texts = []
         for text in texts:
-            if prefix is not None:
-                text = prefix + ' ' + text
-                
             replace_indices = []
             concept_indices = []
             tokens = text.split()
             normal_tokens = []
             # Replace concepts with placeholders and record indices
             cnt = 0
+            is_concept_text = False
             for i, token in enumerate(tokens):
                 punc = None
                 if token.endswith(('.', ',')):
@@ -59,6 +90,7 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
                     replace_indices.extend(list(range(start_replace_index, end_replace_index)))
                     concept_indices.extend(list(range(index * self.concepts_num_embedding, (index + 1) * self.concepts_num_embedding)))
                     normal_tokens.extend(['*'] * self.concepts_num_embedding)
+                    is_concept_text = True
                     cnt += 1
                 else:
                     normal_tokens.append(token)
@@ -67,6 +99,12 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
 
             # Convert modified tokens back to text
             modified_text = ' '.join(normal_tokens)
+            if is_concept_text and enable_prefix:
+                prefix = random.choice(imagenet_templates_small)
+                prefix_length = len(prefix.split())
+                prefix_text = prefix.format(text)
+                replace_indices = [inds + prefix_length for inds in replace_indices]
+                prefix_texts.append(prefix_text)
 
             # Encode the text using the parent class method
             encoding = super().__call__(modified_text, **kwargs)
@@ -74,14 +112,14 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
             all_token_ids.append(encoding['input_ids'])
             all_replace_indices.append(replace_indices)
             all_concept_indices.append(concept_indices)
-            
+
         # print(f'modified_text: {modified_text}')
         # print(f'all_replace_indices: {all_replace_indices}')
         # print(f'all_concept_indices: {all_concept_indices}')
 
         all_token_ids = torch.stack(all_token_ids)
 
-        return ConceptsCLIPTokenizerOutput(all_token_ids, all_replace_indices, all_concept_indices)
+        return ConceptsCLIPTokenizerOutput(all_token_ids, all_replace_indices, all_concept_indices, prefix_texts)
 
     @classmethod
     def from_pretrained_clip(cls, pretrained_model_name_or_path, *model_args, concepts_list:list[str]=None, concepts_num_embedding:int=1,**kwargs):

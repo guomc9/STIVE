@@ -196,7 +196,8 @@ class PtpTextToVideoSDPipeline(TextToVideoSDPipeline):
         else:
             mask_list = None
         if len(edit_controller.attention_store.keys()) > 0:
-            attention_output = attention_util.show_cross_attention(self.tokenizer, target_prompt, edit_controller, 16, ["up", "down"], save_path=save_path)
+            # attention_output = attention_util.show_cross_attention(self.tokenizer, target_prompt, edit_controller, 16, ["up", "down"], save_path=save_path)
+            attention_output = attention_util.show_cross_attention(self.tokenizer, target_prompt, edit_controller, 16, ["down"], save_path=save_path)
         else:
             attention_output = None
             

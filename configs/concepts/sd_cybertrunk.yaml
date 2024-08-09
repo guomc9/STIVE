@@ -1,38 +1,36 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/lambo/base/"
-checkpoints_dir: "checkpoints/sd_concepts/lambo"
+output_dir: ".log/sd_concepts/cybertrunk/base/"
+checkpoints_dir: "checkpoints/sd_concepts/cybertrunk"
 
 train_data:
   video_paths: 
-    - "data/concepts/lambo/videos/lambo.mp4"
+    - "data/concepts/cybertrunk/videos/cybertrunk.mp4"
   prompts: 
-    - "$LAMBO"
+    - "$CYBERTRUNK"
   mask_paths:
-    - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
+    - "data/concepts/cybertrunk/masks/cybertrunk_car_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 4
   sample_stride: 1
   enable_slice: False
   rand_slice: False
-  relax_mask: False
   target_video_paths: 
     - "data/targets/car-turn/videos/car-turn.mp4"
   target_mask_paths: 
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
   target_prompts:
-    - "a $LAMBO driving down a curvy road in the countryside"
+    - "a $CYBERTRUNK driving down a curvy road in the countryside"
   enable_target_slice: False
   target_rand_slice: False
-  target_relax_mask: True
 
 validation_data:
   sources:
-    - "data/concepts/lambo/videos/lambo.mp4"
+    - "data/concepts/cybertrunk/videos/cybertrunk.mp4"
     - "data/targets/car-turn/videos/car-turn.mp4"
   prompts:
-    - "a dark green $LAMBO moving along a road"
-    - "a $LAMBO driving down a curvy road in the countryside"
+    - "a $CYBERTRUNK is driving through the forest"
+    - "a $CYBERTRUNK driving down a curvy road in the countryside"
   num_frames: 4
   sample_stride: 1
   width: 512
@@ -45,7 +43,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$LAMBO']
+concepts: ['$CYBERTRUNK']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
@@ -65,8 +63,8 @@ attn_check_steps: 10
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 3000
-checkpointing_steps: 5000
+num_train_epoch: 5000
+checkpointing_steps: 10000
 validation_steps: 50
 
 seed: 33

@@ -6,6 +6,7 @@ import os
 import torch
 import torch.nn.functional as F
 from einops import rearrange
+from stive.models.unet import UNet3DConditionModel
 from diffusers import AutoencoderKL, DDIMScheduler, UNet3DConditionModel, TextToVideoSDPipeline
 from transformers import CLIPTokenizer, CLIPTextModel
 from accelerate import Accelerator
@@ -39,6 +40,7 @@ def collect_cross_attention(attns_dict, prompts, video_length):
         h = w = int(np.sqrt(q))
         attns = rearrange(attns, '(b f) (h w) k -> b f h w k', b=b, f=f, h=h, w=w)
         for j in range(b):
+            prompt = prompts[j]
             tokens = ['SOT'] + prompts[j].split(' ') + ['EOT']
             prompt_frames = []
             for i, token in enumerate(tokens):
@@ -69,7 +71,7 @@ def main(video_path, prompt):
     video_length = len(video_frames)
     prompts = [prompt]
 
-    pretrained_model_path = "checkpoints/zeroscope_v2_576w"
+    pretrained_model_path = "checkpoints/stable-diffusion-v1-4"
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_model_path)
     text_encoder = CLIPTextModel.from_pretrained(pretrained_model_path)
     vae = AutoencoderKL.from_pretrained(pretrained_model_path)
@@ -80,7 +82,7 @@ def main(video_path, prompt):
     pipeline.enable_vae_slicing()
 
     supervisor = StepAttentionSupervisor()
-    register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False)
+    register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=True)
 
     generator = torch.Generator(device="cuda")
 
@@ -89,7 +91,7 @@ def main(video_path, prompt):
 
     attn_dict = supervisor.get_mean_head_attns()
     prompt_attn_dict = collect_cross_attention(attn_dict, prompts, video_length)
-    save_path = "./attention_videos"
+    save_path = "./trash/attn_prob_videos"
     save_attention_videos(prompt_attn_dict, save_path)
 
 if __name__ == "__main__":

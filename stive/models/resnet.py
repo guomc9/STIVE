@@ -11,6 +11,10 @@ class InflatedConv3d(nn.Conv2d):
     def __init__(self, in_channels, out_channels, *args, **kwargs):
         super().__init__(in_channels, out_channels, *args, **kwargs)
         self.temp_lora_conv = TemporalLoraAdapter(in_features=out_channels, out_features=out_channels, rank=160, stride=1)
+        self.enable_temp_lora_conv = True
+
+    def reset_enable_temp_lora_conv(self, enable: True):
+        self.enable_temp_lora_conv = enable
 
     def forward(self, x):
         video_length = x.shape[2]
@@ -19,12 +23,13 @@ class InflatedConv3d(nn.Conv2d):
         x = super().forward(x)
         x = rearrange(x, "(b f) c h w -> b c f h w", f=video_length)
 
-        *_, h, w = x.shape
-        x = rearrange(x, "b c f h w -> (b h w) c f")
+        if self.enable_temp_lora_conv:
+            *_, h, w = x.shape
+            x = rearrange(x, "b c f h w -> (b h w) c f")
 
-        x = self.temp_lora_conv(x)
+            x = self.temp_lora_conv(x)
 
-        x = rearrange(x, "(b h w) c f -> b c f h w", h=h, w=w)
+            x = rearrange(x, "(b h w) c f -> b c f h w", h=h, w=w)
 
         return x
 

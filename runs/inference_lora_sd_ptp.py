@@ -93,12 +93,12 @@ def main(
         torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained_2d(pretrained_sd_model_path, subfolder="unet")
+    unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     unet.requires_grad_(False)
-    # lora_unet = PeftModel.from_pretrained(unet, os.path.join(pretrained_lora_model_path, 'lora'))
-    # lora_unet.requires_grad_(False)
+    lora_unet = PeftModel.from_pretrained(unet, os.path.join(pretrained_lora_model_path, 'lora'))
+    lora_unet.requires_grad_(False)
     val_dataset = VideoEditPromptsDataset(**validation_data)
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=1
@@ -111,27 +111,23 @@ def main(
         
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
-    # lora_unet.to(accelerator.device, dtype=weight_dtype)
+    lora_unet.to(accelerator.device, dtype=weight_dtype)
     unet.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
-    # lora_unet.eval()
+    lora_unet.eval()
     unet.eval()
     text_encoder.eval()
     torch.cuda.empty_cache()
 
-    # reset_processors(unet)
 
-    # validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, scheduler=scheduler)
-    validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, scheduler=scheduler)
+    validation_pipeline = PtpTextToVideoSDPipeline(disk_store=False, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, scheduler=scheduler)
     validation_pipeline.enable_vae_slicing()
     
 
-    # lora_unet, text_encoder, vae, val_dataloader = accelerator.prepare(
-    #     lora_unet, text_encoder, vae, val_dataloader
-    # )
-    unet, text_encoder, vae, val_dataloader = accelerator.prepare(
-        unet, text_encoder, vae, val_dataloader
+    lora_unet, text_encoder, vae, val_dataloader = accelerator.prepare(
+        lora_unet, text_encoder, vae, val_dataloader
     )
+
     source = val_dataset.get_source()
 
     generator = torch.Generator(device=accelerator.device)
