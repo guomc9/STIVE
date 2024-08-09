@@ -23,7 +23,7 @@ train_data:
 
 validation_data:
   sources:
-    - "data/concepts/FERRARI/videos/FERRARI.mp4"
+    - "data/concepts/ferrari/videos/ferrari.mp4"
     - "data/targets/car-turn/videos/car-turn.mp4"
   prompts:
     - "a $FERRARI is driving along a road"
