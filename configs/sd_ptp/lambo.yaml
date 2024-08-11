@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/jeep"
+pretrained_lora_model_path: "./checkpoints/sd_unet/lambo"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/lambo"
 output_dir: ".log/ptp/sd_car-turn/to-lambo/"
 checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-lambo"
@@ -10,8 +10,8 @@ validation_data:
 
   edit_prompts:
     - "a $LAMBO driving down a curvy road in the countryside"
-  num_frames: 8
-  sample_stride: 4
+  num_frames: 6
+  sample_stride: 6
   width: 512
   height: 512
 

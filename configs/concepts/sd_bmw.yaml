@@ -1,14 +1,14 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/ferrari/base/"
-checkpoints_dir: "checkpoints/sd_concepts/ferrari"
+output_dir: ".log/sd_concepts/bmw/base/"
+checkpoints_dir: "checkpoints/sd_concepts/bmw"
 
 train_data:
   video_paths: 
-    - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/concepts/bmw/videos/bmw.mp4"
   prompts: 
-    - "$FERRARI"
+    - "$BMW"
   mask_paths:
-    - "data/concepts/ferrari/masks/ferrari_car_frame_masks.mp4"
+    - "data/concepts/bmw/masks/bmw_car_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 4
@@ -20,18 +20,18 @@ train_data:
   target_mask_paths: 
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
   target_prompts:
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $BMW driving down a curvy road in the countryside"
   enable_target_slice: False
   target_rand_slice: False
   relax_target_mask: False
 
 validation_data:
   sources:
-    - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/concepts/bmw/videos/bmw.mp4"
     - "data/targets/car-turn/videos/car-turn.mp4"
   prompts:
-    - "a $FERRARI is driving through the forest"
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $BMW driving on the road in the countryside"
+    - "a $BMW driving down a curvy road in the countryside"
   num_frames: 4
   sample_stride: 1
   width: 512
@@ -44,7 +44,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$FERRARI']
+concepts: ['$BMW']
 concepts_num_embedding: 1
 retain_position_embedding: True
 

@@ -705,9 +705,9 @@ def reset_sparse_casual_processors(unet):
                         optim_count += 1
     if optim_count > 0:
         if is_xformers_available():
-            print(f"{optim_count} Attention layers using XFormers Attention Processors.")
+            print(f"{optim_count} Attention layers using Sparse Causal XFormers Attention Processors.")
         else:
-            print(f"{optim_count} Attention layers using Scaled Dot Product Attention Processors.")
+            print(f"{optim_count} Attention layers using Sparse Causal Scaled Dot Product Attention Processors.")
 
 def reset_processors(unet):
     optim_count = 0

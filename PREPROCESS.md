@@ -26,6 +26,7 @@ python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s 
 python scripts/extract_masks.py -v data/concepts/lambo/videos/lambo.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/cybertrunk/videos/cybertrunk.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/ferrari/videos/ferrari.mp4 -s car
+python scripts/extract_masks.py -v data/concepts/bmw/videos/bmw.mp4 -s car
 
 python scripts/extract_concepts.py -f data/concepts/cybertrunk/video_prompts.csv -o data/concepts/cybertrunk/concepts.json
 python scripts/extract_concepts.py -f data/concepts/bmw/video_prompts.csv -o data/concepts/bmw/concepts.json
@@ -55,22 +56,27 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_concepts_ptp.py --config
 
 
 
+## Lambo
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_lambo.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/lambo.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_lambo.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/lambo.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertrunk.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/cybertrunk.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/cybertrunk.yaml
+## Cybertruck
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertruck.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml
 
-
+## Ferrari
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_ferrari.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/ferrari.yaml
 CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/ferrari.yaml
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertrunk.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/lambo.yaml
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml
+## BMW
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bmw.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bmw.yaml
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep.yaml
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_car.yaml
+CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car.yaml

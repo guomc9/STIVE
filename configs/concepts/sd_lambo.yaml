@@ -24,7 +24,7 @@ train_data:
     - "a $LAMBO driving down a curvy road in the countryside"
   enable_target_slice: False
   target_rand_slice: False
-  target_relax_mask: True
+  relax_target_mask: False
 
 validation_data:
   sources:
@@ -65,7 +65,7 @@ attn_check_steps: 10
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 3000
+num_train_epoch: 5000
 checkpointing_steps: 5000
 validation_steps: 50
 

@@ -93,12 +93,15 @@ def main(
         torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
+    lora_unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
-    unet.requires_grad_(False)
-    lora_unet = PeftModel.from_pretrained(unet, os.path.join(pretrained_lora_model_path, 'lora'))
     lora_unet.requires_grad_(False)
+    pretrained_lora_model_path = os.path.join(pretrained_lora_model_path, 'lora')
+    if os.path.exists(pretrained_lora_model_path):
+        lora_unet = PeftModel.from_pretrained(lora_unet, pretrained_lora_model_path)
+        lora_unet.requires_grad_(False)
+
     val_dataset = VideoEditPromptsDataset(**validation_data)
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=1
@@ -112,10 +115,8 @@ def main(
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     lora_unet.to(accelerator.device, dtype=weight_dtype)
-    unet.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
     lora_unet.eval()
-    unet.eval()
     text_encoder.eval()
     torch.cuda.empty_cache()
 

@@ -17,6 +17,7 @@ from einops import rearrange
 import datetime
 from peft import PeftModel
 from ..utils.save_utils import save_video
+from stive.models.attention import SparseCausalXFormersAttnProcessor
 
 def register_attention_control(model, controller, only_cross=False, replace_attn_prob=False, self_to_st_attn=True):
     "Connect a model with a controller"
@@ -255,10 +256,16 @@ def register_attention_control(model, controller, only_cross=False, replace_attn
                 return hidden_states
         
         if store and (not self_to_st_attn or is_cross):
+            print(f'{place_in_unet} replace to AttnWithProbProcessor')
             return AttnWithProbProcessor(replace_attn_prob=replace_attn_prob)
         elif store and self_to_st_attn and not is_cross:
+            print(f'{place_in_unet} replace to SparseCausalAttnWithProbProcessor')
             return SparseCausalAttnWithProbProcessor(replace_attn_prob=replace_attn_prob)
+        elif not store and self_to_st_attn and not is_cross:
+            print(f'{place_in_unet} replace to SparseCausalXFormersAttnProcessor')
+            return SparseCausalXFormersAttnProcessor()
         else:
+            print(f'{place_in_unet} replace to XFormersAttnProcessor')
             return XFormersAttnProcessor()
 
     class DummyController:
@@ -276,7 +283,7 @@ def register_attention_control(model, controller, only_cross=False, replace_attn
         if net_[1].__class__.__name__ == 'Attention':
             store = (place_in_unet == 'down' and down_tsfm_count > begin_store) or (place_in_unet == 'up' and up_tsfm_count < half_unet_len - begin_store) or (place_in_unet == 'mid')
             store = store and (net_[1].is_cross_attention or not only_cross)
-            # print(f'net_[0]: {net_[0]}, store: {store}, is_cross_attention: {net_[1].is_cross_attention}')
+            print(f'net_[0]: {net_[0]}, net_[1]: {net_[1].__class__.__name__}, store: {store}, is_cross_attention: {net_[1].is_cross_attention}')
             net_[1].processor = attention_controlled_processor(store, place_in_unet, replace_attn_prob=replace_attn_prob, is_cross=net_[1].is_cross_attention, self_to_st_attn=self_to_st_attn)
             return count + 1
         elif hasattr(net_[1], 'children'):

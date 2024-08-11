@@ -37,6 +37,7 @@ import gc
 import re
 import wandb
 import random
+from peft import PeftModel
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
@@ -151,8 +152,8 @@ def main(
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
-    pretrained_concepts_model_path: str, 
     lora_conf: Dict, 
+    pretrained_concepts_model_path: str = None, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
@@ -233,17 +234,22 @@ def main(
         torch.cuda.empty_cache()
 
     unet.to(dtype=weight_dtype)
-    lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
-    target_modules = []
-    patterns = lora_conf['target_modules']
-    for name, param in unet.named_parameters():
-        for pattern in patterns:
-            if re.match(pattern, name):
-                target_modules.append(name.rstrip('.weight').rstrip('.bias'))
-    lora_conf['target_modules'] = target_modules
-    lora_conf = LoraConfig(**lora_conf)
-    lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
-    lora_unet.print_trainable_parameters()
+    lora_unet = unet
+    if lora_conf is not None:
+        lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+        target_modules = []
+        patterns = lora_conf['target_modules']
+        if patterns is not None and len(patterns) > 0:
+            for name, param in unet.named_parameters():
+                for pattern in patterns:
+                    if re.match(pattern, name):
+                        target_modules.append(name.rstrip('.weight').rstrip('.bias'))
+            if len(target_modules) > 0:
+                lora_conf['target_modules'] = target_modules
+                lora_conf = LoraConfig(**lora_conf)
+                lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
+                lora_unet.print_trainable_parameters()
+
     vae.requires_grad_(False)
     unet.requires_grad_(False)
     text_encoder.requires_grad_(False)
@@ -339,7 +345,7 @@ def main(
     
     if enable_scam_loss or enable_tcam_loss:
         supervisor = StepAttentionSupervisor()
-        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False)
+        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=True)
     
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
@@ -526,18 +532,21 @@ def main(
                             
                     if enable_scam_loss and enable_tcam_loss:
                         supervisor.reset()
-                        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False)
+                        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False)
                         
                     torch.cuda.empty_cache()
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         lora_unet = accelerator.unwrap_model(lora_unet)
-        save_path = os.path.join(output_dir, 'lora')
-        lora_unet.save_pretrained(save_path)
-        save_path = os.path.join(output_dir, 'unet')
-        unet = lora_unet.unload()
-        unet.save_pretrained(save_path, safe_serialization=False)
+        if isinstance(lora_unet, PeftModel):
+            save_path = os.path.join(output_dir, 'lora')
+            lora_unet.save_pretrained(save_path)
+            unet = lora_unet.unload()
+            unet.save_pretrained(save_path, safe_serialization=False)
+        elif isinstance(lora_unet, UNet3DConditionModel):
+            save_path = os.path.join(output_dir, 'unet')
+            lora_unet.save_pretrained(save_path, safe_serialization=False)
         logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
 
     accelerator.end_training()
