@@ -16,16 +16,14 @@ from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from peft import LoraConfig, get_peft_model
-from diffusers.models.attention_processor import AttnProcessor2_0
-from diffusers.models.attention import BasicTransformerBlock
 from diffusers import AutoencoderKL, DDIMScheduler
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version
-from diffusers.utils.import_utils import is_xformers_available
 from diffusers.pipelines import TextToVideoSDPipeline
-from tqdm.auto import tqdm
 from diffusers.models import UNet3DConditionModel
+from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
+from stive.models.attention import reset_sparse_casual_processors as unregister_attention_control
 from stive.models.concepts_clip import ConceptsCLIPTextModel
 from stive.data.dataset import VideoEditPromptsDataset as VideoPromptValDataset, LatentPromptDataset
 from stive.utils.ddim_utils import ddim_inversion
@@ -39,6 +37,7 @@ import gc
 import re
 import wandb
 import random
+from peft import PeftModel
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["WANDB_MODE"] = "offline"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
@@ -62,47 +61,6 @@ def accelerate_set_verbose(accelerator):
         transformers.utils.logging.set_verbosity_error()
         diffusers.utils.logging.set_verbosity_error()
 
-def set_processors(attentions):
-    for attn in attentions: attn.set_processor(AttnProcessor2_0())
-
-def is_attn(name):
-    return ('attn1' or 'attn2' == name.split('.')[-1])
-
-def set_torch_2_attn(unet):
-    optim_count = 0
-
-    for name, module in unet.named_modules():
-        if is_attn(name):
-            if isinstance(module, torch.nn.ModuleList):
-                for m in module:
-                    if isinstance(m, BasicTransformerBlock):
-                        set_processors([m.attn1, m.attn2])
-                        optim_count += 1
-    if optim_count > 0:
-        print(f"{optim_count} Attention layers using Scaled Dot Product Attention.")
-
-def handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet):
-    try:
-        is_torch_2 = hasattr(F, 'scaled_dot_product_attention')
-        enable_torch_2 = is_torch_2 and enable_torch_2_attn
-
-        if enable_xformers_memory_efficient_attention and not enable_torch_2:
-            if is_xformers_available():
-                from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
-                unet.enable_xformers_memory_efficient_attention(attention_op=MemoryEfficientAttentionFlashAttentionOp)
-            else:
-                raise ValueError("xformers is not available. Make sure it is installed correctly")
-
-        if enable_torch_2:
-            set_torch_2_attn(unet)
-            
-        if gradient_checkpointing:
-            unet._set_gradient_checkpointing(True)
-
-    except Exception as e:
-        print(f"Could not enable memory efficient attention for xformers or Torch 2.0: {e}.")
-
-unregister_attention_control = handle_memory_attention
 
 def create_output_folders(output_dir, config):
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -113,7 +71,6 @@ def create_output_folders(output_dir, config):
 
     return output_dir
 
-from PIL import Image
 import numpy as np
 import cv2
 from einops import rearrange
@@ -189,22 +146,23 @@ def log_cross_attention_mask(accelerator, masks_dict, save_path, step, log_prefi
 
 
 def main(
-    pretrained_t2v_model_path: str,
-    pretrained_concepts_model_path: str, 
+    pretrained_sd_model_path: str,
     output_dir: str,
     checkpoints_dir: str, 
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
     lora_conf: Dict, 
+    pretrained_concepts_model_path: str = None, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
     scam_weight: float = 1.0e-1, 
     scam_only_neg: bool = False, 
     enable_tcam_loss: bool = False, 
-    tcam_only_neg: bool = True, 
     tcam_weight: float = 5.0e-2, 
+    tcam_only_neg: bool = False, 
+    cam_loss_reduction: str = 'mean', 
     attn_check_steps: int = 10, 
     validation_steps: int = 200,
     batch_size: int = 1,
@@ -226,7 +184,7 @@ def main(
     enable_xformers_memory_efficient_attention: bool = True,
     enable_torch_2_attn: bool = True, 
     seed: Optional[int] = None, 
-    extra_trainable_modules = None, 
+    extra_trainable_modules=None, 
 ):
     *_, config = inspect.getargvalues(inspect.currentframe())
 
@@ -238,7 +196,7 @@ def main(
     
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name="zs-unet-fine-tune", 
+            project_name="stive-sd-unet-fine-tune", 
             config={'train_data': train_data, 'inference_conf': inference_conf, 'validation_data': validation_data},
             init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
@@ -257,12 +215,16 @@ def main(
         weight_dtype = torch.float16
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
-
-    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder="scheduler")
-    tokenizer = CLIPTokenizer.from_pretrained(pretrained_t2v_model_path, subfolder="tokenizer")
-    text_encoder = CLIPTextModel.from_pretrained(pretrained_t2v_model_path, subfolder="text_encoder")
-    vae = AutoencoderKL.from_pretrained(pretrained_t2v_model_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained(pretrained_t2v_model_path, subfolder="unet")
+    
+    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_sd_model_path, subfolder="scheduler")
+    tokenizer = CLIPTokenizer.from_pretrained(pretrained_sd_model_path, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(pretrained_sd_model_path, subfolder="text_encoder")
+    vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
+    unet = UNet3DConditionModel.from_pretrained_2d(pretrained_sd_model_path, subfolder="unet")
+    vae.requires_grad_(False)
+    text_encoder.requires_grad_(False)
+    unet.requires_grad_(False)
+    unet._set_gradient_checkpointing(gradient_checkpointing)
     
     if pretrained_concepts_model_path is not None and os.path.exists(pretrained_concepts_model_path):
         concepts_text_encoder = ConceptsCLIPTextModel.from_pretrained(pretrained_concepts_model_path, subfolder="text_encoder")
@@ -270,22 +232,24 @@ def main(
         del concepts_text_encoder
         gc.collect()
         torch.cuda.empty_cache()
-        
-    if not enable_scam_loss and not enable_tcam_loss:
-        handle_memory_attention(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
 
     unet.to(dtype=weight_dtype)
-    lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
-    target_modules = []
-    patterns = lora_conf['target_modules']
-    for name, param in unet.named_parameters():
-        for pattern in patterns:
-            if re.match(pattern, name):
-                target_modules.append(name.rstrip('.weight').rstrip('.bias'))
-    lora_conf['target_modules'] = target_modules
-    lora_conf = LoraConfig(**lora_conf)
-    lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
-    lora_unet.print_trainable_parameters()
+    lora_unet = unet
+    if lora_conf is not None:
+        lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+        target_modules = []
+        patterns = lora_conf['target_modules']
+        if patterns is not None and len(patterns) > 0:
+            for name, param in unet.named_parameters():
+                for pattern in patterns:
+                    if re.match(pattern, name):
+                        target_modules.append(name.rstrip('.weight').rstrip('.bias'))
+            if len(target_modules) > 0:
+                lora_conf['target_modules'] = target_modules
+                lora_conf = LoraConfig(**lora_conf)
+                lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
+                lora_unet.print_trainable_parameters()
+
     vae.requires_grad_(False)
     unet.requires_grad_(False)
     text_encoder.requires_grad_(False)
@@ -301,6 +265,11 @@ def main(
                     print(f'extra trainable param: {name}')
                     param.requires_grad = True
                     param.data = param.data.float()
+
+
+    if not enable_scam_loss and not enable_tcam_loss:
+        unregister_attention_control(unet)
+
     if scale_lr:
         learning_rate = (
             learning_rate * gradient_accumulation_steps * batch_size * accelerator.num_processes
@@ -319,14 +288,16 @@ def main(
     else:
         optimizer_cls = torch.optim.AdamW
 
+    
     optim_params = [p for p in lora_unet.parameters() if p.requires_grad]
     optimizer = optimizer_cls(
-        optim_params, 
+        optim_params,
         lr=learning_rate,
         betas=(adam_beta1, adam_beta2),
         weight_decay=adam_weight_decay,
         eps=adam_epsilon,
     )
+
     replace_indices = validation_data['replace_indices']
     validation_data.pop('replace_indices')
     replace_indices = [torch.as_tensor(replace_inds, device=accelerator.device, dtype=torch.int64) for replace_inds in replace_indices]
@@ -342,11 +313,11 @@ def main(
     )
     
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_t2v_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
+        pretrained_model_name_or_path=pretrained_sd_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
     )
     validation_pipeline.enable_vae_slicing()
     
-    ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_t2v_model_path, subfolder='scheduler')
+    ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_sd_model_path, subfolder='scheduler')
     ddim_inv_scheduler.set_timesteps(inference_conf.num_inv_steps, device=accelerator.device)
 
     num_train_steps = (num_train_epoch * len(train_dataloader)) // gradient_accumulation_steps
@@ -361,14 +332,20 @@ def main(
         lora_unet, optimizer, train_dataloader, val_dataloader, lr_scheduler
     )
 
+    weight_dtype = torch.float32
+    if accelerator.mixed_precision == "fp16":
+        weight_dtype = torch.float16
+    elif accelerator.mixed_precision == "bf16":
+        weight_dtype = torch.bfloat16
+
     text_encoder.to(accelerator.device, dtype=weight_dtype)
-    vae.to(accelerator.device, dtype=weight_dtype)
     text_encoder.eval()
+    vae.to(accelerator.device, dtype=weight_dtype)
     vae.eval()
     
     if enable_scam_loss or enable_tcam_loss:
         supervisor = StepAttentionSupervisor()
-        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False)
+        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=True)
     
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
@@ -425,7 +402,7 @@ def main(
                         scam_loss = 0.0
                         tcam_loss = 0.0
                         if enable_scam_loss and replace_indices is not None:
-                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type, only_neg=scam_only_neg)
+                            scam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=masks, target_indices=replace_indices, sub_sot=sub_sot, only_neg=scam_only_neg, loss_type=cam_loss_type, reduction=cam_loss_reduction)
                             if global_step % attn_check_steps == 0:
                                 save_path = os.path.join(output_dir, 'source-cross-attn')
                                 prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), prompts, video_length=video_length)
@@ -437,7 +414,7 @@ def main(
                             torch.cuda.empty_cache()
                             
                         if enable_tcam_loss and batch.get('target_latents') is not None and batch.get('target_masks') is not None:
-                            target_prompts = batch['target_prompts']            # [B]
+                            target_prompts = batch['target_prompts']                # [B]
                             target_tokens = tokenizer(target_prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
                             target_encoder_hidden_states = text_encoder(target_tokens.input_ids.to(latents.device))[0]
                             if replace_indices is not None:
@@ -446,8 +423,8 @@ def main(
                                 target_latents = batch['target_latents']            # [B, F, C, H, W]
                                 target_masks = batch['target_masks']                # [B, F, 1, H, W]
                                 target_latents = rearrange(target_latents, "b f c h w -> b c f h w")
-                                unet(target_latents, t, target_encoder_hidden_states)
-                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=replace_indices, sub_sot=sub_sot, loss_type=cam_loss_type, only_neg=tcam_only_neg)
+                                lora_unet(target_latents, t, target_encoder_hidden_states)
+                                tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=replace_indices, sub_sot=sub_sot, only_neg=tcam_only_neg, loss_type=cam_loss_type, reduction=cam_loss_reduction)
                                 if global_step % attn_check_steps == 0:
                                     save_path = os.path.join(output_dir, 'target-cross-attn')
                                     prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), target_prompts, video_length=video_length)
@@ -478,12 +455,12 @@ def main(
                                 optimizer.step()
                                 lr_scheduler.step()
                                 optimizer.zero_grad()
-                                if enable_scam_loss and scam_weight > 1e-6:
+                                if enable_scam_loss:
                                     scam_loss = accelerator.gather(scam_loss.repeat(batch_size)).mean()
                                     train_scam_loss += scam_loss.item() / gradient_accumulation_steps
                                     accelerator.log({"scam_loss": train_scam_loss}, step=global_step)
                                     
-                                if enable_tcam_loss and tcam_weight > 1e-6:
+                                if enable_tcam_loss:
                                     tcam_loss = accelerator.gather(tcam_loss.repeat(batch_size)).mean()
                                     train_tcam_loss += tcam_loss.item() / gradient_accumulation_steps
                                     accelerator.log({"tcam_loss": train_tcam_loss}, step=global_step)
@@ -503,9 +480,9 @@ def main(
 
                 if global_step % validation_steps == 0:
                     if enable_scam_loss and enable_tcam_loss:
-                        unregister_attention_control(enable_xformers_memory_efficient_attention, enable_torch_2_attn, gradient_checkpointing, unet)
+                        unregister_attention_control(lora_unet)
+
                     with torch.no_grad(), accelerator.autocast():
-                        torch.cuda.empty_cache()
                         generator = torch.Generator(device=latents.device)
                         if seed is not None:
                             generator.manual_seed(seed)
@@ -554,19 +531,22 @@ def main(
                             logger.info(f"Saved samples to {save_path}")
                             
                     if enable_scam_loss and enable_tcam_loss:
-                        supervisor = StepAttentionSupervisor()
-                        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False)
+                        supervisor.reset()
+                        register_attention_control(lora_unet, supervisor, only_cross=True, replace_attn_prob=False)
                         
                     torch.cuda.empty_cache()
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         lora_unet = accelerator.unwrap_model(lora_unet)
-        save_path = os.path.join(output_dir, 'lora')
-        lora_unet.save_pretrained(save_path)
-        save_path = os.path.join(output_dir, 'unet')
-        unet = lora_unet.unload()
-        unet.save_pretrained(save_path)
+        if isinstance(lora_unet, PeftModel):
+            save_path = os.path.join(output_dir, 'lora')
+            lora_unet.save_pretrained(save_path)
+            unet = lora_unet.unload()
+            unet.save_pretrained(save_path, safe_serialization=False)
+        elif isinstance(lora_unet, UNet3DConditionModel):
+            save_path = os.path.join(output_dir, 'unet')
+            lora_unet.save_pretrained(save_path, safe_serialization=False)
         logger.info(f"Saved Lora UNet3DConditionModel to {save_path}")
 
     accelerator.end_training()
@@ -576,7 +556,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="./configs/stive/lambo.yaml")
+    parser.add_argument("--config", type=str, default="./configs/sd_concepts/lambo.yaml")
     args = parser.parse_args()
 
     main(**OmegaConf.load(args.config))
