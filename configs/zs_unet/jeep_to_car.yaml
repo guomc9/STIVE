@@ -1,6 +1,6 @@
-pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_unet/car/base/"
-checkpoints_dir: "checkpoints/sd_unet/car"
+pretrained_sd_model_path: "./checkpoints/zeroscope_v2_576w"
+output_dir: ".log/zs_unet/car/base/"
+checkpoints_dir: "checkpoints/zs_unet/car"
 
 train_data:
   video_paths:

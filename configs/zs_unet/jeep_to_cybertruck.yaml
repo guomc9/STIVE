@@ -1,7 +1,7 @@
-pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_sd_model_path: "./checkpoints/zeroscope_v2_576w"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/cybertruck"
-output_dir: ".log/sd_unet/cybertruck/base/"
-checkpoints_dir: "checkpoints/sd_unet/cybertruck"
+output_dir: ".log/zs_unet/cybertruck/base/"
+checkpoints_dir: "checkpoints/zs_unet/cybertruck"
 
 train_data:
   video_paths:

@@ -41,19 +41,15 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
+    - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.temp_attentions\\..*\\.attn1\.to_q\\..*$"
+    - "^.*\\.temp_attentions\\..*\\.attn2\.to_q\\..*$"
+    - "^.*\\.temp_attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 
-extra_trainable_modules:
-  - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-  - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-  - "^.*\\.temp_lora_conv\\..*"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
-  - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
+# extra_trainable_modules: 
 
 inference_conf:
   num_inference_steps: 30
