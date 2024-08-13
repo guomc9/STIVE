@@ -24,7 +24,7 @@
 
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_lambo.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_lambo.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_lambo.yaml</code></pre>
@@ -35,6 +35,19 @@
 <li>prompt-to-prompt inference with concept and tuned SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml</code></pre>
 </li>
+
+<li>finetune concept from ZS:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_zs_concepts.py --config configs/zs_concepts/zs_lambo.yaml</code></pre>
+</li>
+<li>finetune ZS with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_zs_unet.py --config configs/zs_unet/jeep_to_lambo.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained ZS:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_zs_ptp.py --config configs/zs_ptp/lambo.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned ZS:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_zs_ptp.py --config configs/zs_ptp/lambo.yaml</code></pre>
+</li>
 </ul>
 
 </details>
@@ -44,7 +57,7 @@
 
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertruck.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_cybertruck.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_cybertruck.yaml</code></pre>
@@ -64,7 +77,7 @@
 
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_ferrari.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ferrari.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_ferrari.yaml</code></pre>
@@ -84,7 +97,7 @@
 
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_bmw.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_bmw.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_bmw.yaml</code></pre>

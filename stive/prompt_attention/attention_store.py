@@ -206,7 +206,7 @@ class StepAttentionSupervisor(StepAttentionStore):
                 
                 adapt_mask = pool_mask(mask, target_size=(h, w))                                            # [B, F, 1, H, W]
                 adapt_mask = rearrange(adapt_mask, 'b f c h w -> b f (h w) c').squeeze(-1)                  # [B, F, Q]
-                adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m).detach_()                        # [B, F * M, Q]
+                adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m).detach()                         # [B, F * M, Q]
                 if sub_sot and not only_neg:
                     adapt_mask = adapt_mask - adapt_mask * attn[..., 0]                                     # [B, F * M, Q]
                     # NO DETACH IS BETTER SINCE WEAKER SUPERVISE

@@ -686,16 +686,17 @@ class SparseCausalAttnProcessor2_0:
         return hidden_states
     
 def is_attn(name):
-    return ('attn1' or 'attn2' == name.split('.')[-1])
+    return ('attentions' == name.split('.')[-1])
 
+from diffusers.models import Transformer2DModel
 def reset_sparse_casual_processors(unet):
     optim_count = 0
 
     for name, module in unet.named_modules():
-        if is_attn(name):
-            if isinstance(module, torch.nn.ModuleList):
-                for m in module:
-                    if isinstance(m, BasicTransformerBlock):
+        if is_attn(name) and isinstance(module, torch.nn.ModuleList):
+            for tsfm_module in module:
+                if isinstance(tsfm_module, (Transformer3DModel, Transformer2DModel)):
+                    for m in tsfm_module.transformer_blocks:
                         if is_xformers_available():
                             m.attn1.processor = SparseCausalXFormersAttnProcessor()
                             m.attn2.processor = XFormersAttnProcessor()
@@ -713,10 +714,10 @@ def reset_processors(unet):
     optim_count = 0
 
     for name, module in unet.named_modules():
-        if is_attn(name):
-            if isinstance(module, torch.nn.ModuleList):
-                for m in module:
-                    if isinstance(m, BasicTransformerBlock):
+        if is_attn(name) and isinstance(module, torch.nn.ModuleList):
+            for tsfm_module in module:
+                if isinstance(tsfm_module, (Transformer3DModel, Transformer2DModel)):
+                    for m in tsfm_module.transformer_blocks:
                         if is_xformers_available():
                             m.attn1.processor = XFormersAttnProcessor()
                             m.attn2.processor = XFormersAttnProcessor()
@@ -729,3 +730,49 @@ def reset_processors(unet):
             print(f"{optim_count} Attention layers using XFormers Attention Processors.")
         else:
             print(f"{optim_count} Attention layers using Scaled Dot Product Attention Processors.")
+
+
+# def is_attn(name):
+#     return ('attn1' or 'attn2' == name.split('.')[-1])
+
+# def reset_sparse_casual_processors(unet):
+#     optim_count = 0
+
+#     for name, module in unet.named_modules():
+#         if is_attn(name):
+#             if isinstance(module, torch.nn.ModuleList):
+#                 for m in module:
+#                     if isinstance(m, BasicTransformerBlock):
+#                         if is_xformers_available():
+#                             m.attn1.processor = SparseCausalXFormersAttnProcessor()
+#                             m.attn2.processor = XFormersAttnProcessor()
+#                         else:
+#                             m.attn1.processor = SparseCausalAttnProcessor2_0()
+#                             m.attn2.processor = AttnProcessor2_0()
+#                         optim_count += 1
+#     if optim_count > 0:
+#         if is_xformers_available():
+#             print(f"{optim_count} Attention layers using Sparse Causal XFormers Attention Processors.")
+#         else:
+#             print(f"{optim_count} Attention layers using Sparse Causal Scaled Dot Product Attention Processors.")
+
+# def reset_processors(unet):
+#     optim_count = 0
+
+#     for name, module in unet.named_modules():
+#         if is_attn(name):
+#             if isinstance(module, torch.nn.ModuleList):
+#                 for m in module:
+#                     if isinstance(m, BasicTransformerBlock):
+#                         if is_xformers_available():
+#                             m.attn1.processor = XFormersAttnProcessor()
+#                             m.attn2.processor = XFormersAttnProcessor()
+#                         else:
+#                             m.attn1.processor = AttnProcessor2_0()
+#                             m.attn2.processor = AttnProcessor2_0()
+#                         optim_count += 1
+#     if optim_count > 0:
+#         if is_xformers_available():
+#             print(f"{optim_count} Attention layers using XFormers Attention Processors.")
+#         else:
+#             print(f"{optim_count} Attention layers using Scaled Dot Product Attention Processors.")

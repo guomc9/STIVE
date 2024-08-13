@@ -1,0 +1,78 @@
+pretrained_zs_model_path: "./checkpoints/zeroscope_v2_576w"
+output_dir: ".log/zs_concepts/bmw/base/"
+checkpoints_dir: "checkpoints/zs_concepts/bmw"
+
+train_data:
+  video_paths: 
+    - "data/concepts/bmw/videos/bmw.mp4"
+  prompts: 
+    - "$BMW"
+  mask_paths:
+    - "data/concepts/bmw/masks/bmw_car_frame_masks.mp4"
+  repeat: 4
+  width: 512
+  height: 512
+  num_frames: 4
+  sample_stride: 1
+  enable_slice: False
+  rand_slice: False
+  target_video_paths: 
+    - "data/targets/car-turn/videos/car-turn.mp4"
+  target_mask_paths: 
+    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+  target_prompts:
+    - "a $BMW driving down a curvy road in the countryside"
+  enable_target_slice: False
+  target_rand_slice: False
+  relax_target_mask: False
+
+validation_data:
+  sources:
+    - "data/concepts/bmw/videos/bmw.mp4"
+    - "data/targets/car-turn/videos/car-turn.mp4"
+  prompts:
+    - "a $BMW driving on the road in the countryside"
+    - "a $BMW driving down a curvy road in the countryside"
+  num_frames: 4
+  sample_stride: 1
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 50
+
+enable_prefix: True
+concepts: ['$BMW']
+concepts_num_embedding: 1
+retain_position_embedding: True
+
+
+sub_sot: True
+cam_loss_type: 'mae'
+
+enable_scam_loss: True
+scam_weight: 0.0
+scam_only_neg: False
+
+enable_tcam_loss: True
+tcam_weight: 0.0
+tcam_only_neg: True
+cam_loss_reduction: 'mean'
+attn_check_steps: 10
+
+learning_rate: 5.0e-4
+batch_size: 1
+num_train_epoch: 5000
+checkpointing_steps: 10000
+validation_steps: 50
+
+seed: 33
+mixed_precision: 'fp16'
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+enable_torch_2_attn: True
+gradient_accumulation_steps: 1

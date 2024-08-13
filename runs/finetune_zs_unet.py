@@ -23,7 +23,7 @@ from diffusers.pipelines import TextToVideoSDPipeline
 from diffusers.models import UNet3DConditionModel
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, CLIPTextModel
-from stive.models.attention import reset_sparse_casual_processors as unregister_attention_control
+from stive.models.attention import reset_processors as unregister_attention_control
 from stive.models.concepts_clip import ConceptsCLIPTextModel
 from stive.data.dataset import VideoEditPromptsDataset as VideoPromptValDataset, LatentPromptDataset
 from stive.utils.ddim_utils import ddim_inversion
@@ -144,9 +144,8 @@ def log_cross_attention_mask(accelerator, masks_dict, save_path, step, log_prefi
     return
 
 
-
 def main(
-    pretrained_sd_model_path: str,
+    pretrained_zs_model_path: str,
     output_dir: str,
     checkpoints_dir: str, 
     train_data: Dict,
@@ -196,7 +195,7 @@ def main(
     
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name="stive-sd-unet-fine-tune", 
+            project_name="stive-zs-unet-finetune", 
             config={'train_data': train_data, 'inference_conf': inference_conf, 'validation_data': validation_data},
             init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
@@ -216,11 +215,11 @@ def main(
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
     
-    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_sd_model_path, subfolder="scheduler")
-    tokenizer = CLIPTokenizer.from_pretrained(pretrained_sd_model_path, subfolder="tokenizer")
-    text_encoder = CLIPTextModel.from_pretrained(pretrained_sd_model_path, subfolder="text_encoder")
-    vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained_2d(pretrained_sd_model_path, subfolder="unet")
+    noise_scheduler = DDIMScheduler.from_pretrained(pretrained_zs_model_path, subfolder="scheduler")
+    tokenizer = CLIPTokenizer.from_pretrained(pretrained_zs_model_path, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(pretrained_zs_model_path, subfolder="text_encoder")
+    vae = AutoencoderKL.from_pretrained(pretrained_zs_model_path, subfolder="vae")
+    unet = UNet3DConditionModel.from_pretrained(pretrained_zs_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     unet.requires_grad_(False)
@@ -313,11 +312,11 @@ def main(
     )
     
     validation_pipeline = TextToVideoSDPipeline.from_pretrained(
-        pretrained_model_name_or_path=pretrained_sd_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
+        pretrained_model_name_or_path=pretrained_zs_model_path, vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=lora_unet, 
     )
     validation_pipeline.enable_vae_slicing()
     
-    ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_sd_model_path, subfolder='scheduler')
+    ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_zs_model_path, subfolder='scheduler')
     ddim_inv_scheduler.set_timesteps(inference_conf.num_inv_steps, device=accelerator.device)
 
     num_train_steps = (num_train_epoch * len(train_dataloader)) // gradient_accumulation_steps

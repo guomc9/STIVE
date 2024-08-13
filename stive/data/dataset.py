@@ -404,6 +404,7 @@ class LatentPromptDataset(Dataset):
         video_paths, 
         prompts, 
         mask_paths, 
+        repeat=None, 
         num_frames=12, 
         sample_stride=1, 
         height=512, 
@@ -434,6 +435,7 @@ class LatentPromptDataset(Dataset):
         self.resolution = (height, width)
         self.concepts_prompt = concepts_prompt
         self.enable_slice = enable_slice
+        self.repeat = repeat
         self.rand_slice = rand_slice
         self.relax_mask = relax_mask
         self.target_video_paths = []
@@ -512,6 +514,10 @@ class LatentPromptDataset(Dataset):
         return latents, sample_indices
     
     def __len__(self):
+        if self.repeat is not None:
+            # print(f'dataset length: {self.repeat * len(self.prompts)}')
+            return self.repeat * len(self.prompts)
+        
         return len(self.prompts)
 
     def __getitem__(self, idx):
@@ -523,6 +529,8 @@ class LatentPromptDataset(Dataset):
         target_prompts = []                     # [B]
         if isinstance(idx, list):
             for i in idx:
+                if self.repeat is not None:
+                    i = i % len(self.prompts)
                 latents = self.latents[i]
                 prompt = self.prompts[i]
                 masks = self.masks[i]
@@ -541,6 +549,8 @@ class LatentPromptDataset(Dataset):
                     target_masks_list.append(target_masks)                                          # [B, 1, C, H, W]
                     target_prompts.append(self.target_prompts[ti])                                  # [B]
         else:
+            if self.repeat is not None:
+                idx = idx % len(self.prompts)
             latents = self.latents[idx]
             prompt = self.prompts[idx]
             masks = self.masks[idx]
