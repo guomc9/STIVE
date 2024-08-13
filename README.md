@@ -23,93 +23,77 @@
 <summary>Swap jeep to <code>$LAMBO</code></summary>
 
 <ul>
-<li>Swap jeep to <code>$LAMBO</code>
-    <ul>
-    <li>finetune concept from SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_lambo.yaml</code></pre>
-    </li>
-    <li>finetune SD with spatial&amp;temporal modules:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_lambo.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and pretrained SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/lambo.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and tuned SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml</code></pre>
-    </li>
-    </ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_lambo.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_lambo.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/lambo.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml</code></pre>
 </li>
 </ul>
 
 </details>
 
 <details>
-<summary>Swap jeep to <code>$LAMBO</code></summary>
+<summary>Swap jeep to <code>$CYBERTRUCK</code></summary>
 
 <ul>
-<li>Swap jeep to <code>$CYBERTRUCK</code>
-    <ul>
-    <li>finetune concept from SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertruck.yaml</code></pre>
-    </li>
-    <li>finetune SD with spatial&amp;temporal modules:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_cybertruck.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and pretrained SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and tuned SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml</code></pre>
-    </li>
-    </ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_cybertruck.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_cybertruck.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/cybertruck.yaml</code></pre>
 </li>
 </ul>
 
 </details>
 
 <details>
-<summary>Swap jeep to <code>$LAMBO</code></summary>
+<summary>Swap jeep to <code>$FERRARI</code></summary>
 
 <ul>
-<li>Swap jeep to <code>$FERRARI</code>
-    <ul>
-    <li>finetune concept from SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_ferrari.yaml</code></pre>
-    </li>
-    <li>finetune SD with spatial&amp;temporal modules:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_ferrari.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and pretrained SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/ferrari.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and tuned SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/ferrari.yaml</code></pre>
-    </li>
-    </ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_ferrari.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_ferrari.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/ferrari.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/ferrari.yaml</code></pre>
 </li>
 </ul>
 
 </details>
 
 <details>
-<summary>Swap jeep to <code>$LAMBO</code></summary>
+<summary>Swap jeep to <code>$BMW</code></summary>
 
 <ul>
-<li>Swap jeep to <code>$BMW</code>
-    <ul>
-    <li>finetune concept from SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_bmw.yaml</code></pre>
-    </li>
-    <li>finetune SD with spatial&amp;temporal modules:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_bmw.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and pretrained SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bmw.yaml</code></pre>
-    </li>
-    <li>prompt-to-prompt inference with concept and tuned SD:
-        <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bmw.yaml</code></pre>
-    </li>
-    </ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/concepts/sd_bmw.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/jeep_to_bmw.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bmw.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bmw.yaml</code></pre>
 </li>
 </ul>
 
