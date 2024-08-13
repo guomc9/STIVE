@@ -19,6 +19,9 @@
 * zeroscope model from: [cerspense/zeroscope_v2_576w](https://huggingface.co/cerspense/zeroscope_v2_576w/tree/main) (more efficent editing, recommend to download)
 
 ## Examples
+<details>
+<summary>Swap jeep to `$LAMBO`</summary>
+
 * Swap jeep to `$LAMBO`
     - finetune concept from SD: 
         ```shell
@@ -36,7 +39,7 @@
         ```shell
         CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/lambo.yaml
         ```
-
+</details>
 * Swap jeep to `$CYBERTRUCK`
     - finetune concept from SD: 
         ```shell
