@@ -113,9 +113,9 @@ class ConceptsCLIPTokenizer(CLIPTokenizer):
             all_replace_indices.append(replace_indices)
             all_concept_indices.append(concept_indices)
 
-        # print(f'modified_text: {modified_text}')
-        # print(f'all_replace_indices: {all_replace_indices}')
-        # print(f'all_concept_indices: {all_concept_indices}')
+        print(f'modified_text: {modified_text}')
+        print(f'all_replace_indices: {all_replace_indices}')
+        print(f'all_concept_indices: {all_concept_indices}')
 
         all_token_ids = torch.stack(all_token_ids)
 

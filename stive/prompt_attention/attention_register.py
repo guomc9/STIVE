@@ -19,7 +19,7 @@ from peft import PeftModel
 from ..utils.save_utils import save_video
 from stive.models.attention import SparseCausalXFormersAttnProcessor
 
-def register_attention_control(model, controller, only_cross=False, replace_attn_prob=False, self_to_st_attn=True):
+def register_attention_control(model, controller, begin_store=1, only_cross=False, replace_attn_prob=False, self_to_st_attn=True):
     "Connect a model with a controller"
     def attention_controlled_processor(store, place_in_unet, replace_attn_prob, is_cross=False, self_to_st_attn=True):
         
@@ -301,7 +301,6 @@ def register_attention_control(model, controller, only_cross=False, replace_attn
         return count
     
     half_unet_len = 4
-    begin_store = 1
     cross_att_count = 0
     if isinstance(model, DiffusionPipeline):
         print(f'unet is an instance of {type(model.unet)}')

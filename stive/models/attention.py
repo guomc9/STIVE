@@ -703,7 +703,7 @@ def reset_sparse_casual_processors(unet):
                         else:
                             m.attn1.processor = SparseCausalAttnProcessor2_0()
                             m.attn2.processor = AttnProcessor2_0()
-                        optim_count += 1
+                        optim_count += 2
     if optim_count > 0:
         if is_xformers_available():
             print(f"{optim_count} Attention layers using Sparse Causal XFormers Attention Processors.")
@@ -724,7 +724,7 @@ def reset_processors(unet):
                         else:
                             m.attn1.processor = AttnProcessor2_0()
                             m.attn2.processor = AttnProcessor2_0()
-                        optim_count += 1
+                        optim_count += 2
     if optim_count > 0:
         if is_xformers_available():
             print(f"{optim_count} Attention layers using XFormers Attention Processors.")

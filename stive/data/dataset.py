@@ -411,6 +411,8 @@ class LatentPromptDataset(Dataset):
         width=512, 
         enable_slice=True, 
         rand_slice=False, 
+        rand_slice_length=False, 
+        rand_slice_stride=False, 
         relax_mask=False, 
         concepts_prompt=False, 
         target_video_paths=None, 
@@ -418,6 +420,8 @@ class LatentPromptDataset(Dataset):
         target_prompts=None, 
         enable_target_slice=True, 
         target_rand_slice=False, 
+        target_rand_slice_length=False, 
+        target_rand_slice_stride=False, 
         relax_target_mask=False, 
     ):
         assert len(video_paths) == len(prompts) == len(mask_paths)
@@ -437,12 +441,18 @@ class LatentPromptDataset(Dataset):
         self.enable_slice = enable_slice
         self.repeat = repeat
         self.rand_slice = rand_slice
+        self.rand_slice_length = rand_slice_length
+        self.rand_slice_stride = rand_slice_stride
+
         self.relax_mask = relax_mask
         self.target_video_paths = []
         self.target_mask_paths = []
         self.target_prompts = []
         self.enable_target_slice = enable_target_slice
         self.target_rand_slice = target_rand_slice
+        self.target_rand_slice_length = target_rand_slice_length
+        self.target_rand_slice_stride = target_rand_slice_stride
+
         self.relax_target_mask = relax_target_mask
         if target_video_paths is not None and target_mask_paths is not None and target_prompts is not None:
             assert len(target_video_paths) == len(target_mask_paths) == len(target_prompts)
@@ -494,14 +504,21 @@ class LatentPromptDataset(Dataset):
         
         return relaxed
 
-    def _sample_latents(self, latents: torch.FloatTensor, enable_slice: bool, rand_slice: bool):
+    def _sample_latents(self, latents: torch.FloatTensor, enable_slice: bool, rand_slice: bool, rand_slice_stride: bool=False, rand_slice_length: bool=False):
         if enable_slice:
-            if rand_slice:
+            if rand_slice and not rand_slice_stride:
                 sample_stride = self.sample_stride if len(latents) // self.num_frames >= self.sample_stride else len(latents) // self.num_frames
                 F = latents.shape[0]
                 max_start_frame = F - (self.num_frames - 1) * sample_stride
                 start_frame = random.randint(0, max_start_frame - 1)
                 sample_indices = torch.arange(start_frame, start_frame + self.num_frames * sample_stride, sample_stride)[:self.num_frames]
+                latents = latents[sample_indices]
+            elif rand_slice and rand_slice_stride:
+                num_frames = self.num_frames if not rand_slice_length else random.randint(max(self.num_frames // 2, 1), max(self.num_frames - 1, 1))
+                F = latents.shape[0]
+                sample_indices = torch.randint(0, F, (num_frames,))
+                sample_indices, _ = torch.sort(sample_indices)
+                print(f'sample_indices: {sample_indices}')
                 latents = latents[sample_indices]
             else:
                 sample_stride = self.sample_stride if len(latents) // self.num_frames >= self.sample_stride else len(latents) // self.num_frames
@@ -515,7 +532,6 @@ class LatentPromptDataset(Dataset):
     
     def __len__(self):
         if self.repeat is not None:
-            # print(f'dataset length: {self.repeat * len(self.prompts)}')
             return self.repeat * len(self.prompts)
         
         return len(self.prompts)
@@ -534,7 +550,8 @@ class LatentPromptDataset(Dataset):
                 latents = self.latents[i]
                 prompt = self.prompts[i]
                 masks = self.masks[i]
-                latents, sample_indices = self._sample_latents(latents, enable_slice=self.enable_slice, rand_slice=self.rand_slice)   # [F, C, H, W]
+                latents, sample_indices = self._sample_latents(latents, enable_slice=self.enable_slice, rand_slice=self.rand_slice, \
+                                                               rand_slice_length=self.rand_slice_length, rand_slice_stride=self.rand_slice_stride)   # [F, C, H, W]
                 masks = masks[sample_indices]
                 prompts.append(prompt)                                                              # [B]
                 latents_list.append(latents)
@@ -543,7 +560,8 @@ class LatentPromptDataset(Dataset):
                     ti = random.randint(0, len(self.target_latents)-1)
                     target_latents = self.target_latents[ti]                                        # [F, C, H, W]
                     target_masks = self.target_masks[ti]                                            # [F, C, H, W]
-                    target_latents, sample_indices = self._sample_latents(target_latents, enable_slice=self.enable_target_slice, rand_slice=self.target_rand_slice)           # [F, C, H, W]
+                    target_latents, sample_indices = self._sample_latents(target_latents, enable_slice=self.enable_target_slice, rand_slice=self.target_rand_slice, \
+                                                                          rand_slice_length=self.target_rand_slice_length, rand_slice_stride=self.target_rand_slice_stride)           # [F, C, H, W]
                     target_masks = target_masks[sample_indices]                                     # [F, 1, H, W]
                     target_latents_list.append(target_latents)                                      # [B, F, C, H, W]
                     target_masks_list.append(target_masks)                                          # [B, 1, C, H, W]

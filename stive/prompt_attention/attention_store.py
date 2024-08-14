@@ -174,7 +174,8 @@ class StepAttentionStore(StepAttentionControl):
         attns = {}
         for key, attn_list in self.attention_store.items():      # [B * F, M, Q, K]
             if attn_list:
-                attns[key]  = attn_list[0].mean(1).detach().cpu()
+                attn = torch.stack(attn_list).mean(0).detach().cpu()    # [B * F, M, Q, K]
+                attns[key] = attn.mean(1)
         return attns                                        # [B * F, Q, K]
 
 import numpy as np

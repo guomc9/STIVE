@@ -154,6 +154,7 @@ def main(
     concepts_num_embedding: int = 1, 
     retain_position_embedding: bool = True, 
     cam_loss_type: str = 'mae', 
+    unet_begin_store_idx: int = 1, 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
     scam_weight: float = 1.0e-1, 
@@ -201,6 +202,7 @@ def main(
                 'validation_data': validation_data, 
                 'supvis_conf': {
                         "cam_loss_type": cam_loss_type, 
+                        "unet_begin_store_idx": unet_begin_store_idx, 
                         "sub_sot": sub_sot, 
                         "enable_scam_loss": enable_scam_loss, 
                         "scam_weight": scam_weight,  
@@ -317,7 +319,7 @@ def main(
     
     if enable_scam_loss or enable_tcam_loss:
         supervisor = StepAttentionSupervisor()
-        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
+        register_attention_control(unet, supervisor, begin_store=unet_begin_store_idx, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
     
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
@@ -345,6 +347,8 @@ def main(
                     with accelerator.accumulate(text_encoder):
                         latents = batch["latents"]          # [B, F, C, H, W]
                         prompts = batch['prompts']
+                        print(f'latents.shape: {latents.shape}')
+                        print(f'prompts: {prompts}')
                         masks = batch['masks']              # [B, F, 1, H, W]
                         video_length = latents.shape[1]
                         
@@ -358,7 +362,9 @@ def main(
                         noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
                         tokens = tokenizer(prompts, enable_prefix=enable_prefix, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
-                        prompts = tokens.prefix_texts
+                        if enable_prefix:
+                            prompts = tokens.prefix_texts
+                            
                         if hasattr(tokens, 'replace_indices') and hasattr(tokens, 'concept_indices'):
                             encoder_hidden_states = text_encoder(tokens.input_ids.to(latents.device), tokens.replace_indices, tokens.concept_indices)[0]
                         else:
@@ -399,12 +405,13 @@ def main(
                                 t = timesteps[random.randint(0, len(timesteps)-1)].long()
                                 target_latents = batch['target_latents']            # [B, F, C, H, W]
                                 target_masks = batch['target_masks']                # [B, F, 1, H, W]
+                                target_video_length = target_latents.shape[1]
                                 target_latents = rearrange(target_latents, "b f c h w -> b c f h w")
                                 unet(target_latents, t, target_encoder_hidden_states)
                                 tcam_loss, masks_dict = supervisor.get_cross_attn_mask_loss(mask=target_masks, target_indices=tokens.replace_indices, sub_sot=sub_sot, only_neg=tcam_only_neg, loss_type=cam_loss_type, reduction=cam_loss_reduction)
                                 if global_step % attn_check_steps == 0:
                                     save_path = os.path.join(output_dir, 'target-cross-attn')
-                                    prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), target_prompts, video_length=video_length)
+                                    prompt_attn_dict = collect_cross_attention(supervisor.get_mean_head_attns(), target_prompts, video_length=target_video_length)
                                     log_cross_attention(accelerator, prompt_attn_dict, save_path, step=global_step)
                                     save_path = os.path.join(output_dir, 'target-cross-attn-mask')
                                     masks_dict = collect_cross_attention_mask(masks_dict)
@@ -511,7 +518,7 @@ def main(
                             
                     if enable_scam_loss and enable_tcam_loss:
                         supervisor = StepAttentionSupervisor()
-                        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
+                        register_attention_control(unet, supervisor, begin_store=unet_begin_store_idx, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
                         
                     torch.cuda.empty_cache()
 
