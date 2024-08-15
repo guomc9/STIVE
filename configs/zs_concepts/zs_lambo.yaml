@@ -24,7 +24,7 @@ train_data:
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
   target_prompts:
     - "a $LAMBO driving down a curvy road in the countryside"
-  enable_target_slice: False
+  enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
   target_rand_slice_stride: True

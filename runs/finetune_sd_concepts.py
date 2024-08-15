@@ -158,6 +158,7 @@ def main(
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     enable_scam_loss: bool = False, 
+    unet_begin_store_idx: int = 0, 
     scam_weight: float = 1.0e-1, 
     scam_only_neg: bool = False, 
     enable_tcam_loss: bool = False, 
@@ -203,6 +204,7 @@ def main(
                 'supvis_conf': {
                         "cam_loss_type": cam_loss_type, 
                         "sub_sot": sub_sot, 
+                        "unet_begin_store_idx": unet_begin_store_idx, 
                         "enable_scam_loss": enable_scam_loss, 
                         "scam_weight": scam_weight,  
                         "scam_only_neg": scam_only_neg, 
@@ -322,7 +324,7 @@ def main(
     
     if enable_scam_loss or enable_tcam_loss:
         supervisor = StepAttentionSupervisor()
-        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
+        register_attention_control(unet, supervisor, begin_store=unet_begin_store_idx, only_cross=True, replace_attn_prob=False, self_to_st_attn=False)
     
     total_batch_size = batch_size * accelerator.num_processes * gradient_accumulation_steps
 
@@ -519,7 +521,7 @@ def main(
                             
                     if enable_scam_loss and enable_tcam_loss:
                         supervisor = StepAttentionSupervisor()
-                        register_attention_control(unet, supervisor, only_cross=True, replace_attn_prob=False)
+                        register_attention_control(unet, supervisor, begin_store=unet_begin_store_idx, only_cross=True, replace_attn_prob=False)
                         
                     torch.cuda.empty_cache()
 

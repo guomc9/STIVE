@@ -42,7 +42,7 @@ inference_conf:
   guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 50
-
+unet_begin_store_idx: 0
 enable_prefix: True
 concepts: ['$BMW']
 concepts_num_embedding: 1

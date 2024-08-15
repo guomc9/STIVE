@@ -52,13 +52,13 @@ retain_position_embedding: True
 
 sub_sot: True
 cam_loss_type: 'mae'
-
+unet_begin_store_idx: 0
 enable_scam_loss: True
-scam_weight: 0.0
-scam_only_neg: False
+scam_weight: 0.05
+scam_only_neg: True
 
 enable_tcam_loss: True
-tcam_weight: 0.0
+tcam_weight: 0.05
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 10

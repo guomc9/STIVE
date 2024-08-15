@@ -51,7 +51,7 @@ retain_position_embedding: True
 
 sub_sot: True
 cam_loss_type: 'mae'
-
+unet_begin_store_idx: 0
 enable_scam_loss: True
 scam_weight: 0.0
 scam_only_neg: False
