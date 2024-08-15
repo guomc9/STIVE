@@ -64,12 +64,13 @@ inference_conf:
 # CHECK
 sub_sot: True
 cam_loss_type: 'mae'
+unet_begin_store_idx: 0
 enable_scam_loss: True
-scam_weight: 0.0
+scam_weight: 0.1
 scam_only_neg: True
 enable_tcam_loss: True
 tcam_only_neg: True
-tcam_weight: 0.0
+tcam_weight: 0.1
 cam_loss_reduction: 'mean'
 attn_check_steps: 15
 
