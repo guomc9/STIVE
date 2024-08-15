@@ -35,17 +35,17 @@ def concat_gifs(gif_files, output_file):
     imageio.mimsave(output_file, concatenated_frames, duration=0.1)
 
 # concat_gifs([
-#     ".assets/jeep/car-turn.gif", 
-#     ".assets/jeep/to-lambo.gif", 
-#     ".assets/jeep/to-bmw.gif", 
-#     ".assets/jeep/to-ferrari.gif", 
-#     ".assets/jeep/to-cybertruck.gif"
-#     ], ".assets/jeep/concat.gif")
+#     "assets/jeep/car-turn.gif", 
+#     "assets/jeep/to-lambo.gif", 
+#     "assets/jeep/to-bmw.gif", 
+#     "assets/jeep/to-ferrari.gif", 
+#     "assets/jeep/to-cybertruck.gif"
+#     ], "assets/jeep/concat.gif")
 
 concat_gifs([
-    ".assets/jeep-unet-full-supvis/car-turn.gif", 
-    ".assets/jeep-unet-full-supvis/to-lambo.gif", 
-    ".assets/jeep-unet-full-supvis/to-bmw.gif", 
-    ".assets/jeep-unet-full-supvis/to-ferrari.gif", 
-    ".assets/jeep-unet-full-supvis/to-cybertruck.gif"
-    ], ".assets/jeep-unet-full-supvis/concat.gif")
+    "assets/jeep-unet-full-supvis/car-turn.gif", 
+    "assets/jeep-unet-full-supvis/to-lambo.gif", 
+    "assets/jeep-unet-full-supvis/to-bmw.gif", 
+    "assets/jeep-unet-full-supvis/to-ferrari.gif", 
+    "assets/jeep-unet-full-supvis/to-cybertruck.gif"
+    ], "assets/jeep-unet-full-supvis/concat.gif")

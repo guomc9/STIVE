@@ -1,5 +1,7 @@
 # STIVE (Stable Textual Inversion Video Editing)
 
+![examples](assets/jeep-unet-full-supvis/concat.gif)
+
 ## Get started
 ### Prepare Environment
 * To create environment with conda:
