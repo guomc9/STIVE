@@ -12,7 +12,6 @@ train_data:
   width: 512
   height: 512
   num_frames: 6
-  # sample_stride: 1
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -37,7 +36,7 @@ validation_data:
     - "a $BMW driving on the road in the countryside"
     - "a $BMW driving down a curvy road in the countryside"
   num_frames: 6
-  sample_stride: 4
+  sample_stride: 6
   width: 512
   height: 512
 
@@ -58,19 +57,19 @@ cam_loss_type: 'mae'
 
 enable_scam_loss: True
 scam_weight: 0.0
-scam_only_neg: False
+scam_only_neg: True
 
 enable_tcam_loss: True
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 10
+attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 7000
 checkpointing_steps: 10000
-validation_steps: 100
+validation_steps: 500
 
 seed: 33
 mixed_precision: 'fp16'

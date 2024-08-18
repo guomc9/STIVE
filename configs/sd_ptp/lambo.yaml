@@ -7,7 +7,6 @@ checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-lambo"
 validation_data:
   source: "data/targets/car-turn/videos/car-turn.mp4"
   source_prompt: "a jeep driving down a curvy road in the countryside"
-
   edit_prompts:
     - "a $LAMBO driving down a curvy road in the countryside"
   num_frames: 6
@@ -16,16 +15,16 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 30
-  guidance_scale: 12.5
+  num_inference_steps: 38
+  guidance_scale: 15
   use_inv_latent: True
-  num_inv_steps: 30
+  num_inv_steps: 38
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.35]
+  self_replace_steps: [0.0, 0.35]
   blend_words: 
     sources:
       - "jeep"
