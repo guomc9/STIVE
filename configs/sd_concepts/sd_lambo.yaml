@@ -11,10 +11,12 @@ train_data:
     - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 4
-  sample_stride: 1
-  enable_slice: False
-  rand_slice: False
+  num_frames: 6
+  # sample_stride: 1
+  enable_slice: True
+  rand_slice: True
+  rand_slice_length: True
+  rand_slice_stride: True
   relax_mask: False
   target_video_paths: 
     - "data/targets/car-turn/videos/car-turn.mp4"
@@ -22,8 +24,10 @@ train_data:
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
   target_prompts:
     - "a $LAMBO driving down a curvy road in the countryside"
-  enable_target_slice: False
-  target_rand_slice: False
+  enable_target_slice: True
+  target_rand_slice: True
+  target_rand_slice_length: True
+  target_rand_slice_stride: True
   relax_target_mask: False
 
 validation_data:
@@ -31,10 +35,10 @@ validation_data:
     - "data/concepts/lambo/videos/lambo.mp4"
     - "data/targets/car-turn/videos/car-turn.mp4"
   prompts:
-    - "a dark green $LAMBO moving along a road"
+    - "a $LAMBO moving along a road"
     - "a $LAMBO driving down a curvy road in the countryside"
-  num_frames: 4
-  sample_stride: 1
+  num_frames: 6
+  sample_stride: 6
   width: 512
   height: 512
 
@@ -49,25 +53,24 @@ concepts: ['$LAMBO']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
-
 sub_sot: True
 cam_loss_type: 'mae'
 unet_begin_store_idx: 0
 enable_scam_loss: True
-scam_weight: 0.0
+scam_weight: 0.1
 scam_only_neg: False
 
 enable_tcam_loss: True
-tcam_weight: 0.0
+tcam_weight: 0.1
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 10
+attn_check_steps: 100
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 5000
-checkpointing_steps: 5000
-validation_steps: 50
+num_train_epoch: 7000
+checkpointing_steps: 20000
+validation_steps: 100
 
 seed: 33
 mixed_precision: 'fp16'

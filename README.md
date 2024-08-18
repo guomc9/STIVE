@@ -1,6 +1,11 @@
 # STIVE (Stable Textual Inversion Video Editing)
 
-![examples](assets/jeep-unet-full-supvis/concat.gif)
+<!-- <video src="assets/jeep-unet-full-supvis/concat.mp4"> </video> -->
+<video autoplay loop muted playsinline>
+    <source src="assets/jeep-unet-full-supvis/concat.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+<!-- ![examples](assets/jeep-unet-full-supvis/concat.gif) -->
 
 ## Get started
 ### Prepare Environment

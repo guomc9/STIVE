@@ -407,6 +407,7 @@ def main(
                                 timesteps = ddim_inv_scheduler.timesteps
                                 t = timesteps[random.randint(0, len(timesteps)-1)].long()
                                 target_latents = batch['target_latents']            # [B, F, C, H, W]
+                                video_length = target_latents.shape[1]
                                 target_masks = batch['target_masks']                # [B, F, 1, H, W]
                                 target_latents = rearrange(target_latents, "b f c h w -> b c f h w")
                                 unet(target_latents, t, target_encoder_hidden_states)

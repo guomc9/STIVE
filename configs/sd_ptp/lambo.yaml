@@ -24,8 +24,8 @@ inference_conf:
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.5]
-  self_replace_steps: [0.0, 0.5]
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "jeep"

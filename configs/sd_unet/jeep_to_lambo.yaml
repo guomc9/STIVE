@@ -72,13 +72,13 @@ enable_tcam_loss: True
 tcam_only_neg: True
 tcam_weight: 0.1
 cam_loss_reduction: 'mean'
-attn_check_steps: 15
+attn_check_steps: 25
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 200
+num_train_epoch: 150
 checkpointing_steps: 2000
-validation_steps: 10
+validation_steps: 50
 
 seed: 33
 mixed_precision: 'fp16'

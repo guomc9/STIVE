@@ -1,5 +1,7 @@
 
 python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s jeep
+python scripts/extract_masks.py -v data/targets/drift/videos/drift.mp4 -s car
+
 
 python scripts/extract_masks.py -v data/concepts/lambo/videos/lambo.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/cybertrunk/videos/cybertrunk.mp4 -s car

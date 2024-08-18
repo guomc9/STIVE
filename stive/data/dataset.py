@@ -514,7 +514,7 @@ class LatentPromptDataset(Dataset):
                 sample_indices = torch.arange(start_frame, start_frame + self.num_frames * sample_stride, sample_stride)[:self.num_frames]
                 latents = latents[sample_indices]
             elif rand_slice and rand_slice_stride:
-                num_frames = self.num_frames if not rand_slice_length else random.randint(max(self.num_frames // 2, 1), max(self.num_frames - 1, 1))
+                num_frames = self.num_frames if not rand_slice_length else random.randint(max(self.num_frames // 2, 1), max(self.num_frames, 1))
                 F = latents.shape[0]
                 sample_indices = torch.randint(0, F, (num_frames,))
                 sample_indices, _ = torch.sort(sample_indices)
