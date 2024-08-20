@@ -1,42 +1,39 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/bmw"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/bmw"
-output_dir: ".log/ptp/sd_car-turn/to-bmw/"
-checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-bmw"
+pretrained_lora_model_path: "./checkpoints/sd_unet/lambo"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/lambo"
+output_dir: ".log/ptp/sd_car-turn/to-lambo/"
+checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-lambo"
 
 validation_data:
   source: "data/targets/car-turn/videos/car-turn.mp4"
   source_prompt: "a jeep driving down a curvy road in the countryside"
-
   edit_prompts:
-    - "a $BMW driving down a curvy road in the countryside"
+    - "a $LAMBO driving down a curvy road in the countryside"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 35
+  num_inference_steps: 30
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 35
+  num_inv_steps: 30
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.5]
-  self_replace_steps: [0.0, 0.5]
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "jeep"
     targets:
-      - "$BMW"
-      # - "car"
+      - "$LAMBO"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]
   fuse_th: 0.01
-  # fuse_scale: 1.5
 
 seed: 33
 mixed_precision: 'fp16'

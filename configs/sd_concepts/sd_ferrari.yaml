@@ -12,7 +12,6 @@ train_data:
   width: 512
   height: 512
   num_frames: 6
-  # sample_stride: 1
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -56,20 +55,20 @@ retain_position_embedding: True
 sub_sot: True
 cam_loss_type: 'mae'
 unet_begin_store_idx: 0
-enable_scam_loss: True
+enable_scam_loss: False
 scam_weight: 0.0
 scam_only_neg: True
 
-enable_tcam_loss: True
+enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 5.0e-4
+learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 7000
-checkpointing_steps: 10000
+num_train_epoch: 5000
+checkpointing_steps: 20000
 validation_steps: 500
 
 seed: 33

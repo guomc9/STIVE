@@ -444,6 +444,7 @@ def main(
                                 optimizer.step()
                                 lr_scheduler.step()
                                 optimizer.zero_grad()
+                                torch.cuda.empty_cache()
                                 if enable_scam_loss:
                                     scam_loss = accelerator.gather(scam_loss.repeat(batch_size)).mean()
                                     train_scam_loss += scam_loss.item() / gradient_accumulation_steps

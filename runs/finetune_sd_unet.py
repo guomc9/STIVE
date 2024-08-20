@@ -560,6 +560,7 @@ def main(
             save_path = os.path.join(output_dir, 'lora')
             lora_unet.save_pretrained(save_path)
             unet = lora_unet.unload()
+            save_path = os.path.join(output_dir, 'unet')
             unet.save_pretrained(save_path, safe_serialization=False)
         elif isinstance(lora_unet, UNet3DConditionModel):
             save_path = os.path.join(output_dir, 'unet')

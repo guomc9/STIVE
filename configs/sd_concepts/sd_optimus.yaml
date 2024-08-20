@@ -1,30 +1,30 @@
-pretrained_zs_model_path: "./checkpoints/zeroscope_v2_576w"
-output_dir: ".log/zs_concepts/bmw/base/"
-checkpoints_dir: "checkpoints/zs_concepts/bmw"
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/sd_concepts/neo/base/"
+checkpoints_dir: "checkpoints/sd_concepts/neo"
 
 train_data:
   video_paths: 
-    - "data/concepts/bmw/videos/bmw.mp4"
+    - "data/concepts/neo/videos/neo.mp4"
   prompts: 
-    - "a $BMW driving on the road in the countryside"
+    - "$NEO"
   mask_paths:
-    - "data/concepts/bmw/masks/bmw_car_frame_masks.mp4"
-  width: 384
-  height: 384
-  num_frames: 8
-  # sample_stride: 4
+    - "data/concepts/neo/masks/neo_man_frame_masks.mp4"
+  width: 512
+  height: 512
+  num_frames: 6
+  # sample_stride: 1
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
   rand_slice_stride: True
   relax_mask: False
   target_video_paths: 
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/man-skate/videos/man-skate.mp4"
   target_mask_paths: 
-    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+    - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $BMW driving down a curvy road in the countryside"
-  enable_target_slice: False
+    - "a $NEO driving down a curvy road in the countryside"
+  enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
   target_rand_slice_stride: True
@@ -32,15 +32,15 @@ train_data:
 
 validation_data:
   sources:
-    - "data/concepts/bmw/videos/bmw.mp4"
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/concepts/neo/videos/neo.mp4"
+    - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
-    - "a $BMW driving on the road in the countryside"
-    - "a $BMW driving down a curvy road in the countryside"
+    - "a $NEO moving along a road"
+    - "a $NEO driving down a curvy road in the countryside"
   num_frames: 6
   sample_stride: 6
-  width: 384
-  height: 384
+  width: 512
+  height: 512
 
 inference_conf:
   num_inference_steps: 50
@@ -48,30 +48,29 @@ inference_conf:
   use_inv_latent: True
   num_inv_steps: 50
 
-enable_prefix: False
-concepts: ['$BMW']
+enable_prefix: True
+concepts: ['$NEO']
 concepts_num_embedding: 1
 retain_position_embedding: True
-
 
 sub_sot: True
 cam_loss_type: 'mae'
 unet_begin_store_idx: 0
 enable_scam_loss: True
 scam_weight: 0.0
-scam_only_neg: False
+scam_only_neg: True
 
 enable_tcam_loss: True
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 10
+attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 5000
-checkpointing_steps: 5000
-validation_steps: 50
+num_train_epoch: 7000
+checkpointing_steps: 20000
+validation_steps: 500
 
 seed: 33
 mixed_precision: 'fp16'

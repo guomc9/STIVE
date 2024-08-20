@@ -1,0 +1,39 @@
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_lora_model_path: "./checkpoints/sd_unet/pokeball"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/pokeball"
+output_dir: ".log/ptp/sd_ptp/capsule-rot/to-pokeball/"
+checkpoints_dir: "checkpoints/sd_ptp/capsule-rot/to-pokeball"
+
+validation_data:
+  source: "data/targets/capsule-rot/videos/capsule-rot.mp4"
+  source_prompt: "several capsule on Ferris wheel rotating around the axis"
+  edit_prompts:
+    - "several $POKEBALL on Ferris wheel rotating around the axis"
+  num_frames: 6
+  sample_stride: 6
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 35
+  guidance_scale: 15
+  use_inv_latent: True
+  num_inv_steps: 35
+
+ptp_conf:
+  source_mask: "data/targets/capsule-rot/check/capsule-rot_capsule_frame_masks.mp4"
+  is_replace_controller: True
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
+  blend_words: 
+    sources:
+      - "capsule"
+    targets:
+      - "$POKEBALL"
+  blend_self_attention: True
+  use_inversion_attention: True
+  blend_th: [0.3, 0.3]
+  fuse_th: 0.01
+
+seed: 33
+mixed_precision: 'fp16'

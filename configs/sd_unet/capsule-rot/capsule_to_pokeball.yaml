@@ -1,40 +1,40 @@
-pretrained_sd_model_path: "./checkpoints/zeroscope_v2_576w"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/ferrari"
-output_dir: ".log/zs_unet/ferrari/base/"
-checkpoints_dir: "checkpoints/zs_unet/ferrari"
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/pokeball"
+output_dir: ".log/sd_unet/pokeball/base/"
+checkpoints_dir: "checkpoints/sd_unet/pokeball"
 
 train_data:
   video_paths:
-    - "data/targets/car-turn/videos/car-turn.mp4"
-    - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
+    - "data/concepts/pokeball/videos/pokeball.mp4"
   prompts:
-    - "a jeep driving down a curvy road in the countryside"
-    - "a $FERRARI is driving through the forest"
+    - "several capsule on Ferris wheel rotating around the axis"
+    - "a $POKEBALL"
   mask_paths:
-    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
-    - "data/concepts/ferrari/masks/ferrari_car_frame_masks.mp4"
+    - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
+    - "data/concepts/pokeball/masks/pokeball_ball_frame_masks.mp4"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
   rand_slice: False
   target_video_paths:
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   target_mask_paths:
-    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+    - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "several $POKEBALL on Ferris wheel rotating around the axis"
 
 validation_data:
-  source: "data/targets/car-turn/videos/car-turn.mp4"
-  source_prompt: "a jeep driving down a curvy road in the countryside"
+  source: "data/targets/capsule-rot/videos/capsule-rot.mp4"
+  source_prompt: "several capsule on Ferris wheel rotating around the axis"
   edit_prompts:
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "several $POKEBALL on Ferris wheel rotating around the axis"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
-  replace_indices: [[2]]    # jeep -> '$FERRARI'
+  replace_indices: [[2]]    # capsule -> '$POKEBALL'
 
 lora_conf:
   r: 6
@@ -64,12 +64,13 @@ inference_conf:
 # CHECK
 sub_sot: True
 cam_loss_type: 'mae'
+unet_begin_store_idx: 0
 enable_scam_loss: True
-scam_weight: 0.0
+scam_weight: 0.1
 scam_only_neg: True
 enable_tcam_loss: True
 tcam_only_neg: True
-tcam_weight: 0.0
+tcam_weight: 0.1
 cam_loss_reduction: 'mean'
 attn_check_steps: 15
 

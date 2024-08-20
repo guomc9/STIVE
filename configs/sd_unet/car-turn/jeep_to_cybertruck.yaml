@@ -1,7 +1,7 @@
-pretrained_sd_model_path: "./checkpoints/zeroscope_v2_576w"
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/cybertruck"
-output_dir: ".log/zs_unet/cybertruck/base/"
-checkpoints_dir: "checkpoints/zs_unet/cybertruck"
+output_dir: ".log/sd_unet/cybertruck/base/"
+checkpoints_dir: "checkpoints/sd_unet/cybertruck"
 
 train_data:
   video_paths:
@@ -18,6 +18,8 @@ train_data:
   width: 512
   height: 512
   rand_slice: False
+  relax_mask: False
+  relax_target_mask: True
   target_video_paths:
     - "data/targets/car-turn/videos/car-turn.mp4"
   target_mask_paths:
@@ -64,20 +66,21 @@ inference_conf:
 # CHECK
 sub_sot: True
 cam_loss_type: 'mae'
+unet_begin_store_idx: 0
 enable_scam_loss: True
-scam_weight: 0.0
+scam_weight: 0.1
 scam_only_neg: True
 enable_tcam_loss: True
 tcam_only_neg: True
-tcam_weight: 0.0
+tcam_weight: 0.1
 cam_loss_reduction: 'mean'
-attn_check_steps: 15
+attn_check_steps: 25
 
 learning_rate: 1.0e-5
 batch_size: 1
 num_train_epoch: 150
 checkpointing_steps: 2000
-validation_steps: 10
+validation_steps: 50
 
 seed: 33
 mixed_precision: 'fp16'
