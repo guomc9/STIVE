@@ -12,5 +12,7 @@ python scripts/extract_masks.py -v data/concepts/ferrari/videos/ferrari.mp4 -s c
 python scripts/extract_masks.py -v data/concepts/bmw/videos/bmw.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/optimus/videos/optimus.mp4 -s robot -t 0.02
 python scripts/extract_masks.py -v data/concepts/neo/videos/neo.mp4 -s man
-python scripts/extract_masks.py -v data/concepts/pokeball/videos/pokeball.mp4 -s ball -t 0.03
+python scripts/extract_masks.py -v data/concepts/pokeball/videos/pokeball.mp4 -s ball -t 0.015
 python scripts/extract_masks.py -v data/concepts/chrysanthemum/videos/chrysanthemum.mp4 -s flower -t 0.03
+python scripts/extract_masks.py -v data/concepts/star/videos/star.mp4 -s star -t 0.015
+python scripts/extract_masks.py -v data/concepts/pokeflag/videos/pokeflag.mp4 -s flag -t 0.015

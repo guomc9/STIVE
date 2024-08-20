@@ -1,29 +1,28 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/lambo/base/"
-checkpoints_dir: "checkpoints/sd_concepts/lambo"
+output_dir: ".log/sd_concepts/star/base/"
+checkpoints_dir: "checkpoints/sd_concepts/star"
 
 train_data:
   video_paths: 
-    - "data/concepts/lambo/videos/lambo.mp4"
+    - "data/concepts/star/videos/star.mp4"
   prompts: 
-    - "$LAMBO"
+    - "$STAR"
   mask_paths:
-    - "data/concepts/lambo/masks/lambo_car_frame_masks.mp4"
+    - "data/concepts/star/masks/star_star_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 6
-  # sample_stride: 1
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
   rand_slice_stride: True
   relax_mask: False
   target_video_paths: 
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   target_mask_paths: 
-    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+    - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "a $LAMBO driving down a curvy road in the countryside"
+    - "several $STAR moving on the track of Ferris wheel"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -32,11 +31,11 @@ train_data:
 
 validation_data:
   sources:
-    - "data/concepts/lambo/videos/lambo.mp4"
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/concepts/star/videos/star.mp4"
+    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
-    - "a $LAMBO moving along a road"
-    - "a $LAMBO driving down a curvy road in the countryside"
+    - "a $STAR"
+    - "several $STAR moving on the track of Ferris wheel"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -49,7 +48,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$LAMBO']
+concepts: ['$STAR']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
@@ -64,11 +63,11 @@ enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 500
+attn_check_steps: 100
 
-learning_rate: 5.0e-3
+learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 1000
+num_train_epoch: 3000
 checkpointing_steps: 20000
 validation_steps: 500
 

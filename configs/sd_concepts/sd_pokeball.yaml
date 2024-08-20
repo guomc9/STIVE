@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "several $POKEBALL on Ferris wheel rotating around the axis"
+    - "several $POKEBALL moving on the track of Ferris wheel"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -35,7 +35,7 @@ validation_data:
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
     - "a $POKEBALL"
-    - "several $POKEBALL on Ferris wheel rotating around the axis"
+    - "several $POKEBALL moving on the track of Ferris wheel"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -63,11 +63,11 @@ enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 500
+attn_check_steps: 100
 
-learning_rate: 5.0e-3
+learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 3000
 checkpointing_steps: 20000
 validation_steps: 500
 
