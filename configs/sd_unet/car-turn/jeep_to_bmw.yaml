@@ -40,11 +40,11 @@ validation_data:
   replace_indices: [[2]]    # jeep -> '$BMW'
 
 lora_conf:
-  r: 6
+  r: 32
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    - "^.*\\.resnets\\..*\\.conv1\\..*\\.spatial_conv\\..*"
+    - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
     # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 

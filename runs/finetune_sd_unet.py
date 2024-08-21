@@ -433,6 +433,8 @@ def main(
                             torch.cuda.empty_cache()
                             
                         if enable_tcam_loss and batch.get('target_latents') is not None and batch.get('target_masks') is not None:
+                            if not enable_temporal_modules:
+                                unet.enable_temporal_modules()
                             target_prompts = batch['target_prompts']                # [B]
                             target_tokens = tokenizer(target_prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
                             target_encoder_hidden_states = text_encoder(target_tokens.input_ids.to(latents.device))[0]

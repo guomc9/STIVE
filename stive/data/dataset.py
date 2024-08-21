@@ -602,7 +602,7 @@ class LatentPromptDataset(Dataset):
             return {
                 'latents': torch.stack(latents_list, dim=0), 
                 'masks': torch.stack(masks_list, dim=0), 
-                'enable_temporal_modules': torch.stack(enable_temporal_modules, dim=0), 
+                'enable_temporal_modules': torch.as_tensor(enable_temporal_modules), 
                 'prompts': prompts, 
                 'target_latents': torch.stack(target_latents_list, dim=0), 
                 'target_masks': torch.stack(target_masks_list, dim=0), 
@@ -612,7 +612,7 @@ class LatentPromptDataset(Dataset):
             return {
                 'latents': torch.stack(latents_list, dim=0), 
                 'masks': torch.stack(masks_list, dim=0), 
-                'enable_temporal_modules': torch.stack(enable_temporal_modules, dim=0), 
+                'enable_temporal_modules': torch.as_tensor(enable_temporal_modules), 
                 'prompts': prompts, 
                 }
             
