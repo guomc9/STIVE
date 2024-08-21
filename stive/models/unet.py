@@ -468,6 +468,43 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
             if 'temp_lora_conv.' in k:
                 state_dict.update({k: v})
 
-        model.load_state_dict(state_dict)
+        extra_state_dict = {}
+        keys_to_delete = []
+        for key, value in state_dict.items():
+            if 'temp_lora_conv' not in key:
+                if 'conv1' in key:
+                    new_key = key.replace('conv1', 'conv1.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'conv2' in key:
+                    new_key = key.replace('conv2', 'conv2.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'conv_shortcut' in key:
+                    new_key = key.replace('conv_shortcut', 'conv_shortcut.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'conv_in' in key:
+                    new_key = key.replace('conv_in', 'conv_in.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'conv_out' in key:
+                    new_key = key.replace('conv_out', 'conv_out.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'conv.' in key:
+                    new_key = key.replace('conv', 'conv.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+                elif 'Conv2d_0' in key:
+                    new_key = key.replace('Conv2d_0', 'Conv2d_0.spatial_conv')
+                    keys_to_delete.append(key)
+                    extra_state_dict[new_key] = value
+            
+        state_dict.update(extra_state_dict)
+        for key in keys_to_delete:
+            del state_dict[key]
+
+        model.load_state_dict(state_dict, strict=True)
 
         return model
