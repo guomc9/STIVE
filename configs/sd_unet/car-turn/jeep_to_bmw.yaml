@@ -13,6 +13,9 @@ train_data:
   mask_paths:
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
     - "data/concepts/bmw/masks/bmw_car_frame_masks.mp4"
+  enable_temporal_modules:
+    - True
+    - False
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -41,18 +44,14 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.resnets\\..*\\.conv1\\..*\\.spatial_conv\\..*"
+    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
   bias: "none"
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
   - "^.*\\.temp_lora_conv\\..*"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:

@@ -404,6 +404,7 @@ class LatentPromptDataset(Dataset):
         video_paths, 
         prompts, 
         mask_paths, 
+        enable_temporal_modules=None, 
         repeat=None, 
         num_frames=12, 
         sample_stride=1, 
@@ -428,6 +429,7 @@ class LatentPromptDataset(Dataset):
         self.video_paths = []
         self.prompts = []
         self.mask_paths = []
+        self.enable_temporal_modules = enable_temporal_modules
         for video_path, prompt, mask_path in zip(video_paths, prompts, mask_paths):
             if os.path.exists(video_path) and os.path.exists(mask_path):
                 self.video_paths.append(video_path)
@@ -540,6 +542,7 @@ class LatentPromptDataset(Dataset):
         prompts = []                            # [B]
         latents_list = []                       # [B, F, C, H, W]
         masks_list = []                         # [B, F, 1, H, W]
+        enable_temporal_modules = []            # [B]
         target_latents_list = []                # [B, F, C, H, W]
         target_masks_list = []                  # [B, F, 1, H, W]
         target_prompts = []                     # [B]
@@ -556,6 +559,10 @@ class LatentPromptDataset(Dataset):
                 prompts.append(prompt)                                                              # [B]
                 latents_list.append(latents)
                 masks_list.append(masks)
+                if self.enable_temporal_modules is not None:
+                    enable_temporal_modules.append(self.enable_temporal_modules[i])
+                else:
+                    enable_temporal_modules.append(True)
                 if self.target_latents is not None:
                     ti = random.randint(0, len(self.target_latents)-1)
                     target_latents = self.target_latents[ti]                                        # [F, C, H, W]
@@ -572,6 +579,10 @@ class LatentPromptDataset(Dataset):
             latents = self.latents[idx]
             prompt = self.prompts[idx]
             masks = self.masks[idx]
+            if self.enable_temporal_modules is not None:
+                enable_temporal_modules.append(self.enable_temporal_modules[i])
+            else:
+                enable_temporal_modules.append(True)
             latents, sample_indices = self._sample_latents(latents, enable_slice=self.enable_slice, rand_slice=self.rand_slice)        # [F, C, H, W]
             masks = masks[sample_indices]
             prompts.append(prompt)
@@ -591,6 +602,7 @@ class LatentPromptDataset(Dataset):
             return {
                 'latents': torch.stack(latents_list, dim=0), 
                 'masks': torch.stack(masks_list, dim=0), 
+                'enable_temporal_modules': torch.stack(enable_temporal_modules, dim=0), 
                 'prompts': prompts, 
                 'target_latents': torch.stack(target_latents_list, dim=0), 
                 'target_masks': torch.stack(target_masks_list, dim=0), 
@@ -600,6 +612,7 @@ class LatentPromptDataset(Dataset):
             return {
                 'latents': torch.stack(latents_list, dim=0), 
                 'masks': torch.stack(masks_list, dim=0), 
+                'enable_temporal_modules': torch.stack(enable_temporal_modules, dim=0), 
                 'prompts': prompts, 
                 }
             

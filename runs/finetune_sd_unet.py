@@ -390,6 +390,8 @@ def main(
                         latents = batch["latents"]          # [B, F, C, H, W]
                         prompts = batch['prompts']
                         masks = batch['masks']              # [B, F, 1, H, W]
+                        enable_temporal_modules = torch.sum(batch['enable_temporal_modules']) > 0
+                        unet._reset_temporal_modules(enable_temporal_modules)
                         video_length = latents.shape[1]
                         
                         latents = rearrange(latents, "b f c h w -> b c f h w")
