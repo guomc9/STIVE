@@ -51,6 +51,17 @@ concepts: ['$FERRARI']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
+lora_conf:
+  r: 16
+  lora_alpha: 1.0
+  lora_dropout: 0.1
+  target_modules:
+    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
+    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
+    - "^.*\\.spatial_conv\\..*"
+    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+  bias: "none"
+lora_lr: 1.0e-5
 
 sub_sot: True
 cam_loss_type: 'mae'

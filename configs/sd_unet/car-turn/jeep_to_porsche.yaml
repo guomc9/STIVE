@@ -33,23 +33,10 @@ validation_data:
   height: 512
   replace_indices: [[2]]    # jeep -> Porsche
 
-lora_conf:
-  r: 6
-  lora_alpha: 1.0
-  lora_dropout: 0.1
-  target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
-  bias: "none"
-
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
   - "^.*\\.temp_lora_conv\\..*"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:

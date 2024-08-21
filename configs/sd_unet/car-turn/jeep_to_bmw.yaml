@@ -39,15 +39,6 @@ validation_data:
   height: 512
   replace_indices: [[2]]    # jeep -> '$BMW'
 
-lora_conf:
-  r: 32
-  lora_alpha: 1.0
-  lora_dropout: 0.1
-  target_modules:
-    - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
-  bias: "none"
-
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
@@ -75,7 +66,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 150
+num_train_epoch: 60
 checkpointing_steps: 2000
 validation_steps: 10
 

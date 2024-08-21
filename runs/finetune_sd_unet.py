@@ -15,7 +15,6 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
-from peft import LoraConfig, get_peft_model
 from diffusers import AutoencoderKL, DDIMScheduler
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version
@@ -152,7 +151,6 @@ def main(
     train_data: Dict,
     validation_data: Dict,
     inference_conf: Dict, 
-    lora_conf: Dict, 
     pretrained_concepts_model_path: str = None, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
@@ -161,7 +159,7 @@ def main(
     scam_weight: float = 1.0e-1, 
     scam_only_neg: bool = False, 
     enable_tcam_loss: bool = False, 
-    tcam_weight: float = 5.0e-2, 
+    tcam_weight: float = 1.0e-1, 
     tcam_only_neg: bool = False, 
     cam_loss_reduction: str = 'mean', 
     attn_check_steps: int = 10, 
@@ -213,7 +211,8 @@ def main(
                         "tcam_weight": tcam_weight, 
                         "tcam_only_neg": tcam_only_neg, 
                         "cam_loss_reduction": cam_loss_reduction, 
-                    }
+                    }, 
+                'extra_trainable_modules': extra_trainable_modules
                 },
             init_kwargs={"wandb": {"name": f'{os.path.basename(checkpoints_dir)}-{datetime.datetime.now().strftime("%Y.%m.%d.%H-%M-%S")}'}}
         )
@@ -252,36 +251,21 @@ def main(
 
     unet.to(dtype=weight_dtype)
     lora_unet = unet
-    if lora_conf is not None:
-        lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
-        target_modules = []
-        patterns = lora_conf['target_modules']
-        if patterns is not None and len(patterns) > 0:
-            for name, param in unet.named_parameters():
-                for pattern in patterns:
-                    if re.match(pattern, name):
-                        target_modules.append(name.rstrip('.weight').rstrip('.bias'))
-            if len(target_modules) > 0:
-                lora_conf['target_modules'] = target_modules
-                lora_conf = LoraConfig(**lora_conf)
-                lora_unet = get_peft_model(model=unet, peft_config=lora_conf)
-                lora_unet.print_trainable_parameters()
+    pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
+    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_lora_model_path):
+        lora_unet = PeftModel.from_pretrained(lora_unet, pretrained_lora_model_path)
+        lora_unet.requires_grad_(False)
 
     vae.requires_grad_(False)
     unet.requires_grad_(False)
     text_encoder.requires_grad_(False)
     lora_unet.requires_grad_(False)
     for name, param in lora_unet.named_parameters():
-        if 'lora' in name:
-            print(f'lora trainable param: {name}')
-            param.requires_grad = True
-            param.data = param.data.float()
-        elif extra_trainable_modules is not None:
-            for extra_trainable_module in extra_trainable_modules:
-                if re.match(extra_trainable_module, name):
-                    print(f'extra trainable param: {name}')
-                    param.requires_grad = True
-                    param.data = param.data.float()
+        for extra_trainable_module in extra_trainable_modules:
+            if re.match(extra_trainable_module, name):
+                print(f'extra trainable param: {name}')
+                param.requires_grad = True
+                param.data = param.data.float()
 
 
     if not enable_scam_loss and not enable_tcam_loss:
@@ -375,7 +359,7 @@ def main(
     logger.info(f"  Total optimization steps = {num_train_steps}")
     global_step = 0
     first_epoch = 0
-
+    temporal_modules_enabled = True
     for epoch in range(first_epoch, num_train_epoch):
         lora_unet.train()
         train_loss = 0.0
@@ -391,7 +375,10 @@ def main(
                         prompts = batch['prompts']
                         masks = batch['masks']              # [B, F, 1, H, W]
                         enable_temporal_modules = torch.sum(batch['enable_temporal_modules']) > 0
-                        unet._reset_temporal_modules(enable_temporal_modules)
+                        if temporal_modules_enabled != enable_temporal_modules:
+                            unet._reset_temporal_modules(enable_temporal_modules)
+                            temporal_modules_enabled = enable_temporal_modules
+
                         video_length = latents.shape[1]
                         
                         latents = rearrange(latents, "b f c h w -> b c f h w")
@@ -433,8 +420,9 @@ def main(
                             torch.cuda.empty_cache()
                             
                         if enable_tcam_loss and batch.get('target_latents') is not None and batch.get('target_masks') is not None:
-                            if not enable_temporal_modules:
+                            if not temporal_modules_enabled:
                                 unet.enable_temporal_modules()
+                                temporal_modules_enabled = True
                             target_prompts = batch['target_prompts']                # [B]
                             target_tokens = tokenizer(target_prompts, return_tensors="pt", max_length=tokenizer.model_max_length, padding="max_length", truncation=True)
                             target_encoder_hidden_states = text_encoder(target_tokens.input_ids.to(latents.device))[0]
@@ -467,9 +455,11 @@ def main(
                         accelerator.backward(loss)
                         if accelerator.sync_gradients:
                             accelerator.clip_grad_norm_(optim_params, max_grad_norm)
-                            for param in optim_params:
-                                if param.grad is None:
-                                    print(f"Epoch {epoch}, Parameter: {param}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
+                            for name, param in lora_unet.named_parameters():
+                            # for param in optim_params:
+                                # if param.grad is None:
+                                if param.requires_grad and param.grad is None:
+                                    print(f"Epoch {epoch}, Parameter: {name}, Gradient: {param.grad}, Requires_grad: {param.requires_grad}")
 
             
                             if (global_step + 1) % gradient_accumulation_steps == 0:
@@ -561,8 +551,6 @@ def main(
     if accelerator.is_main_process:
         lora_unet = accelerator.unwrap_model(lora_unet)
         if isinstance(lora_unet, PeftModel):
-            save_path = os.path.join(output_dir, 'lora')
-            lora_unet.save_pretrained(save_path)
             unet = lora_unet.unload()
             save_path = os.path.join(output_dir, 'unet')
             unet.save_pretrained(save_path, safe_serialization=False)

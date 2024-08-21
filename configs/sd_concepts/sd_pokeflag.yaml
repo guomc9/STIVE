@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/pokeflag/videos/pokeflag.mp4"
   prompts: 
-    - "$POKEFLAG"
+    - "$POKEFLAG flag on a flagpole in the wind"
   mask_paths:
     - "data/concepts/pokeflag/masks/pokeflag_flag_frame_masks.mp4"
   width: 512
@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/usa-flag/masks/usa-flag_flag_frame_masks.mp4"
   target_prompts:
-    - "a $POKEFLAG waving in the wind"
+    - "a $POKEFLAG flag on a flagpole moves in the wind"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -34,8 +34,8 @@ validation_data:
     - "data/concepts/pokeflag/videos/pokeflag.mp4"
     - "data/targets/usa-flag/videos/usa-flag.mp4"
   prompts:
-    - "a $POKEFLAG"
-    - "a $POKEFLAG waving in the wind"
+    - "a $POKEFLAG flag on a flagpole in the wind"
+    - "a $POKEFLAG flag on a flagpole moves in the wind"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -52,6 +52,18 @@ concepts: ['$POKEFLAG']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
+lora_conf:
+  r: 16
+  lora_alpha: 1.0
+  lora_dropout: 0.1
+  target_modules:
+    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
+    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
+    - "^.*\\.spatial_conv\\..*"
+    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+  bias: "none"
+lora_lr: 1.0e-5
+
 sub_sot: True
 cam_loss_type: 'mae'
 unet_begin_store_idx: 0
@@ -65,9 +77,9 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 100
 
-learning_rate: 1.0e-4
+learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 10000
+num_train_epoch: 2000
 checkpointing_steps: 20000
 validation_steps: 500
 
