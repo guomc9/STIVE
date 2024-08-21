@@ -20,9 +20,9 @@ train_data:
   target_video_paths: 
     - "data/targets/man-skate/videos/man-skate.mp4"
   target_mask_paths: 
-    - "data/targets/man-skate/masks/man-skate_jeep_frame_masks.mp4"
+    - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "A $NEO rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $NEO rides a wooden skateboard on the rail with a helmet and arms outstretched"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -34,7 +34,7 @@ validation_data:
     - "data/concepts/neo/videos/neo.mp4"
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
-    - "a $NEO is waving his arms"
+    - "a $NEO is outstretching his arms"
     - "a $NEO rides a wooden skateboard on the rail with a helmet and arms outstretched"
   num_frames: 6
   sample_stride: 6
