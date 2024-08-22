@@ -97,8 +97,8 @@ def main(
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     lora_unet.requires_grad_(False)
-    pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
-    if os.path.exists(pretrained_lora_model_path):
+    if pretrained_concepts_model_path is not None and os.path.exists(os.path.join(pretrained_concepts_model_path, 'lora')):
+        pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
         lora_unet = PeftModel.from_pretrained(lora_unet, pretrained_lora_model_path)
         lora_unet.requires_grad_(False)
 
@@ -165,8 +165,11 @@ def main(
             pixel_values = batch["frames"].to(weight_dtype)                 # [1, F, C, H, W]
             target_prompts = batch['prompts'][0]                            # [T]
             source_prompts = batch['source_prompts'][0]                     # [T]
-            blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
-            
+            if ptp_conf.get('is_replace_controller', None):
+                blend_word = [[ptp_conf['blend_words']['sources'][i]], [ptp_conf['blend_words']['targets'][i]]]
+            else:
+                blend_word = [[ptp_conf['blend_words']['sources'][i]]]
+
             mask = load_masks(ptp_conf['source_mask'], sample_stride=validation_data['sample_stride'], num_frames=validation_data['num_frames'])    # [f, h, w]
             print(f'mask.shape: {mask.shape}')
             edited_output = validation_pipeline.ptp_replace_edit(

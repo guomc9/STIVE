@@ -118,9 +118,9 @@
 
 </details>
 
+
 <details>
 <summary>Swap jeep to <code>porsche</code></summary>
-
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-turn/jeep_to_porsche.yaml</code></pre>
@@ -177,7 +177,6 @@
 
 <details>
 <summary>Swap flag to <code>$POKEFLAG</code></summary>
-
 <ul>
 <li>finetune concept from SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_pokeflag.yaml</code></pre>
@@ -191,9 +190,19 @@
 <li>prompt-to-prompt inference with concept and tuned SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/usa-flag/pokeflag.yaml</code></pre>
 </li>
-
 </ul>
+</details>
 
+<details>
+<summary>Swap flag to <code>FrenchFlag</code></summary>
+<ul>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/usa-flag/flag_to_frenchflag.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/usa-flag/frenchflag.yaml</code></pre>
+</li>
+</ul>
 </details>
 
 <details>
@@ -251,6 +260,18 @@
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/man-skate/optimus.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+<details>
+<summary>Swap man to <code>spiderman</code></summary>
+<ul>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/man-skate/man_to_spiderman.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/man-skate/spiderman.yaml</code></pre>
 </li>
 </ul>
 </details>

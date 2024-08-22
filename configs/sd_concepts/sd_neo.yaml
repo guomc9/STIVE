@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/neo/videos/neo.mp4"
   prompts: 
-    - "$NEO"
+    - "$NEO is outstretching his arms"
   mask_paths:
     - "data/concepts/neo/masks/neo_man_frame_masks.mp4"
   width: 512
@@ -57,27 +57,27 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
-    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
-    - "^.*\\.spatial_conv\\..*"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    # - "^.*\\.conv1\\.\\.spatial_conv\\..*"
+    # - "^.*\\.conv2\\.\\.spatial_conv\\..*"
+    # - "^.*\\.spatial_conv\\..*"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
   bias: "none"
 lora_lr: 1.0e-5
 
 sub_sot: True
 cam_loss_type: 'mae'
 unet_begin_store_idx: 0
-enable_scam_loss: True
+enable_scam_loss: False
 scam_weight: 0.0
 scam_only_neg: True
 
-enable_tcam_loss: True
+enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 5.0e-4
+learning_rate: 1.0e-3
 batch_size: 1
 num_train_epoch: 5000
 checkpointing_steps: 20000

@@ -1,15 +1,14 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/neo"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/neo"
-output_dir: ".log/ptp/man-skate/to-neo/"
-checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-neo"
+pretrained_lora_model_path: "./checkpoints/sd_unet/spiderman"
+output_dir: ".log/ptp/man-skate/to-spiderman/"
+checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-spiderman"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
   source_prompt: "a man rides a wooden skateboard on the rail with a helmet and arms outstretched"
 
   edit_prompts:
-    - "a $NEO rides a wooden skateboard on the rail and arms outstretched"
+    - "a Spider-Man rides a wooden skateboard on the rail with a helmet and arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -17,26 +16,25 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 33
-  guidance_scale: 12.5
+  guidance_scale: 7.5
   use_inv_latent: True
   num_inv_steps: 33
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
-  # is_replace_controller: False
-  is_replace_controller: True
-
+  is_replace_controller: False
   cross_replace_steps: [0.0, 0.3]
   self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "man"
-    targets:
-      - "$NEO"
+    # targets:
+    #   - "Spider-Man"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]
   fuse_th: 0.01
+  # fuse_scale: 1.5
 
 seed: 33
 mixed_precision: 'fp16'

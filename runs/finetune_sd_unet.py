@@ -251,8 +251,9 @@ def main(
 
     unet.to(dtype=weight_dtype)
     lora_unet = unet
-    pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
-    if pretrained_concepts_model_path is not None and os.path.exists(pretrained_lora_model_path):
+
+    if pretrained_concepts_model_path is not None and os.path.exists(os.path.join(pretrained_concepts_model_path, 'lora')):
+        pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
         lora_unet = PeftModel.from_pretrained(lora_unet, pretrained_lora_model_path)
         lora_unet.requires_grad_(False)
 

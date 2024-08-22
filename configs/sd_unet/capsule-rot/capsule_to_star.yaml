@@ -6,13 +6,13 @@ checkpoints_dir: "checkpoints/sd_unet/star"
 train_data:
   video_paths:
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
-    # - "data/concepts/star/videos/star.mp4"
+    - "data/concepts/star/videos/star.mp4"
   prompts:
     - "several capsule moving on the track"
-    # - "a $STAR"
+    - "a $STAR"
   mask_paths:
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
-    # - "data/concepts/star/masks/star_star_frame_masks.mp4"
+    - "data/concepts/star/masks/star_star_frame_masks.mp4"
   num_frames: 6
   sample_stride: 6
   width: 512

@@ -1,0 +1,42 @@
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_lora_model_path: "./checkpoints/sd_unet/chrysanthemum"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/chrysanthemum"
+output_dir: ".log/ptp/lotus/to-chrysanthemum/"
+checkpoints_dir: "checkpoints/sd_ptp/lotus/to-chrysanthemum"
+
+validation_data:
+  source: "data/targets/lotus/videos/lotus.mp4"
+  source_prompt: "a lotus sways in the wind"
+
+  edit_prompts:
+    - "a $CHRYSANTHEMUM sways in the wind"
+  num_frames: 6
+  sample_stride: 6
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 33
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 33
+
+ptp_conf:
+  source_mask: "data/targets/lotus/videos/lotus_flower_frame_masks.mp4"
+  # is_replace_controller: False
+  is_replace_controller: True
+
+  cross_replace_steps: [0.0, 0.5]
+  self_replace_steps: [0.0, 0.5]
+  blend_words: 
+    sources:
+      - "lotus"
+    targets:
+      - "$CHRYSANTHEMUM"
+  blend_self_attention: True
+  use_inversion_attention: True
+  blend_th: [0.3, 0.3]
+  fuse_th: 0.01
+
+seed: 33
+mixed_precision: 'fp16'

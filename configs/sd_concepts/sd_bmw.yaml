@@ -57,9 +57,11 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    - "^.*\\.spatial_conv\\..*"
+    - "^.*\\.conv1\\.\\.spatial_conv\\..*"
+    - "^.*\\.conv2\\.\\.spatial_conv\\..*"
+    # - "^.*\\.spatial_conv\\..*"
   bias: "none"
-lora_lr: 1.0e-5
+lora_lr: 5.0e-6
 
 sub_sot: True
 cam_loss_type: 'mae'
@@ -76,7 +78,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 10000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 

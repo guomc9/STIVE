@@ -9,7 +9,7 @@ validation_data:
   source_prompt: "a man rides a wooden skateboard on the rail with a helmet and arms outstretched"
 
   edit_prompts:
-    - "a $OPTIMUS rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $OPTIMUS rides a wooden skateboard on the rail and arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -23,9 +23,10 @@ inference_conf:
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
+  # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.5]
-  self_replace_steps: [0.0, 0.5]
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "man"

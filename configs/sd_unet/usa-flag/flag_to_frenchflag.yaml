@@ -10,9 +10,6 @@ train_data:
     - "a American flag on a flagpole moves in the wind"
   mask_paths:
     - "data/targets/usa-flag/masks/usa-flag_flag_frame_masks.mp4"
-  enable_temporal_modules:
-    - True
-    - True
   num_frames: 6
   sample_stride: 6
   width: 512
