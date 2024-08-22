@@ -1,15 +1,15 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/pokeflag"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/pokeflag"
-output_dir: ".log/ptp/usa-flag/to-pokeflag/"
-checkpoints_dir: "checkpoints/sd_ptp/usa-flag/to-pokeflag"
+pretrained_lora_model_path: "./checkpoints/sd_unet/frenchflag"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/frenchflag"
+output_dir: ".log/ptp/usa-flag/to-frenchflag/"
+checkpoints_dir: "checkpoints/sd_ptp/usa-flag/to-frenchflag"
 
 validation_data:
   source: "data/targets/usa-flag/videos/usa-flag.mp4"
   source_prompt: "a American flag on a flagpole moves in the windd"
 
   edit_prompts:
-    - "a $POKEFLAG flag on a flagpole moves in the wind"
+    - "a French flag on a flagpole moves in the wind"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -30,7 +30,7 @@ ptp_conf:
     sources:
       - "American"
     targets:
-      - "$POKEFLAG"
+      - "French"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.0, 0.0]

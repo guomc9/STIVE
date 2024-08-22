@@ -127,6 +127,8 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             if is_cross and self.num_cross_replace[0] <= self.cur_step < self.num_cross_replace[1]:
                 alpha_words = self.cross_replace_alpha[self.cur_step]           # [1, 1, 1, 77]
                 
+                # attn_base: source prompt attention probability
+                # attn_replace: edit prompt attention probability
                 attn_replace_new = self.replace_cross_attention(attn_base, attn_replace) * alpha_words + (1 - alpha_words) * attn_replace
             
                 attn[0:] = attn_replace_new # b t h p n = [1, 8, 10, 1024, 77]

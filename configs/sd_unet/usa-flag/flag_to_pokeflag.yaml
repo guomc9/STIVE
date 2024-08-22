@@ -15,7 +15,7 @@ train_data:
     - "data/concepts/pokeflag/masks/pokeflag_flag_frame_masks.mp4"
   enable_temporal_modules:
     - True
-    - False
+    - True
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -37,7 +37,7 @@ validation_data:
   sample_stride: 6
   width: 512
   height: 512
-  replace_indices: [[2]]    # flag -> '$POKEFLAG'
+  replace_indices: [[2]]    # American -> '$POKEFLAG'
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
@@ -69,9 +69,9 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 150
+num_train_epoch: 50
 checkpointing_steps: 2000
-validation_steps: 10
+validation_steps: 5
 
 seed: 33
 mixed_precision: 'fp16'
