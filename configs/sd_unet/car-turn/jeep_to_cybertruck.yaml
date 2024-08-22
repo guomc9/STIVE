@@ -14,7 +14,7 @@ train_data:
     - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
     - "data/concepts/cybertruck/masks/cybertruck_car_frame_masks.mp4"
   num_frames: 6
-  sample_stride: 6
+  sample_stride: 8
   width: 512
   height: 512
   rand_slice: False
@@ -33,7 +33,7 @@ validation_data:
   edit_prompts:
     - "a $CYBERTRUCK driving down a curvy road in the countryside"
   num_frames: 6
-  sample_stride: 6
+  sample_stride: 8
   width: 512
   height: 512
   replace_indices: [[2]]    # jeep -> '$CYBERTRUCK'

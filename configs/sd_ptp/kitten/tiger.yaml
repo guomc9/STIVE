@@ -1,35 +1,35 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/porsche"
-output_dir: ".log/ptp/sd_car-turn/to-porsche/"
-checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-porsche"
+pretrained_lora_model_path: "./checkpoints/sd_unet/fox"
+output_dir: ".log/ptp/sd_tiger/to-tiger/"
+checkpoints_dir: "checkpoints/sd_ptp/kitten/to-tiger"
 
 validation_data:
-  source: "data/targets/car-turn/videos/car-turn.mp4"
-  source_prompt: "a jeep driving down a curvy road in the countryside"
+  source: "data/targets/kitten/videos/kitten.mp4"
+  source_prompt: "a cat walking on the floor next to a wall"
 
   edit_prompts:
-    - "a porsche driving down a curvy road in the countryside"
+    - "a tiger walking on the floor next to a wall"
   num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 33
+  num_inference_steps: 34
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 33
+  num_inv_steps: 34
 
 ptp_conf:
-  source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
+  source_mask: "data/targets/kitten/check/kitten_cat_frame_masks.mp4"
   is_replace_controller: True
   cross_replace_steps: [0.0, 0.5]
   self_replace_steps: [0.0, 0.5]
   blend_words: 
     sources:
-      - "jeep"
+      - "cat"
     targets:
-      - "porsche"
+      - "tiger"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]

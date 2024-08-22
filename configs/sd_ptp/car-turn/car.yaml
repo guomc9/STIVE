@@ -10,7 +10,7 @@ validation_data:
 
   edit_prompts:
     - "a Porsche driving down a curvy road in the countryside"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
