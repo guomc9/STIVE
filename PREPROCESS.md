@@ -6,6 +6,12 @@ python scripts/extract_masks.py -v data/targets/man-skate/videos/man-skate.mp4 -
 python scripts/extract_masks.py -v data/targets/usa-flag/videos/usa-flag.mp4 -s flag
 python scripts/extract_masks.py -v data/targets/lotus/videos/lotus.mp4 -s lotus
 
+python scripts/extract_masks.py -v data/targets/gray-dog/videos/gray-dog.mp4 -s dog
+python scripts/extract_masks.py -v data/targets/swan/videos/swan.mp4 -s swan -t 0.08
+python scripts/extract_masks.py -v data/targets/kitten/videos/kitten.mp4 -s cat
+
+
+
 python scripts/extract_masks.py -v data/concepts/lambo/videos/lambo.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/cybertrunk/videos/cybertrunk.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/ferrari/videos/ferrari.mp4 -s car
@@ -16,3 +22,5 @@ python scripts/extract_masks.py -v data/concepts/pokeball/videos/pokeball.mp4 -s
 python scripts/extract_masks.py -v data/concepts/chrysanthemum/videos/chrysanthemum.mp4 -s flower -t 0.03
 python scripts/extract_masks.py -v data/concepts/star/videos/star.mp4 -s star -t 0.015
 python scripts/extract_masks.py -v data/concepts/pokeflag/videos/pokeflag.mp4 -s flag -t 0.015
+
+python scripts/extract_masks.py -v data/concepts/fox/videos/fox.mp4 -s fox -t 0.015

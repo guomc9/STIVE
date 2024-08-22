@@ -11,7 +11,7 @@ train_data:
     - "data/concepts/cybertruck/masks/cybertruck_car_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -35,7 +35,7 @@ validation_data:
   prompts:
     - "a $CYBERTRUCK is driving through the forest"
     - "a $CYBERTRUCK driving down a curvy road in the countryside"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
@@ -78,7 +78,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-3
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 

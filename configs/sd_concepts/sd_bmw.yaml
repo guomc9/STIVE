@@ -11,7 +11,7 @@ train_data:
     - "data/concepts/bmw/masks/bmw_car_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -57,11 +57,9 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    - "^.*\\.conv1\\.\\.spatial_conv\\..*"
-    - "^.*\\.conv2\\.\\.spatial_conv\\..*"
-    # - "^.*\\.spatial_conv\\..*"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
   bias: "none"
-lora_lr: 5.0e-6
+lora_lr: 1.0e-5
 
 sub_sot: True
 cam_loss_type: 'mae'
@@ -76,7 +74,7 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 5.0e-3
+learning_rate: 1.0e-3
 batch_size: 1
 num_train_epoch: 7000
 checkpointing_steps: 20000

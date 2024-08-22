@@ -11,7 +11,7 @@ train_data:
     - "data/concepts/pokeflag/masks/pokeflag_flag_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -36,7 +36,7 @@ validation_data:
   prompts:
     - "a $POKEFLAG flag on a flagpole in the wind"
     - "a $POKEFLAG flag on a flagpole moves in the wind"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
@@ -57,10 +57,7 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
-    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
-    - "^.*\\.spatial_conv\\..*"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
   bias: "none"
 lora_lr: 1.0e-5
 
@@ -75,11 +72,11 @@ enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 100
+attn_check_steps: 500
 
-learning_rate: 5.0e-4
+learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 

@@ -1,14 +1,14 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/pokeball/base/"
-checkpoints_dir: "checkpoints/sd_concepts/pokeball"
+output_dir: ".log/sd_concepts/fox/base/"
+checkpoints_dir: "checkpoints/sd_concepts/fox"
 
 train_data:
   video_paths: 
-    - "data/concepts/pokeball/videos/pokeball.mp4"
+    - "data/concepts/fox/videos/fox.mp4"
   prompts: 
-    - "$POKEBALL"
+    - "$FOX"
   mask_paths:
-    - "data/concepts/pokeball/masks/pokeball_ball_frame_masks.mp4"
+    - "data/concepts/fox/masks/fox_fox_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 8
@@ -18,11 +18,11 @@ train_data:
   rand_slice_stride: True
   relax_mask: False
   target_video_paths: 
-    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
+    - "data/targets/kitten/videos/kitten.mp4"
   target_mask_paths: 
-    - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
+    - "data/targets/kitten/masks/kitten_cat_frame_masks.mp4"
   target_prompts:
-    - "several $POKEBALL moving on the track of Ferris wheel"
+    - "a $FOX walking on the floor next to a wall"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -31,11 +31,11 @@ train_data:
 
 validation_data:
   sources:
-    - "data/concepts/pokeball/videos/pokeball.mp4"
-    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
+    - "data/concepts/fox/videos/fox.mp4"
+    - "data/targets/kitten/videos/kitten.mp4"
   prompts:
-    - "a $POKEBALL"
-    - "several $POKEBALL moving on the track of Ferris wheel"
+    - "a $FOX sitting in the grass"
+    - "a $FOX walking on the floor next to a wall"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -48,7 +48,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$POKEBALL']
+concepts: ['$FOX']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
@@ -72,7 +72,7 @@ enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 500
+attn_check_steps: 100
 
 learning_rate: 1.0e-3
 batch_size: 1

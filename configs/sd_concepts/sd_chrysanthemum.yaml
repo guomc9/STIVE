@@ -11,7 +11,7 @@ train_data:
     - "data/concepts/chrysanthemum/masks/chrysanthemum_flower_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -36,7 +36,7 @@ validation_data:
   prompts:
     - "a $CHRYSANTHEMUM in the wind"
     - "a $CHRYSANTHEMUM sways in the wind"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
@@ -76,7 +76,7 @@ attn_check_steps: 100
 
 learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 

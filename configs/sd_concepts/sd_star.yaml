@@ -11,7 +11,7 @@ train_data:
     - "data/concepts/star/masks/star_star_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -36,7 +36,7 @@ validation_data:
   prompts:
     - "a $STAR"
     - "several $STAR moving on the track of Ferris wheel"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
@@ -57,10 +57,7 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
-    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
-    - "^.*\\.spatial_conv\\..*"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
   bias: "none"
 lora_lr: 1.0e-5
 
@@ -79,7 +76,7 @@ attn_check_steps: 100
 
 learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 3000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 
