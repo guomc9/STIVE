@@ -42,9 +42,6 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
   - "^.*\\.temp_lora_conv\\..*"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
