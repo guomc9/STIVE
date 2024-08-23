@@ -67,7 +67,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 75
+num_train_epoch: 45
 checkpointing_steps: 2000
 validation_steps: 10
 

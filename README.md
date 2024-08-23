@@ -348,7 +348,7 @@
 
 
 <details>
-<summary>Swap cat to <code>Tiger</code></summary>
+<summary>Swap cat to <code>tiger</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/kitten/kitten_to_tiger.yaml</code></pre>

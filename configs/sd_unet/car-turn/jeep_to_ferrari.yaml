@@ -40,9 +40,6 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
   - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
   - "^.*\\.temp_lora_conv\\..*"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_q\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_k\\..*$"
-  # - "^.*\\.attentions\\..*\\.attn_temp\\.to_v\\..*$"
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
@@ -66,7 +63,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 150
+num_train_epoch: 100
 checkpointing_steps: 2000
 validation_steps: 10
 

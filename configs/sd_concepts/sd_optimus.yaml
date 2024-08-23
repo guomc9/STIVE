@@ -6,12 +6,12 @@ train_data:
   video_paths: 
     - "data/concepts/optimus/videos/optimus.mp4"
   prompts: 
-    - "$OPTIMUS is squatting"
+    - "$OPTIMUS is squatting on a wooden floor with its back to a white wall"
   mask_paths:
     - "data/concepts/optimus/masks/optimus_robot_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
@@ -34,9 +34,9 @@ validation_data:
     - "data/concepts/optimus/videos/optimus.mp4"
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
-    - "a $OPTIMUS is squatting"
+    - "a $OPTIMUS is squatting on a wooden floor with its back to a white wall"
     - "a $OPTIMUS rides a wooden skateboard on the rail with a helmet and arms outstretched"
-  num_frames: 6
+  num_frames: 8
   sample_stride: 6
   width: 512
   height: 512
@@ -76,7 +76,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 3500
+num_train_epoch: 5000
 checkpointing_steps: 20000
 validation_steps: 500
 

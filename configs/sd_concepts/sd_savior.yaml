@@ -6,7 +6,8 @@ train_data:
   video_paths: 
     - "data/concepts/savior/videos/savior.mp4"
   prompts: 
-    - "$SAVIOR is outstretching his arms"
+    - "$SAVIOR stands with his back to a wall"
+    # - "$SAVIOR"
   mask_paths:
     - "data/concepts/savior/masks/savior_man_frame_masks.mp4"
   width: 512
@@ -34,7 +35,7 @@ validation_data:
     - "data/concepts/savior/videos/savior.mp4"
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
-    - "a $SAVIOR is outstretching his arms"
+    - "a $SAVIOR stands with his back to a wall"
     - "a $SAVIOR rides a wooden skateboard on the rail with a helmet and arms outstretched"
   num_frames: 6
   sample_stride: 8
@@ -76,7 +77,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 3500
+num_train_epoch: 5000
 checkpointing_steps: 20000
 validation_steps: 500
 
