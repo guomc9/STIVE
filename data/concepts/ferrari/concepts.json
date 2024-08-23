@@ -1,0 +1,14 @@
+{
+    "video_concepts": {
+        "ferrari": [
+            "$FERRARI"
+        ]
+    },
+    "concepts": [
+        "$FERRARI"
+    ],
+    "global_concepts": [],
+    "private_concepts": [
+        "$FERRARI"
+    ]
+}

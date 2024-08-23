@@ -1,0 +1,14 @@
+{
+    "video_concepts": {
+        "lambo": [
+            "$LAMBO"
+        ]
+    },
+    "concepts": [
+        "$LAMBO"
+    ],
+    "global_concepts": [],
+    "private_concepts": [
+        "$LAMBO"
+    ]
+}

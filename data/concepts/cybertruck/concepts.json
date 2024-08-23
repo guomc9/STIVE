@@ -1,0 +1,14 @@
+{
+    "video_concepts": {
+        "cybertrunk": [
+            "$CYBERTRUCK"
+        ]
+    },
+    "concepts": [
+        "$CYBERTRUCK"
+    ],
+    "global_concepts": [],
+    "private_concepts": [
+        "$CYBERTRUCK"
+    ]
+}
