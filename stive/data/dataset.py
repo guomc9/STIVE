@@ -414,7 +414,7 @@ class LatentPromptDataset(Dataset):
         rand_slice=False, 
         rand_slice_length=False, 
         rand_slice_stride=False, 
-        relax_mask=False, 
+        relax_mask=0, 
         concepts_prompt=False, 
         target_video_paths=None, 
         target_mask_paths=None, 
@@ -423,7 +423,7 @@ class LatentPromptDataset(Dataset):
         target_rand_slice=False, 
         target_rand_slice_length=False, 
         target_rand_slice_stride=False, 
-        relax_target_mask=False, 
+        relax_target_mask=0, 
     ):
         assert len(video_paths) == len(prompts) == len(mask_paths)
         self.video_paths = []
@@ -479,7 +479,7 @@ class LatentPromptDataset(Dataset):
         else:
             self.latents = encode_videos_latents(self.video_paths, height=height, width=width)              # [B, F, C, H, W]: List
 
-    def _load_masks(self, mask_paths, relax=False):
+    def _load_masks(self, mask_paths, relax=0):
         masks_list = []
         for mask_path in mask_paths:
             cap = cv2.VideoCapture(mask_path)
@@ -493,7 +493,7 @@ class LatentPromptDataset(Dataset):
             if len(masks) >= self.num_frames:
                 masks = torch.from_numpy(np.asarray(masks)[..., :1] / 255)              # [F, H, W, 1]
                 masks = rearrange(masks, 'f h w c -> f c h w')                          # [F, 1, H, W]
-                if relax:
+                for _ in range(0, relax):
                     masks = self._relax_binary_tensor(masks)                            # [F, 1, H, W]
                 masks_list.append(masks)
         return masks_list                                                               # [T, F, 1, H, W]

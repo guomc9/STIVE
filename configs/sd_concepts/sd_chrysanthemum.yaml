@@ -16,7 +16,7 @@ train_data:
   rand_slice: True
   rand_slice_length: True
   rand_slice_stride: True
-  relax_mask: False
+  relax_mask: 0
   target_video_paths: 
     - "data/targets/lotus/videos/lotus.mp4"
   target_mask_paths: 
@@ -27,7 +27,7 @@ train_data:
   target_rand_slice: True
   target_rand_slice_length: True
   target_rand_slice_stride: True
-  relax_target_mask: False
+  relax_target_mask: 0
 
 validation_data:
   sources:

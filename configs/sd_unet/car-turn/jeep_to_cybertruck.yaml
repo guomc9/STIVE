@@ -18,8 +18,8 @@ train_data:
   width: 512
   height: 512
   rand_slice: False
-  relax_mask: False
-  relax_target_mask: True
+  relax_mask: 0
+  relax_target_mask: 0
   target_video_paths:
     - "data/targets/car-turn/videos/car-turn.mp4"
   target_mask_paths:
