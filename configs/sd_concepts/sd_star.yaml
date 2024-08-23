@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/star/videos/star.mp4"
   prompts: 
-    - "$STAR"
+    - "$STAR with a white background"
   mask_paths:
     - "data/concepts/star/masks/star_star_frame_masks.mp4"
   width: 512
@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "several $STAR moving on the track of Ferris wheel"
+    - "several $STAR moving on the track"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -34,8 +34,8 @@ validation_data:
     - "data/concepts/star/videos/star.mp4"
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
-    - "a $STAR"
-    - "several $STAR moving on the track of Ferris wheel"
+    - "a $STAR with a white background"
+    - "several $STAR moving on the track"
   num_frames: 8
   sample_stride: 6
   width: 512

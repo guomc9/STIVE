@@ -29,8 +29,8 @@ train_data:
     - "a $FOX walking on the floor next to a wall"
 
 validation_data:
-  source: "data/targets/car-turn/videos/car-turn.mp4"
-  source_prompt: "a jeep driving down a curvy road in the countryside"
+  source: "data/targets/kitten/videos/kitten.mp4"
+  source_prompt: "a cat walking on the floor next to a wall"
   edit_prompts:
     - "a $FOX walking on the floor next to a wall"
   num_frames: 6
@@ -66,7 +66,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 200
+num_train_epoch: 110
 checkpointing_steps: 2000
 validation_steps: 10
 

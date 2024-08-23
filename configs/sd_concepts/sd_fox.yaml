@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/fox/videos/fox.mp4"
   prompts: 
-    - "$FOX"
+    - "a $FOX sitting in the grass"
   mask_paths:
     - "data/concepts/fox/masks/fox_fox_frame_masks.mp4"
   width: 512
@@ -74,9 +74,9 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 100
 
-learning_rate: 1.0e-3
+learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 7000
+num_train_epoch: 3500
 checkpointing_steps: 20000
 validation_steps: 500
 

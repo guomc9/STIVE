@@ -9,7 +9,7 @@ train_data:
     - "data/concepts/pokeball/videos/pokeball.mp4"
   prompts:
     - "several capsule moving on the track"
-    - "a $POKEBALL"
+    - "a $POKEBALL with a white background"
   mask_paths:
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
     - "data/concepts/pokeball/masks/pokeball_ball_frame_masks.mp4"
@@ -35,16 +35,6 @@ validation_data:
   width: 512
   height: 512
   replace_indices: [[2]]    # capsule -> '$POKEBALL'
-
-lora_conf:
-  r: 6
-  lora_alpha: 1.0
-  lora_dropout: 0.1
-  target_modules:
-    # - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.attn2\\.to_q\\..*$"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
-  bias: "none"
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"

@@ -10,8 +10,8 @@ validation_data:
 
   edit_prompts:
     - "a $FOX walking on the floor next to a wall"
-  num_frames: 8
-  sample_stride: 6
+  num_frames: 6
+  sample_stride: 8
   width: 512
   height: 512
 
@@ -24,8 +24,8 @@ inference_conf:
 ptp_conf:
   source_mask: "data/targets/kitten/check/kitten_cat_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.1]
-  self_replace_steps: [0.0, 0.1]
+  cross_replace_steps: [0.0, 0.04]
+  self_replace_steps: [0.0, 0.04]
   blend_words: 
     sources:
       - "cat"

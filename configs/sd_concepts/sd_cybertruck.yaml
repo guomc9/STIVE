@@ -56,10 +56,7 @@ lora_conf:
   lora_alpha: 1.0
   lora_dropout: 0.1
   target_modules:
-    # - "^.*\\.resnets\\..*\\.conv1\\.spatial_conv\\..*"
-    # - "^.*\\.resnets\\..*\\.conv2\\.spatial_conv\\..*"
-    - "^.*\\.spatial_conv\\..*"
-    # - "^.*\\.attentions\\..*\\.ff\\.net\\.2\\..*$"
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
   bias: "none"
 lora_lr: 1.0e-5
 
@@ -78,7 +75,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 7000
+num_train_epoch: 3500
 checkpointing_steps: 20000
 validation_steps: 500
 

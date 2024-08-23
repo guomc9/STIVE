@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/pokeball/videos/pokeball.mp4"
   prompts: 
-    - "$POKEBALL"
+    - "$POKEBALL with a white background"
   mask_paths:
     - "data/concepts/pokeball/masks/pokeball_ball_frame_masks.mp4"
   width: 512
@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "several $POKEBALL moving on the track of Ferris wheel"
+    - "several $POKEBALL moving on the track"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -34,8 +34,8 @@ validation_data:
     - "data/concepts/pokeball/videos/pokeball.mp4"
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
-    - "a $POKEBALL"
-    - "several $POKEBALL moving on the track of Ferris wheel"
+    - "a $POKEBALL with a white background"
+    - "several $POKEBALL moving on the track"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -74,9 +74,9 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 1.0e-3
+learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 7000
+num_train_epoch: 3500
 checkpointing_steps: 20000
 validation_steps: 500
 

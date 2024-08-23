@@ -22,5 +22,6 @@ python scripts/extract_masks.py -v data/concepts/pokeball/videos/pokeball.mp4 -s
 python scripts/extract_masks.py -v data/concepts/chrysanthemum/videos/chrysanthemum.mp4 -s flower -t 0.03
 python scripts/extract_masks.py -v data/concepts/star/videos/star.mp4 -s star -t 0.015
 python scripts/extract_masks.py -v data/concepts/pokeflag/videos/pokeflag.mp4 -s flag -t 0.015
-
+python scripts/extract_masks.py -v data/concepts/savior/videos/savior.mp4 -s man
 python scripts/extract_masks.py -v data/concepts/fox/videos/fox.mp4 -s fox -t 0.015
+python scripts/extract_masks.py -v data/concepts/duck/videos/duck.mp4 -s duck -t 0.015

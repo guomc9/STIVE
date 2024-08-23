@@ -1,28 +1,28 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/optimus/base/"
-checkpoints_dir: "checkpoints/sd_concepts/optimus"
+output_dir: ".log/sd_concepts/duck/base/"
+checkpoints_dir: "checkpoints/sd_concepts/duck"
 
 train_data:
   video_paths: 
-    - "data/concepts/optimus/videos/optimus.mp4"
+    - "data/concepts/duck/videos/duck.mp4"
   prompts: 
-    - "$OPTIMUS is squatting"
+    - "sleepy $DUCK sitting on the mat"
   mask_paths:
-    - "data/concepts/optimus/masks/optimus_robot_frame_masks.mp4"
+    - "data/concepts/duck/masks/duck_duck_frame_masks.mp4"
   width: 512
   height: 512
-  num_frames: 6
+  num_frames: 8
   enable_slice: True
   rand_slice: True
   rand_slice_length: True
   rand_slice_stride: True
   relax_mask: False
   target_video_paths: 
-    - "data/targets/man-skate/videos/man-skate.mp4"
+    - "data/targets/swan/videos/swan.mp4"
   target_mask_paths: 
-    - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
+    - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
   target_prompts:
-    - "a $OPTIMUS rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $DUCK swimming in a river near a wall and bushes"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -31,13 +31,13 @@ train_data:
 
 validation_data:
   sources:
-    - "data/concepts/optimus/videos/optimus.mp4"
+    - "data/concepts/savior/videos/savior.mp4"
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
-    - "a $OPTIMUS is squatting"
-    - "a $OPTIMUS rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a sleepy $DUCK sitting on the mat"
+    - "a $DUCK swimming in a river near a wall and bushes"
   num_frames: 6
-  sample_stride: 6
+  sample_stride: 8
   width: 512
   height: 512
 
@@ -48,7 +48,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$OPTIMUS']
+concepts: ['$DUCK']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
