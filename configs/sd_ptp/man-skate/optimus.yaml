@@ -6,13 +6,8 @@ checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-optimus"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
-  # source_prompt: "a man rides a wooden skateboard on the rail with a helmet and arms outstretched"
-  # source_prompt: "a man rides a wooden skateboard on the rail with arms outstretched"
-  # source_prompt: "a man rides a wooden skateboard on the rail"
   source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   edit_prompts:
-    # - "a $OPTIMUS rides a wooden skateboard on the rail with arms outstretched"
-    # - "a $OPTIMUS rides a wooden skateboard on the rail"
     - "a $OPTIMUS rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 6
@@ -20,17 +15,17 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 35
+  num_inference_steps: 50
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 35
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.04]
+  self_replace_steps: [0.0, 0.04]
   blend_words: 
     sources:
       - "man"
@@ -38,7 +33,7 @@ ptp_conf:
       - "$OPTIMUS"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.3, 0.3]
+  blend_th: [0., 0.]
   fuse_th: 0.01
   # fuse_scale: 1.5
 

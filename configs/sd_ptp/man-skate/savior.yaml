@@ -6,10 +6,10 @@ checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-savior"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
-  source_prompt: "a man rides a wooden skateboard on the rail and arms outstretched"
+  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
 
   edit_prompts:
-    - "a $SAVIOR rides a wooden skateboard on the rail and arms outstretched"
+    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512

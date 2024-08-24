@@ -144,6 +144,7 @@ def main(
             negative_prompt=None
         )
         print(f'source["frames"].shape: {source["frames"].shape}')
+        print(f'source["source_prompts"]: {source["source_prompts"]}')
         all_step_source_latents = validation_pipeline.prepare_ddim_source_latents(
             frames=source['frames'].to(accelerator.device, dtype=weight_dtype), 
             text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype),

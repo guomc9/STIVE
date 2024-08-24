@@ -5,10 +5,10 @@ checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-spiderman"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
-  source_prompt: "a man rides a wooden skateboard on the rail with a helmet and arms outstretched"
+  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
 
   edit_prompts:
-    - "a Spider-Man rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a Spider-Man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512
