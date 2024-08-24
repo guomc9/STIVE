@@ -23,8 +23,8 @@ inference_conf:
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.35]
-  self_replace_steps: [0.0, 0.35]
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "jeep"
@@ -33,7 +33,7 @@ ptp_conf:
       # - "car"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.1, 0.1]
+  blend_th: [0.3, 0.3]
   fuse_th: 0.01
   # fuse_scale: 1.5
 

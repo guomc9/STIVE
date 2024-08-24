@@ -23,7 +23,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $SAVIOR rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -36,7 +36,7 @@ validation_data:
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
     - "a $SAVIOR stands with his back to a wall"
-    - "a $SAVIOR rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 8
   width: 512

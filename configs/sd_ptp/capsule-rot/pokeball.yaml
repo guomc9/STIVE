@@ -6,9 +6,9 @@ checkpoints_dir: "checkpoints/sd_ptp/capsule-rot/to-pokeball"
 
 validation_data:
   source: "data/targets/capsule-rot/videos/capsule-rot.mp4"
-  source_prompt: "several capsule moving on the track"
+  source_prompt: "several capsule moving on the track against a blue sky background"
   edit_prompts:
-    - "several $POKEBALL moving on the track"
+    - "several $POKEBALL moving on the track against a blue sky background"
   num_frames: 6
   sample_stride: 6
   width: 512

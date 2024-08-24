@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/fox/videos/fox.mp4"
   prompts: 
-    - "a $FOX sitting in the grass"
+    - "$FOX sitting in the grass"
   mask_paths:
     - "data/concepts/fox/masks/fox_fox_frame_masks.mp4"
   width: 512

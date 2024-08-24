@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $NEO rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -35,7 +35,7 @@ validation_data:
     - "data/targets/man-skate/videos/man-skate.mp4"
   prompts:
     - "a $NEO is outstretching his arms"
-    - "a $NEO rides a wooden skateboard on the rail with a helmet and arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -76,7 +76,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 5000
+num_train_epoch: 7000
 checkpointing_steps: 20000
 validation_steps: 500
 

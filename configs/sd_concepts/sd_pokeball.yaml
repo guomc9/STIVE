@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "several $POKEBALL moving on the track"
+    - "several $POKEBALL moving on the track against a blue sky background"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -35,7 +35,7 @@ validation_data:
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
     - "a $POKEBALL with a white background"
-    - "several $POKEBALL moving on the track"
+    - "several $POKEBALL moving on the track against a blue sky background"
   num_frames: 8
   sample_stride: 6
   width: 512

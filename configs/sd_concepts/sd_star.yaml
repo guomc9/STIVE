@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
   target_prompts:
-    - "several $STAR moving on the track"
+    - "several $STAR moving on the track against a blue sky background"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -35,7 +35,7 @@ validation_data:
     - "data/targets/capsule-rot/videos/capsule-rot.mp4"
   prompts:
     - "a $STAR with a white background"
-    - "several $STAR moving on the track"
+    - "several $STAR moving on the track against a blue sky background"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -74,7 +74,7 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 100
 
-learning_rate: 1.0e-3
+learning_rate: 5.0e-4
 batch_size: 1
 num_train_epoch: 7000
 checkpointing_steps: 20000
