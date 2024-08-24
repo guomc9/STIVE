@@ -8,7 +8,7 @@ train_data:
     - "data/targets/man-skate/videos/man-skate.mp4"
     - "data/concepts/neo/videos/neo.mp4"
   prompts:
-    - "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a man rides a wooden skateboard on the handrail of the staircase with a helmet arms outstretched"
     - "a $NEO is outstretching his arms"
   mask_paths:
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
@@ -26,7 +26,7 @@ train_data:
   target_mask_paths:
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
