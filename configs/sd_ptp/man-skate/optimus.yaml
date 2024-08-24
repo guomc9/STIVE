@@ -15,17 +15,17 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 50
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 50
+  num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.04]
-  self_replace_steps: [0.0, 0.04]
+  cross_replace_steps: [0.0, -0.1]
+  self_replace_steps: [0.0, -0.1]
   blend_words: 
     sources:
       - "man"
