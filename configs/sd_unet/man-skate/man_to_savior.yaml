@@ -8,7 +8,7 @@ train_data:
     - "data/targets/man-skate/videos/man-skate.mp4"
     - "data/concepts/savior/videos/savior.mp4"
   prompts:
-    - "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a man rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
     - "a $SAVIOR stands with his back to a wall"
   mask_paths:
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
@@ -26,7 +26,7 @@ train_data:
   target_mask_paths:
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
@@ -47,10 +47,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 30
+  num_inference_steps: 50
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 30
+  num_inv_steps: 50
 
 # CHECK
 sub_sot: True

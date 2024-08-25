@@ -6,10 +6,10 @@ checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-neo"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
-  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with no helmet and arms outstretched"
 
   edit_prompts:
-    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with no helmet and arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -23,7 +23,6 @@ inference_conf:
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
-  # is_replace_controller: False
   is_replace_controller: True
 
   cross_replace_steps: [0.0, 0.0]

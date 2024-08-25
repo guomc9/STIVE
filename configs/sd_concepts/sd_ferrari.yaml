@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/ferrari/videos/ferrari.mp4"
   prompts: 
-    - "$FERRARI is driving through the forest"
+    - "a $FERRARI is driving through the forest"
   mask_paths:
     - "data/concepts/ferrari/masks/ferrari_car_frame_masks.mp4"
   width: 512
@@ -75,7 +75,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 8000
+num_train_epoch: 6000
 checkpointing_steps: 20000
 validation_steps: 500
 
