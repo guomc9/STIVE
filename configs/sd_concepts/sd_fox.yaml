@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/fox/videos/fox.mp4"
   prompts: 
-    - "a $FOX sitting in the grass"
+    - "a $WHITE fox sitting in the grass"
   mask_paths:
     - "data/concepts/fox/masks/fox_fox_frame_masks.mp4"
   width: 512
@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/kitten/masks/kitten_cat_frame_masks.mp4"
   target_prompts:
-    - "a $FOX walking on the floor next to a wall"
+    - "a $WHITE cat walking on the floor next to a wall"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -34,8 +34,8 @@ validation_data:
     - "data/concepts/fox/videos/fox.mp4"
     - "data/targets/kitten/videos/kitten.mp4"
   prompts:
-    - "a $FOX sitting in the grass"
-    - "a $FOX walking on the floor next to a wall"
+    - "a $WHITE fox sitting in the grass"
+    - "a $WHITE fox walking on the floor next to a wall"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -48,7 +48,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$FOX']
+concepts: ['$WHITE']
 concepts_num_embedding: 1
 retain_position_embedding: True
 

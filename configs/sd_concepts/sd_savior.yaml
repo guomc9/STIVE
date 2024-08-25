@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/savior/videos/savior.mp4"
   prompts: 
-    - "$SAVIOR stands with his back to a wall"
+    - "a $SAVIOR stands with his back to a wall"
     # - "$SAVIOR"
   mask_paths:
     - "data/concepts/savior/masks/savior_man_frame_masks.mp4"

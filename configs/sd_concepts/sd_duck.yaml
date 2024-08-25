@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/duck/videos/duck.mp4"
   prompts: 
-    - "sleepy $DUCK sitting on the mat"
+    - "a sleepy $DUCK sitting on the mat"
   mask_paths:
     - "data/concepts/duck/masks/duck_duck_frame_masks.mp4"
   width: 512
