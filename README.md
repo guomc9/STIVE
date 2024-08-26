@@ -270,19 +270,7 @@
 </details>
 
 
-<details>
-<summary>Swap man to <code>spiderman</code></summary>
-<ul>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/man-skate/man_to_spiderman.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/man-skate/spiderman.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-<details>
+<!-- <details>
 <summary>Swap swan to <code>$DUCK</code></summary>
 <ul>
 <li>finetune concept from SD:
@@ -298,11 +286,43 @@
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/swan/duck.yaml</code></pre>
 </li>
 </ul>
+</details> -->
+
+
+<details>
+<summary>Swap swan to <code>flamingo</code></summary>
+<ul>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/swan/swan_to_flamingo.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/swan/flamingo.yaml</code></pre>
+</li>
+</ul>
 </details>
 
 
 <details>
-<summary>Swap dog to <code>$CAT</code></summary>
+<summary>Swap dog to <code>$FOX</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_fox.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/gray-dog/dog_to_fox.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/gray-dog/fox.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/gray-dog/fox.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+
+<details>
+<summary>Swap kitten to <code>$CAT</code></summary>
 <ul>
 <li>finetune concept from SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_cat.yaml</code></pre>
@@ -321,26 +341,7 @@
 
 
 <details>
-<summary>Swap cat to <code>$FOX</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_fox.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/kitten/kitten_to_fox.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/kitten/fox.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/kitten/fox.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-
-<details>
-<summary>Swap cat to <code>Shiba-Inu</code></summary>
+<summary>Swap kitten to <code>Shiba-Inu</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/kitten/kitten_to_Shiba-Inu.yaml</code></pre>
@@ -353,7 +354,7 @@
 
 
 <details>
-<summary>Swap cat to <code>tiger</code></summary>
+<summary>Swap kitten to <code>tiger</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/kitten/kitten_to_tiger.yaml</code></pre>

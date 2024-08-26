@@ -32,10 +32,10 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/fox/videos/fox.mp4"
-    - "data/targets/kitten/videos/kitten.mp4"
+    - "data/targets/gray-dog/videos/gray-dog.mp4"
   prompts:
     - "a $FOX sitting in the grass"
-    - "a $FOX walking on the floor next to a wall"
+    - "a $FOX sitting on the mat"
   num_frames: 8
   sample_stride: 6
   width: 512

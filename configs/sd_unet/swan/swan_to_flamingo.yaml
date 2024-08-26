@@ -42,10 +42,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 30
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 30
+  num_inv_steps: 40
 
 # CHECK
 sub_sot: True
@@ -62,7 +62,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 75
+num_train_epoch: 150
 checkpointing_steps: 2000
 validation_steps: 10
 

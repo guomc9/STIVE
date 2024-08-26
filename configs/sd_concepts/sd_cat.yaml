@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/cat/videos/cat.mp4"
   prompts: 
-    - "$CAT sitting on the grass in the sun"
+    - "a $CAT sitting on the grass in the sun"
   mask_paths:
     - "data/concepts/cat/masks/cat_cat_frame_masks.mp4"
   width: 512
@@ -18,9 +18,9 @@ train_data:
   rand_slice_stride: True
   relax_mask: 0
   target_video_paths: 
-    - "data/targets/gray-dog/videos/gray-dog.mp4"
+    - "data/targets/kitten/videos/kitten.mp4"
   target_mask_paths: 
-    - "data/targets/gray-dog/masks/gray-dog_dog_frame_masks.mp4"
+    - "data/targets/kitten/masks/kitten_cat_frame_masks.mp4"
   target_prompts:
     - "a $CAT sitting on the mat"
   enable_target_slice: True
@@ -32,10 +32,10 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/cat/videos/cat.mp4"
-    - "data/targets/gray-dog/videos/gray-dog.mp4"
+    - "data/targets/kitten/videos/kitten.mp4"
   prompts:
     - "a $CAT sitting on the grass in the sun"
-    - "a $CAT sitting on the mat"
+    - "a $CAT walking on the floor next to a wall"
   num_frames: 8
   sample_stride: 6
   width: 512
