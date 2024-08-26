@@ -6,10 +6,10 @@ checkpoints_dir: "checkpoints/sd_ptp/kitten/to-fox"
 
 validation_data:
   source: "data/targets/kitten/videos/kitten.mp4"
-  source_prompt: "a black cat walking on the floor next to a wall"
+  source_prompt: "a cat walking on the floor next to a wall"
 
   edit_prompts:
-    - "a $WHITE fox walking on the floor next to a wall"
+    - "a $FOX walking on the floor next to a wall"
   num_frames: 6
   sample_stride: 8
   width: 512
@@ -28,11 +28,9 @@ ptp_conf:
   self_replace_steps: [0.0, 0.04]
   blend_words: 
     sources:
-      - "black"
       - "cat"
     targets:
-      - "$WHITE"
-      - "fox"
+      - "$FOX"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]

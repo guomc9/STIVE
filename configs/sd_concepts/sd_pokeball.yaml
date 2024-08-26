@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/pokeball/videos/pokeball.mp4"
   prompts: 
-    - "$POKEBALL with a white background"
+    - "a $POKEBALL with a white background"
   mask_paths:
     - "data/concepts/pokeball/masks/pokeball_ball_frame_masks.mp4"
   width: 512
@@ -76,7 +76,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 3500
+num_train_epoch: 5000
 checkpointing_steps: 20000
 validation_steps: 500
 

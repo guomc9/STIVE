@@ -26,13 +26,13 @@ train_data:
   target_mask_paths:
     - "data/targets/man-skate/masks/man-skate_man_frame_masks.mp4"
   target_prompts:
-    - "a $NEO rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
-  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
+  source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   edit_prompts:
-    - "a $NEO rides a wooden skateboard on the handrail of the staircase with a helmet and arms outstretched"
+    - "a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512

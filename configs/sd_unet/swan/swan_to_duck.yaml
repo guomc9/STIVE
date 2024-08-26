@@ -24,7 +24,7 @@ train_data:
   target_video_paths:
     - "data/targets/swan/videos/swan.mp4"
   target_mask_paths:
-    - "data/targets/swan/masks/swan_man_frame_masks.mp4"
+    - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
   target_prompts:
     - "a $DUCK swimming in a river near a wall and bushes"
 
@@ -67,7 +67,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 75
+num_train_epoch: 150
 checkpointing_steps: 2000
 validation_steps: 10
 
