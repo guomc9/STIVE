@@ -36,16 +36,16 @@ def concat_gifs(gif_files, output_file):
 
 # concat_gifs([
 #     "assets/jeep/car-turn.gif", 
-#     "assets/jeep/to-lambo.gif", 
-#     "assets/jeep/to-bmw.gif", 
-#     "assets/jeep/to-ferrari.gif", 
-#     "assets/jeep/to-cybertruck.gif"
+#     "assets/jeep/to-$lambo.gif", 
+#     "assets/jeep/to-$BMW.gif", 
+#     "assets/jeep/to-$FERRARI.gif", 
+#     "assets/jeep/to-$CYBETRUCK.gif"
 #     ], "assets/jeep/concat.gif")
 
 concat_gifs([
     "assets/jeep-unet-full-supvis/car-turn.gif", 
-    "assets/jeep-unet-full-supvis/to-lambo.gif", 
-    "assets/jeep-unet-full-supvis/to-bmw.gif", 
-    "assets/jeep-unet-full-supvis/to-ferrari.gif", 
-    "assets/jeep-unet-full-supvis/to-cybertruck.gif"
+    "assets/jeep-unet-full-supvis/to-$lambo.gif", 
+    "assets/jeep-unet-full-supvis/to-$BMW.gif", 
+    "assets/jeep-unet-full-supvis/to-$FERRARI.gif", 
+    "assets/jeep-unet-full-supvis/to-$CYBETRUCK.gif"
     ], "assets/jeep-unet-full-supvis/concat.gif")

@@ -210,7 +210,7 @@ class StepAttentionSupervisor(StepAttentionStore):
                 adapt_mask = repeat(adapt_mask, 'b f q -> b (f m) q', m=m).detach()                         # [B, F * M, Q]
                 if sub_sot and not only_neg:
                     adapt_mask = adapt_mask - adapt_mask * attn[..., 0]                                     # [B, F * M, Q]
-                    # NO DETACH IS BETTER SINCE WEAKER SUPERVISE
+                    # NO DETACH IS BETTER FOR WEAKER SUPERVISE
                     # adapt_mask.detach_()
                     
                 for i in range(b):
