@@ -1,4 +1,3 @@
-
 python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s jeep
 python scripts/extract_masks.py -v data/targets/car-drift/videos/car-drift.mp4 -s car
 python scripts/extract_masks.py -v data/targets/capsule-rot/videos/capsule-rot.mp4 -s capsule -t 0.004695
@@ -27,3 +26,7 @@ python scripts/extract_masks.py -v data/concepts/fox/videos/fox.mp4 -s fox -t 0.
 python scripts/extract_masks.py -v data/concepts/duck/videos/duck.mp4 -s duck -t 0.015
 
 python scripts/extract_masks.py -v data/concepts/cat/videos/cat.mp4 -s cat -t 0.015
+
+
+python scripts/extract_gif.py data/targets/car-turn/videos/car-turn.mp4 6 8 assets/jeep-unet-full-supvis/car-turn.gif
+python scripts/extract_gif.py data/targets/man-skate/videos/man-skate.mp4 6 8 assets/man-skate-unet-full-supvis/man-skate.gif
