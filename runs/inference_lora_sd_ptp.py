@@ -93,7 +93,10 @@ def main(
         torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
-    lora_unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
+    if os.path.exists(os.path.join(pretrained_lora_model_path, 'lora')):
+        lora_unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
+    else:
+        lora_unet = UNet3DConditionModel.from_pretrained_2d(pretrained_sd_model_path, subfolder="unet")
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     lora_unet.requires_grad_(False)

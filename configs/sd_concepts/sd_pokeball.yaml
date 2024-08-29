@@ -18,11 +18,14 @@ train_data:
   rand_slice_stride: True
   relax_mask: 0
   target_video_paths: 
-    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
+    - "data/targets/steel/videos/steel.mp4"
+    - "data/targets/kun/videos/kun.mp4"
   target_mask_paths: 
-    - "data/targets/capsule-rot/masks/capsule-rot_capsule_frame_masks.mp4"
+    - "data/targets/steel/masks/steel_ball_frame_masks.mp4"
+    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
   target_prompts:
-    - "several $POKEBALL moving on the track against a blue sky background"
+    - "four $POKEBALL on a wooden table"
+    - "a man playing a $POKEBALL on the floor back to a white wall"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -32,10 +35,12 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/pokeball/videos/pokeball.mp4"
-    - "data/targets/capsule-rot/videos/capsule-rot.mp4"
+    - "data/targets/steel/videos/steel.mp4"
+    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
   prompts:
     - "a $POKEBALL with a white background"
-    - "several $POKEBALL moving on the track against a blue sky background"
+    - "four $POKEBALL on a wooden table"
+    - "a man playing a $POKEBALL on the floor back to a white wall"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -76,7 +81,7 @@ attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 10000
+num_train_epoch: 4500
 checkpointing_steps: 20000
 validation_steps: 500
 

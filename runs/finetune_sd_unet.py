@@ -152,6 +152,7 @@ def main(
     validation_data: Dict,
     inference_conf: Dict, 
     pretrained_concepts_model_path: str = None, 
+    np_weight: float = 1.0, 
     cam_loss_type: str = 'mae', 
     sub_sot: bool = True, 
     unet_begin_store_idx: int = 1, 
@@ -446,7 +447,7 @@ def main(
                             supervisor.reset()
                             torch.cuda.empty_cache()
                             
-                        loss = mse_loss + scam_weight * scam_loss + tcam_weight * tcam_loss
+                        loss = np_weight * mse_loss + scam_weight * scam_loss + tcam_weight * tcam_loss
                         
                         avg_loss = accelerator.gather(loss.repeat(batch_size)).mean()
                         mse_loss = accelerator.gather(mse_loss.repeat(batch_size)).mean()

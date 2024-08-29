@@ -298,11 +298,12 @@ class CrossAttnDownBlock3D(nn.Module):
                     return custom_forward
 
                 hidden_states = torch.utils.checkpoint.checkpoint(create_custom_forward(resnet), hidden_states, temb)
-                hidden_states = torch.utils.checkpoint.checkpoint(
-                    create_custom_forward(attn, return_dict=False),
-                    hidden_states,
-                    encoder_hidden_states,
-                )[0]
+                # hidden_states = torch.utils.checkpoint.checkpoint(
+                #     create_custom_forward(attn, return_dict=False),
+                #     hidden_states,
+                #     encoder_hidden_states,
+                # )[0]
+                hidden_states = attn(hidden_states, encoder_hidden_states=encoder_hidden_states).sample
             else:
                 hidden_states = resnet(hidden_states, temb)
                 hidden_states = attn(hidden_states, encoder_hidden_states=encoder_hidden_states).sample

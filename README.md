@@ -119,57 +119,36 @@
 
 
 <details>
-<summary>Swap capsule to <code>$POKEBALL</code></summary>
+<summary>Swap steel to <code>$POKEBALL</code></summary>
 
 <ul>
 <li>finetune concept from SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_pokeball.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/capsule-rot/capsule_to_pokeball.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/steel/steel_to_pokeball.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/capsule-rot/pokeball.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/steel/pokeball.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/capsule-rot/pokeball.yaml</code></pre>
-</li>
-
-</ul>
-
-</details>
-
-
-<!-- <details>
-<summary>Swap flag to <code>$POKEFLAG</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_pokeflag.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/usa-flag/flag_to_pokeflag.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/usa-flag/pokeflag.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/usa-flag/pokeflag.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/pokeball.yaml</code></pre>
 </li>
 </ul>
 </details>
 
 <details>
-<summary>Swap flag to <code>FrenchFlag</code></summary>
+<summary>Swap steel to <code>football</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/usa-flag/flag_to_frenchflag.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/steel/steel_to_football.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/usa-flag/frenchflag.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/football.yaml</code></pre>
 </li>
 </ul>
-</details> -->
 
+</details>
 
 <details>
 <summary>Swap lotus to <code>$CHRYSANTHEMUM</code></summary>
@@ -227,6 +206,7 @@
 </li>
 </ul>
 </details>
+
 
 <details>
 <summary>Swap man to <code>$SAVIOR</code></summary>
@@ -331,7 +311,7 @@
 
 
 <details>
-<summary>Swap kitten to <code>tiger</code></summary>
+<summary>Swap black kitten to <code>red tiger</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/kitten/kitten_to_tiger.yaml</code></pre>
