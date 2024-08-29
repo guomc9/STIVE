@@ -5,6 +5,16 @@
     Your browser does not support the video tag.
 </video>
 
+<video autoplay loop muted playsinline>
+    <source src="assets/man-skate-unet-full-supvis/concat.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<video autoplay loop muted playsinline>
+    <source src="assets/tesla-unet-full-supvis/concat.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
 ## Get started
 ### Prepare Environment
 * To create environment with conda:

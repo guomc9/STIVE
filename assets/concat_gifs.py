@@ -47,8 +47,13 @@ def concat_gifs(gif_files, output_file):
 #     "assets/jeep-unet-full-supvis/to-$CYBERTRUCK.gif"
 #     ], "assets/jeep-unet-full-supvis/concat.gif")
 
+# concat_gifs([
+#     "assets/man-skate-unet-full-supvis/man-skate.gif", 
+#     "assets/man-skate-unet-full-supvis/to-$OPTIMUS.gif", 
+#     "assets/man-skate-unet-full-supvis/to-$NEO.gif", 
+#     ], "assets/man-skate-unet-full-supvis/concat.gif")
+
 concat_gifs([
-    "assets/man-skate-unet-full-supvis/man-skate.gif", 
-    "assets/man-skate-unet-full-supvis/to-$OPTIMUS.gif", 
-    "assets/man-skate-unet-full-supvis/to-$NEO.gif", 
-    ], "assets/man-skate-unet-full-supvis/concat.gif")
+    "assets/tesla-unet-full-supvis/tesla.gif", 
+    "assets/tesla-unet-full-supvis/to-$FERRARI.gif", 
+    ], "assets/tesla-unet-full-supvis/concat.gif")
