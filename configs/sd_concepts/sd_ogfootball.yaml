@@ -1,14 +1,14 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-output_dir: ".log/sd_concepts/chrysanthemum/base/"
-checkpoints_dir: "checkpoints/sd_concepts/chrysanthemum"
+output_dir: ".log/sd_concepts/ogfootball/base/"
+checkpoints_dir: "checkpoints/sd_concepts/ogfootball"
 
 train_data:
   video_paths: 
-    - "data/concepts/chrysanthemum/videos/chrysanthemum.mp4"
+    - "data/concepts/ogfootball/videos/ogfootball.mp4"
   prompts: 
-    - "a $CHRYSANTHEMUM with a black background"
+    - "a $OGFOOTBALL on a green grass"
   mask_paths:
-    - "data/concepts/chrysanthemum/masks/chrysanthemum_flower_frame_masks.mp4"
+    - "data/concepts/ogfootball/masks/ogfootball_football_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 8
@@ -17,27 +17,16 @@ train_data:
   rand_slice_length: True
   rand_slice_stride: True
   relax_mask: 0
-  target_video_paths: 
-    - "data/targets/lotus/videos/lotus.mp4"
-  target_mask_paths: 
-    - "data/targets/lotus/masks/lotus_lotus_frame_masks.mp4"
-  target_prompts:
-    - "a $CHRYSANTHEMUM sways in the wind"
-  enable_target_slice: True
-  target_rand_slice: True
-  target_rand_slice_length: True
-  target_rand_slice_stride: True
-  relax_target_mask: 0
 
 validation_data:
   sources:
-    - "data/concepts/chrysanthemum/videos/chrysanthemum.mp4"
-    - "data/targets/lotus/videos/lotus.mp4"
-    - "data/targets/rain-lotus/videos/rain-lotus.mp4"
+    - "data/concepts/ogfootball/videos/ogfootball.mp4"
+    - "data/targets/steel/videos/steel.mp4"
+    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
   prompts:
-    - "a $CHRYSANTHEMUM with a black background"
-    - "a $CHRYSANTHEMUM sways in the wind"
-    - "a $CHRYSANTHEMUM blooms in a rainy lotus pond"
+    - "a $OGFOOTBALL on a green grass"
+    - "four $OGFOOTBALL on a wooden table"
+    - "a man playing a $OGFOOTBALL on the floor back to a white wall"
   num_frames: 8
   sample_stride: 6
   width: 512
@@ -50,7 +39,7 @@ inference_conf:
   num_inv_steps: 50
 
 enable_prefix: True
-concepts: ['$CHRYSANTHEMUM']
+concepts: ['$OGFOOTBALL']
 concepts_num_embedding: 1
 retain_position_embedding: True
 
@@ -74,11 +63,11 @@ enable_tcam_loss: False
 tcam_weight: 0.0
 tcam_only_neg: True
 cam_loss_reduction: 'mean'
-attn_check_steps: 100
+attn_check_steps: 500
 
 learning_rate: 5.0e-4
 batch_size: 1
-num_train_epoch: 6000
+num_train_epoch: 4500
 checkpointing_steps: 20000
 validation_steps: 500
 

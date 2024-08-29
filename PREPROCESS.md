@@ -39,4 +39,7 @@ python scripts/extract_masks.py -v data/concepts/mallard/videos/mallard.mp4 -s m
 
 ## Extract GIFs
 python scripts/extract_gif.py data/targets/car-turn/videos/car-turn.mp4 6 8 assets/jeep-unet-full-supvis/car-turn.gif
+
 python scripts/extract_gif.py data/targets/man-skate/videos/man-skate.mp4 6 8 assets/man-skate-unet-full-supvis/man-skate.gif
+
+python scripts/extract_gif.py data/targets/tesla/videos/tesla.mp4 6 8 assets/tesla-unet-full-supvis/tesla.gif

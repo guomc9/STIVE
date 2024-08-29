@@ -17,11 +17,11 @@ train_data:
   rand_slice_length: True
   rand_slice_stride: True
   target_video_paths: 
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/tesla/videos/tesla.mp4"
   target_mask_paths: 
-    - "data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4"
+    - "data/targets/tesla/masks/tesla_car_frame_masks.mp4"
   target_prompts:
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $FERRARI is drifting in the snow"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True
@@ -31,10 +31,10 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/ferrari/videos/ferrari.mp4"
-    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/tesla/videos/tesla.mp4"
   prompts:
     - "a $FERRARI is driving through the forest"
-    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $FERRARI is drifting in the snow"
   num_frames: 8
   sample_stride: 2
   width: 512
