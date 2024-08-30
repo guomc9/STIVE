@@ -5,11 +5,11 @@ output_dir: ".log/ptp/sd_fox/to-fox/"
 checkpoints_dir: "checkpoints/sd_ptp/gray-dog/to-fox"
 
 validation_data:
-  source: "data/targets/kitten/videos/kitten.mp4"
-  source_prompt: "a dog sitting in the grass"
+  source: "data/targets/gray-dog/videos/gray-dog.mp4"
+  source_prompt: "a dog sitting on a mat"
 
   edit_prompts:
-    - "a $FOX sitting in the grass"
+    - "a $FOX sitting on a mat"
   num_frames: 6
   sample_stride: 8
   width: 512
@@ -24,8 +24,8 @@ inference_conf:
 ptp_conf:
   source_mask: "data/targets/gray-dog/check/gray-dog_dog_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.04]
-  self_replace_steps: [0.0, 0.04]
+  cross_replace_steps: [0.0, 0.5]
+  self_replace_steps: [0.0, 0.5]
   blend_words: 
     sources:
       - "dog"

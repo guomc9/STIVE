@@ -43,3 +43,12 @@ python scripts/extract_gif.py data/targets/car-turn/videos/car-turn.mp4 6 8 asse
 python scripts/extract_gif.py data/targets/man-skate/videos/man-skate.mp4 6 8 assets/man-skate-unet-full-supvis/man-skate.gif
 
 python scripts/extract_gif.py data/targets/tesla/videos/tesla.mp4 6 8 assets/tesla-unet-full-supvis/tesla.gif
+
+
+## Check clip-score, fc-score, mpsnr
+python scripts/check_fc_score.py -v "assets/jeep-unet-full-supvis/to-\$LAMBO.gif"
+
+python scripts/check_mpsnr.py -v1 assets/jeep-unet-full-supvis/car-turn.gif -v2 assets/jeep-unet-full-supvis/to-\$CYBERTRUCK.gif -m data/targets/car-turn/masks/car-turn_jeep_frame_masks.mp4
+
+## Check word in tokenizer
+python scripts/check_word_in_tokenizer.py -w bmw

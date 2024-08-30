@@ -6,31 +6,33 @@ checkpoints_dir: "checkpoints/sd_ptp/swan/to-flamingo"
 
 validation_data:
   source: "data/targets/swan/videos/swan.mp4"
-  source_prompt: "a swan swimming in a river near a wall and bushes"
+  source_prompt: "a black swan swimming in a river near a wall and bushes"
 
   edit_prompts:
-    - "a flagmingo swimming in a river near a wall and bushes"
+    - "a pink flagmingo swimming in a river near a wall and bushes"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 33
-  guidance_scale: 12.5
+  num_inference_steps: 35
+  guidance_scale: 7.5
   use_inv_latent: True
-  num_inv_steps: 33
+  num_inv_steps: 35
 
 ptp_conf:
   source_mask: "data/targets/swan/videos/swan_swan_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.4]
+  self_replace_steps: [0.0, 0.4]
   blend_words: 
     sources:
+      - "black"
       - "swan"
     targets:
+      - "pink"
       - "flamingo"
   blend_self_attention: True
   use_inversion_attention: True

@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/ogfootball/videos/ogfootball.mp4"
   prompts: 
-    - "a $OGFOOTBALL on a green grass"
+    - "a $OGFOOTBALL on the grass"
   mask_paths:
     - "data/concepts/ogfootball/masks/ogfootball_football_frame_masks.mp4"
   width: 512
@@ -22,9 +22,9 @@ validation_data:
   sources:
     - "data/concepts/ogfootball/videos/ogfootball.mp4"
     - "data/targets/steel/videos/steel.mp4"
-    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
+    - "data/targets/kun/videos/kun.mp4"
   prompts:
-    - "a $OGFOOTBALL on a green grass"
+    - "a $OGFOOTBALL on the grass"
     - "four $OGFOOTBALL on a wooden table"
     - "a man playing a $OGFOOTBALL on the floor back to a white wall"
   num_frames: 8

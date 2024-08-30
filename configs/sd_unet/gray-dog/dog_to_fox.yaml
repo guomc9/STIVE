@@ -47,7 +47,7 @@ extra_trainable_modules:
 
 inference_conf:
   num_inference_steps: 50
-  guidance_scale: 12.5
+  guidance_scale: 7.5
   use_inv_latent: True
   num_inv_steps: 50
 
@@ -66,7 +66,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 250
+num_train_epoch: 60
 checkpointing_steps: 2000
 validation_steps: 10
 

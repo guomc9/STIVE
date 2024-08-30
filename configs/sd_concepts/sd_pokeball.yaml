@@ -36,7 +36,7 @@ validation_data:
   sources:
     - "data/concepts/pokeball/videos/pokeball.mp4"
     - "data/targets/steel/videos/steel.mp4"
-    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
+    - "data/targets/kun/videos/kun.mp4"
   prompts:
     - "a $POKEBALL with a white background"
     - "four $POKEBALL on a wooden table"

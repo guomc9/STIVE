@@ -22,7 +22,7 @@ train_data:
   target_mask_paths: 
     - "data/targets/kitten/masks/kitten_cat_frame_masks.mp4"
   target_prompts:
-    - "a $CAT sitting on the mat"
+    - "a $CAT walking on the floor next to a wall"
   enable_target_slice: True
   target_rand_slice: True
   target_rand_slice_length: True

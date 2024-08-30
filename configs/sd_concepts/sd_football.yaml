@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/football/videos/football.mp4"
   prompts: 
-    - "a $FOOTBALL on a green grass"
+    - "a $FOOTBALL on the grass"
   mask_paths:
     - "data/concepts/football/masks/football_football_frame_masks.mp4"
   width: 512
@@ -22,9 +22,9 @@ validation_data:
   sources:
     - "data/concepts/football/videos/football.mp4"
     - "data/targets/steel/videos/steel.mp4"
-    - "data/targets/kun/masks/kun_basketball_frame_masks.mp4"
+    - "data/targets/kun/videos/kun.mp4"
   prompts:
-    - "a $POKEBALL on a green grass"
+    - "a $FOOTBALL on the grass"
     - "four $FOOTBALL on a wooden table"
     - "a man playing a $FOOTBALL on the floor back to a white wall"
   num_frames: 8
@@ -65,7 +65,7 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 5.0e-4
+learning_rate: 1.0e-3
 batch_size: 1
 num_train_epoch: 4500
 checkpointing_steps: 20000

@@ -6,7 +6,7 @@ train_data:
   video_paths:
     - "data/targets/swan/videos/swan.mp4"
   prompts:
-    - "a swan swimming in a river near a wall and bushes"
+    - "a black swan swimming in a river near a wall and bushes"
   mask_paths:
     - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
   enable_temporal_modules:
@@ -19,20 +19,20 @@ train_data:
   target_video_paths:
     - "data/targets/swan/videos/swan.mp4"
   target_mask_paths:
-    - "data/targets/swan/masks/swan_man_frame_masks.mp4"
+    - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
   target_prompts:
-    - "a flamingo swimming in a river near a wall and bushes"
+    - "a pink flamingo swimming in a river near a wall and bushes"
 
 validation_data:
   source: "data/targets/swan/videos/swan.mp4"
-  source_prompt: "a swan swimming in a river near a wall and bushes"
+  source_prompt: "a black swan swimming in a river near a wall and bushes"
   edit_prompts:
-    - "a flamingo swimming in a river near a wall and bushes"
+    - "a pink flamingo swimming in a river near a wall and bushes"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
-  replace_indices: [[2]]    # swan -> flamingo
+  replace_indices: [[2, 3]]    # black swan -> pink flamingo
 
 
 extra_trainable_modules:
@@ -42,10 +42,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 40
-  guidance_scale: 12.5
+  num_inference_steps: 50
+  guidance_scale: 7.5
   use_inv_latent: True
-  num_inv_steps: 40
+  num_inv_steps: 50
 
 # CHECK
 sub_sot: True
