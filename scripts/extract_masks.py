@@ -54,7 +54,7 @@ def create_unet_mask(boxes, frame_size):
     
     return unet_mask
 
-
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--video_path', type=str, help='Path to the video file', required=True)
@@ -73,7 +73,7 @@ def main():
     masks_dir = os.path.join(os.path.dirname(os.path.dirname(video_path)), 'masks')
     os.makedirs(check_dir, exist_ok=True)
     processor = OwlViTProcessor.from_pretrained("./checkpoints/owlvit-base-patch16")
-    model = OwlViTForObjectDetection.from_pretrained("./checkpoints/owlvit-base-patch16")
+    model = OwlViTForObjectDetection.from_pretrained("./checkpoints/owlvit-base-patch16").to(device)
     owl_size = (768, 768)
     patch_size = 16
 
@@ -82,15 +82,15 @@ def main():
     frame_masks = []
     for frame_index, frame in enumerate(frames):
         owl_frame = cv2.resize(frame, owl_size)
-        inputs = processor(text=[target_str], images=owl_frame, return_tensors="pt")
+        inputs = processor(text=[target_str], images=owl_frame, return_tensors="pt").to(device)
         with torch.no_grad():
             outputs = model(**inputs)
 
-        target_sizes = torch.Tensor([owl_frame.shape[:2]])
+        target_sizes = torch.Tensor([owl_frame.shape[:2]]).to(device)
         results = processor.post_process_object_detection(outputs=outputs, threshold=thresh, target_sizes=target_sizes)
         
         for i in range(len(results)):
-            boxes = results[i]["boxes"]
+            boxes = results[i]["boxes"].cpu()
             frame_with_boxes = draw_boxes(owl_frame.copy(), boxes)
             boxed_frames.append(frame_with_boxes)
 

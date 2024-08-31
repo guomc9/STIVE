@@ -17,8 +17,8 @@ python scripts/extract_masks.py -v data/targets/rain-lotus/videos/rain-lotus.mp4
 python scripts/extract_masks.py -v data/targets/tesla/videos/tesla.mp4 -s car
 
 python scripts/extract_masks.py -v data/targets/mallard/videos/mallard.mp4 -s mallard -t 0.03
-python scripts/extract_masks.py -v data/targets/bear/videos/bear.mp4 -s bear -t 0.03
-python scripts/extract_masks.py -v data/targets/race/videos/race.mp4 -s car -t 0.03
+python scripts/extract_masks.py -v data/targets/bear/videos/bear.mp4 -s bear -t 0.025
+python scripts/extract_masks.py -v data/targets/race/videos/race.mp4 -s car -t 0.05
 python scripts/extract_masks.py -v data/targets/soccerball/videos/soccerball.mp4 -s soccerball -t 0.03
 python scripts/extract_masks.py -v data/targets/tennis/videos/tennis.mp4 -s man -t 0.03
 
@@ -46,7 +46,7 @@ python scripts/extract_masks.py -v data/concepts/pelican/videos/pelican.mp4 -s p
 python scripts/extract_masks.py -v data/concepts/rhino/videos/rhino.mp4 -s rhino
 python scripts/extract_masks.py -v data/concepts/ultron/videos/ultron.mp4 -s robot
 python scripts/extract_masks.py -v data/concepts/ogsoccerball/videos/ogsoccerball.mp4 -s soccerball
-python scripts/extract_masks.py -v data/targets/cow/videos/cow.mp4 -s cow -t 0.03
+python scripts/extract_masks.py -v data/concepts/cow/videos/cow.mp4 -s cow -t 0.03
 
 
 
