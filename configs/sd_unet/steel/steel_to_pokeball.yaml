@@ -8,7 +8,7 @@ train_data:
     - "data/targets/steel/videos/steel.mp4"
     - "data/concepts/pokeball/videos/pokeball.mp4"
   prompts:
-    - "four ball on a wooden table"
+    - "two ball on a wooden table"
     - "a $POKEBALL with a white background"
   mask_paths:
     - "data/targets/steel/masks/steel_ball_frame_masks.mp4"
@@ -23,13 +23,13 @@ train_data:
   target_mask_paths:
     - "data/targets/steel/masks/steel_ball_frame_masks.mp4"
   target_prompts:
-    - "four $POKEBALL on a wooden table"
+    - "two $POKEBALL on a wooden table"
 
 validation_data:
   source: "data/targets/steel/videos/steel.mp4"
-  source_prompt: "four ball on a wooden table"
+  source_prompt: "two ball on a wooden table"
   edit_prompts:
-    - "four $POKEBALL on a wooden table"
+    - "two $POKEBALL on a wooden table"
   num_frames: 6
   sample_stride: 6
   width: 512

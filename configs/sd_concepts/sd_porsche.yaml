@@ -1,0 +1,83 @@
+pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
+output_dir: ".log/sd_concepts/porsche/base/"
+checkpoints_dir: "checkpoints/sd_concepts/porsche"
+
+train_data:
+  video_paths: 
+    - "data/concepts/porsche/videos/porsche.mp4"
+  prompts: 
+    - "a $PORSCHE is driving on the race track"
+  mask_paths:
+    - "data/concepts/porsche/masks/porsche_car_frame_masks.mp4"
+  width: 512
+  height: 512
+  num_frames: 8
+  enable_slice: True
+  rand_slice: True
+  rand_slice_length: True
+  rand_slice_stride: True
+
+validation_data:
+  sources:
+    - "data/concepts/porsche/videos/porsche.mp4"
+    - "data/targets/car-turn/videos/car-turn.mp4"
+    - "data/targets/race/videos/race.mp4"
+    - "data/targets/tesla/videos/tesla.mp4"
+
+  prompts:
+    - "a $PORSCHE is driving on the race track"
+    - "a $PORSCHE driving down a curvy road in the countryside"
+    - "a $PORSCHE is drifting on the race track"
+    - "a $PORSCHE is drifting in the snow"
+  num_frames: 6
+  sample_stride: 6
+  width: 512
+  height: 512
+
+inference_conf:
+  num_inference_steps: 50
+  guidance_scale: 12.5
+  use_inv_latent: True
+  num_inv_steps: 50
+unet_begin_store_idx: 0
+enable_prefix: True
+concepts: ['$PORSCHE']
+concepts_num_embedding: 1
+retain_position_embedding: True
+
+
+lora_conf:
+  r: 16
+  lora_alpha: 1.0
+  lora_dropout: 0.1
+  target_modules:
+    - "^.*\\.attentions\\..*\\.attn2\\.to_v\\..*$"
+  bias: "none"
+lora_lr: 1.0e-5
+
+sub_sot: True
+cam_loss_type: 'mae'
+
+enable_scam_loss: False
+scam_weight: 0.0
+scam_only_neg: True
+
+enable_tcam_loss: False
+tcam_weight: 0.0
+tcam_only_neg: True
+cam_loss_reduction: 'mean'
+attn_check_steps: 500
+
+learning_rate: 1.0e-3
+batch_size: 1
+num_train_epoch: 3500
+checkpointing_steps: 20000
+validation_steps: 500
+
+seed: 33
+mixed_precision: 'fp16'
+use_8bit_adam: False
+gradient_checkpointing: True
+enable_xformers_memory_efficient_attention: True
+enable_torch_2_attn: True
+gradient_accumulation_steps: 1

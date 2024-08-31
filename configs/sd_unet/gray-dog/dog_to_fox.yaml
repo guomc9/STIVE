@@ -26,7 +26,7 @@ train_data:
   target_mask_paths:
     - "data/targets/gray-dog/masks/gray-dog_dog_frame_masks.mp4"
   target_prompts:
-    - "a $FOX sitting in the grass"
+    - "a $FOX sitting on the mat"
 
 validation_data:
   source: "data/targets/gray-dog/videos/gray-dog.mp4"
@@ -66,7 +66,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 60
+num_train_epoch: 55
 checkpointing_steps: 2000
 validation_steps: 10
 

@@ -3,13 +3,9 @@ import argparse
 
 def check_word_in_tokenizer(tokenizer, word):
     # Get the token ID for the word
-    token_id = tokenizer.convert_tokens_to_ids(word)
-    
-    # If the token ID is the same as the unknown token ID, the word is not in the vocabulary
-    if token_id == tokenizer.unk_token_id:
-        return False
-    else:
-        return True
+    tokens = tokenizer.tokenize(word)
+    token_ids = tokenizer.convert_tokens_to_ids(tokens)
+    print(f'tokenize {word} to tokens: {tokens}, and token_ids: {token_ids}')
 
 def main():
     # Set up argument parser
@@ -21,11 +17,7 @@ def main():
 
     # Check each word
     for word in args.words:
-        exists = check_word_in_tokenizer(tokenizer, word)
-        if exists:
-            print(f"The word '{word}' exists in the CLIP tokenizer vocabulary.")
-        else:
-            print(f"The word '{word}' does NOT exist in the CLIP tokenizer vocabulary.")
+        check_word_in_tokenizer(tokenizer, word)
 
 if __name__ == "__main__":
     main()
