@@ -25,8 +25,8 @@ ptp_conf:
   source_mask: "data/targets/gray-dog/check/gray-dog_dog_frame_masks.mp4"
   # is_replace_controller: True
   is_replace_controller: False
-  cross_replace_steps: [0.0, 0.0]
-  self_replace_steps: [0.0, 0.0]
+  cross_replace_steps: [0.0, 0.3]
+  self_replace_steps: [0.0, 0.3]
   blend_words: 
     sources:
       - "dog"

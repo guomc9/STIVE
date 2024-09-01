@@ -93,7 +93,7 @@ def main(
         torch.cuda.empty_cache()
     
     vae = AutoencoderKL.from_pretrained(pretrained_sd_model_path, subfolder="vae")
-    if os.path.exists(os.path.join(pretrained_lora_model_path, 'lora')):
+    if os.path.exists(os.path.join(pretrained_lora_model_path, 'unet')):
         lora_unet = UNet3DConditionModel.from_pretrained(pretrained_lora_model_path, subfolder="unet")
     else:
         lora_unet = UNet3DConditionModel.from_pretrained_2d(pretrained_sd_model_path, subfolder="unet")

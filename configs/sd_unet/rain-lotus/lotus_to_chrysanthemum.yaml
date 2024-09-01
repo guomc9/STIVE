@@ -5,13 +5,13 @@ checkpoints_dir: "checkpoints/sd_unet/chrysanthemum"
 
 train_data:
   video_paths:
-    - "data/targets/lotus/videos/lotus.mp4"
+    - "data/targets/rain-lotus/videos/rain-lotus.mp4"
     - "data/concepts/chrysanthemum/videos/chrysanthemum.mp4"
   prompts:
     - "a lotus sways in the wind"
     - "a $CHRYSANTHEMUM sways in the wind"
   mask_paths:
-    - "data/targets/lotus/masks/lotus_lotus_frame_masks.mp4"
+    - "data/targets/rain-lotus/masks/rain-lotus_lotus_frame_masks.mp4"
     - "data/concepts/chrysanthemum/masks/chrysanthemum_flower_frame_masks.mp4"
   num_frames: 6
   sample_stride: 6
@@ -19,9 +19,9 @@ train_data:
   height: 512
   rand_slice: False
   target_video_paths:
-    - "data/targets/lotus/videos/lotus.mp4"
+    - "data/targets/rain-lotus/videos/rain-lotus.mp4"
   target_mask_paths:
-    - "data/targets/lotus/masks/lotus_lotus_frame_masks.mp4"
+    - "data/targets/rain-lotus/masks/rain-lotus_lotus_frame_masks.mp4"
   target_prompts:
     - "a $CHRYSANTHEMUM sways in the wind"
 
