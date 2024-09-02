@@ -6,7 +6,7 @@ train_data:
   video_paths: 
     - "data/concepts/rhino/videos/rhino.mp4"
   prompts: 
-    - "a $RHINO swimming in the lake"
+    - "a $RHINO walking on the rock against a wall"
   mask_paths:
     - "data/concepts/rhino/masks/rhino_rhino_frame_masks.mp4"
   width: 512

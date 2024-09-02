@@ -41,6 +41,7 @@ python scripts/extract_masks.py -v data/concepts/cat/videos/cat.mp4 -s cat -t 0.
 
 python scripts/extract_masks.py -v data/concepts/audi/videos/audi.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/mercedes/videos/mercedes.mp4 -s car
+python scripts/extract_masks.py -v data/concepts/porsche/videos/porsche.mp4 -s car
 python scripts/extract_masks.py -v data/concepts/goldentiger/videos/goldentiger.mp4 -s tiger
 python scripts/extract_masks.py -v data/concepts/pelican/videos/pelican.mp4 -s pelican
 python scripts/extract_masks.py -v data/concepts/rhino/videos/rhino.mp4 -s rhino

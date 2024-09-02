@@ -33,6 +33,9 @@
 * owlvit model from: [google/owlvit-base-patch16](https://huggingface.co/google/owlvit-base-patch16/tree/main) (to extract mask for attn-prob supervision, necessary for custom data)
 
 ## Examples
+
+
+### jeep
 <details>
 <summary>Swap jeep to <code>$LAMBO</code></summary>
 
@@ -108,6 +111,7 @@
 </ul>
 </details>
 
+### tesla
 <details>
 <summary>Swap tesla to <code>$FERRARI</code></summary>
 <ul>
@@ -126,6 +130,47 @@
 </ul>
 </details>
 
+
+### race
+<details>
+<summary>Swap race-car to <code>$AUDI</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_audi.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/race/car_to_audi.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/race/audi.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/race/audi.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+<details>
+<summary>Swap race-car to <code>$GT3</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_gt3.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/race/car_to_gt3.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/race/gt3.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/race/gt3.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+
+
+### steel
 <details>
 <summary>Swap steel to <code>$POKEBALL</code></summary>
 <ul>
@@ -145,37 +190,19 @@
 </details>
 
 <details>
-<summary>Swap steel to <code>$FOOTBALL</code></summary>
+<summary>Swap steel to <code>$OGSOCCERBALL</code></summary>
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_football.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ogsoccerball.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/steel/steel_to_football.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/steel/steel_to_ogsoccerball.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/steel/football.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/steel/ogsoccerball.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/football.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-<details>
-<summary>Swap steel to <code>$OGFOOTBALL</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ogfootball.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/steel/steel_to_ogfootball.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/steel/ogfootball.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/ogfootball.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/ogsoccerball.yaml</code></pre>
 </li>
 </ul>
 </details>
@@ -198,6 +225,7 @@
 </ul>
 </details>
 
+### lotus
 <details>
 <summary>Swap lotus to <code>$CHRYSANTHEMUM</code></summary>
 
@@ -217,6 +245,7 @@
 </ul>
 </details>
 
+### rain-lotus
 <details>
 <summary>Swap rain-lotus to <code>$CHRYSANTHEMUM</code></summary>
 
@@ -236,7 +265,7 @@
 </ul>
 </details>
 
-
+### man-skate
 <details>
 <summary>Swap man to <code>$NEO</code></summary>
 <ul>
@@ -276,24 +305,24 @@
 
 
 <details>
-<summary>Swap man to <code>$SAVIOR</code></summary>
+<summary>Swap man to <code>$ULTRON</code></summary>
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_savior.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ultron.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/man-skate/man_to_savior.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/man-skate/man_to_ultron.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/man-skate/savior.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/man-skate/ultron.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/man-skate/savior.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/man-skate/ultron.yaml</code></pre>
 </li>
 </ul>
 </details>
 
-
+### swan
 <details>
 <summary>Swap swan to <code>$MALLARD</code></summary>
 <ul>
@@ -325,7 +354,7 @@
 </ul>
 </details>
 
-
+### dog
 <details>
 <summary>Swap dog to <code>$FOX</code></summary>
 <ul>
@@ -344,7 +373,7 @@
 </ul>
 </details>
 
-
+### kitten
 <details>
 <summary>Swap kitten to <code>$CAT</code></summary>
 <ul>
@@ -385,6 +414,63 @@
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/kitten/tiger.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+
+### bear
+<details>
+<summary>Swap bear to <code>$GOLDENTIGER</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_goldentiger.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_goldentiger.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/goldentiger.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/goldentiger.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+<details>
+<summary>Swap bear to <code>$COW</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_cow.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_cow.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/cow.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/cow.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+
+<details>
+<summary>Swap bear to <code>$RHINO</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_rhino.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_rhino.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/rhino.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/rhino.yaml</code></pre>
 </li>
 </ul>
 </details>

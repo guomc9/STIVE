@@ -9,16 +9,16 @@ validation_data:
 
   edit_prompts:
     - "a porsche driving down a curvy road in the countryside"
-  num_frames: 8
-  sample_stride: 6
+  num_frames: 6
+  sample_stride: 8
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 33
+  num_inference_steps: 35
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 33
+  num_inv_steps: 35
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
