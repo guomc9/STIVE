@@ -1,16 +1,5 @@
 # STIVE (Stable Textual Inversion Video Editing)
 
-<video autoplay loop muted playsinline>
-    <source src="assets/jeep-unet-full-supvis/concat.mp4" type="video/mp4">
-</video>
-
-<video autoplay loop muted playsinline>
-    <source src="assets/man-skate-unet-full-supvis/concat.mp4" type="video/mp4">
-</video>
-<video autoplay loop muted playsinline>
-    <source src="assets/tesla-unet-full-supvis/concat.mp4" type="video/mp4">
-</video>
-
 <table style="width:100%; border-collapse: collapse;">
   <tr>
     <th style="border: 1px solid black; padding: 10px;">Source Video</th>
@@ -23,9 +12,7 @@
         <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/lambo/videos/lambo.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/lambo/videos/lambo.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/jeep-unet-full-supvis/to-$LAMBO.gif" >
@@ -39,9 +26,7 @@
         <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/bmw/videos/bmw.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/bmw/videos/bmw.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/jeep-unet-full-supvis/to-$BMW.gif" >
@@ -55,9 +40,7 @@
         <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/cybertruck/videos/cybertruck.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/cybertruck/videos/cybertruck.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/jeep-unet-full-supvis/to-$CYBERTRUCK.gif" >
@@ -71,9 +54,7 @@
         <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/optimus/videos/optimus.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/optimus/videos/optimus.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/man-skate-unet-full-supvis/to-$OPTIMUS.gif" >
@@ -88,9 +69,7 @@
         <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/neo/videos/neo.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/neo/videos/neo.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/man-skate-unet-full-supvis/to-$NEO.gif" >
@@ -105,9 +84,7 @@
         <img src="assets/tesla-unet-full-supvis/tesla.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <video autoplay loop muted playsinline>
-        <source src="data/concepts/ferrari/videos/ferrari.mp4" type="video/mp4">
-        </video>
+        <img src="data/concepts/ferrari/videos/ferrari.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/tesla-unet-full-supvis/to-$FERRARI.gif" >

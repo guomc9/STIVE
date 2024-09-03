@@ -22,7 +22,7 @@ def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=4, f
         outputs.append(x)
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    imageio.mimsave(path, outputs, fps=fps)
+    imageio.mimsave(path, outputs, fps=fps, loop=0)
 
 def save_images(images, rescale=True, save_path=None):
     """
@@ -68,4 +68,4 @@ def save_video(video: torch.Tensor, path: str, rescale=False, fps=8, to_uint8=Tr
     for i in range(video.shape[0]):
         frames.append(video[i])
 
-    imageio.mimsave(path, frames, fps=fps)
+    imageio.mimsave(path, frames, fps=fps, loop=0)
