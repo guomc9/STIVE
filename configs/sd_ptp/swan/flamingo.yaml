@@ -17,7 +17,7 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 35
-  guidance_scale: 7.5
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 35
 
@@ -25,8 +25,8 @@ ptp_conf:
   source_mask: "data/targets/swan/videos/swan_swan_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.4]
-  self_replace_steps: [0.0, 0.4]
+  cross_replace_steps: [0.0, 0.2]
+  self_replace_steps: [0.0, 0.2]
   blend_words: 
     sources:
       - "black"

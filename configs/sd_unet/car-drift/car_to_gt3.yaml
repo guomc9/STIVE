@@ -1,18 +1,18 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/audi"
-output_dir: ".log/sd_unet/race/base/"
-checkpoints_dir: "checkpoints/sd_unet/audi"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/car-drift"
+output_dir: ".log/sd_unet/car-drift/gt3/base/"
+checkpoints_dir: "checkpoints/sd_unet/car-drift/gt3"
 
 train_data:
   video_paths:
-    - "data/targets/race/videos/race.mp4"
-    - "data/concepts/audi/videos/audi.mp4"
+    - "data/targets/car-drift/videos/car-drift.mp4"
+    - "data/concepts/gt3/videos/gt3.mp4"
   prompts:
-    - "a car is drifting on the race track"
-    - "a $AUDI driving along a road"
+    - "a car is drifting around a curve road with the background of a forest"
+    - "a $GT3 is driving on the race track"
   mask_paths:
-    - "data/targets/race/masks/race_car_frame_masks.mp4"
-    - "data/concepts/audi/masks/audi_car_frame_masks.mp4"
+    - "data/targets/car-drift/masks/car-drift_car_frame_masks.mp4"
+    - "data/concepts/gt3/masks/gt3_car_frame_masks.mp4"
   enable_temporal_modules:
     - True
     - True
@@ -22,22 +22,22 @@ train_data:
   height: 512
   rand_slice: False
   target_video_paths:
-    - "data/targets/race/videos/race.mp4"
+    - "data/targets/car-drift/videos/car-drift.mp4"
   target_mask_paths:
-    - "data/targets/race/masks/race_car_frame_masks.mp4"
+    - "data/targets/car-drift/masks/car-drift_car_frame_masks.mp4"
   target_prompts:
-    - "a $AUDI is drifting on the race track"
+    - "a $GT3 is drifting around a curve road with the background of a forest"
 
 validation_data:
-  source: "data/targets/race/videos/race.mp4"
-  source_prompt: "a car is drifting on the race track"
+  source: "data/targets/car-drift/videos/car-drift.mp4"
+  source_prompt: "a car is drifting around a curve road with the background of a forest"
   edit_prompts:
-    - "a $AUDI is drifting on the race track"
+    - "a $GT3 is drifting around a curve road with the background of a forest"
   num_frames: 6
   sample_stride: 8
   width: 512
   height: 512
-  replace_indices: [[2]]    # car -> '$AUDI'
+  replace_indices: [[2]]    # car -> '$GT3'
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"

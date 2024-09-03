@@ -1,14 +1,14 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/car-drift/to-lambo"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/lambo"
-output_dir: ".log/ptp/sd_car-drift/to-lambo/"
-checkpoints_dir: "checkpoints/sd_ptp/car-drift/to-lambo"
+pretrained_lora_model_path: "./checkpoints/sd_unet/car-drift/to-ferrari"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/ferrari"
+output_dir: ".log/ptp/sd_car-drift/to-ferrari/"
+checkpoints_dir: "checkpoints/sd_ptp/car-drift/to-ferrari"
 
 validation_data:
   source: "data/targets/car-drift/videos/car-drift.mp4"
-  source_prompt: "a car drifting around the road sign"
+  source_prompt: "a car is drifting around a curve road with the background of a forest"
   edit_prompts:
-    - "a $LAMBO drifting around the road sign"
+    - "a $FERRARI is drifting around a curve road with the background of a forest"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -21,7 +21,7 @@ inference_conf:
   num_inv_steps: 35
 
 ptp_conf:
-  source_mask: "data/targets/car-drift/check/car-drift_jeep_frame_masks.mp4"
+  source_mask: "data/targets/car-drift/check/car-drift_car_frame_masks.mp4"
   is_replace_controller: True
   cross_replace_steps: [0.0, 0.3]
   self_replace_steps: [0.0, 0.3]
@@ -29,7 +29,7 @@ ptp_conf:
     sources:
       - "car"
     targets:
-      - "$LAMBO"
+      - "$FERRARI"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]

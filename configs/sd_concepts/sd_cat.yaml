@@ -32,9 +32,11 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/cat/videos/cat.mp4"
+    - "data/targets/gray-dog/videos/gray-dog.mp4"
     - "data/targets/kitten/videos/kitten.mp4"
   prompts:
     - "a $CAT sitting on the grass in the sun"
+    - "a $CAT sitting on the mat"
     - "a $CAT walking on the floor next to a wall"
   num_frames: 8
   sample_stride: 6

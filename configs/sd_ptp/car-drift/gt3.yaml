@@ -2,14 +2,14 @@ pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
 pretrained_lora_model_path: "./checkpoints/sd_unet/gt3"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/gt3"
 output_dir: ".log/ptp/sd_race/to-gt3/"
-checkpoints_dir: "checkpoints/sd_ptp/race/to-gt3"
+checkpoints_dir: "checkpoints/sd_ptp/car-drift/to-gt3"
 
 validation_data:
-  source: "data/targets/race/videos/race.mp4"
-  source_prompt: "a car is drifting on the race track"
+  source: "data/targets/car-drift/videos/car-drift.mp4"
+  source_prompt: "a car is drifting around a curve road with the background of a forest"
 
   edit_prompts:
-    - "a $GT3 is drifting on the race track"
+    - "a $GT3 is drifting around a curve road with the background of a forest"
   num_frames: 6
   sample_stride: 8
   width: 512
@@ -22,7 +22,7 @@ inference_conf:
   num_inv_steps: 35
 
 ptp_conf:
-  source_mask: "data/targets/race/check/race_car_frame_masks.mp4"
+  source_mask: "data/targets/car-drift/check/car-drift_car_frame_masks.mp4"
   is_replace_controller: True
   cross_replace_steps: [0.0, 0.1]
   self_replace_steps: [0.0, 0.1]

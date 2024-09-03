@@ -21,13 +21,13 @@ validation_data:
   sources:
     - "data/concepts/mercedes/videos/mercedes.mp4"
     - "data/targets/car-turn/videos/car-turn.mp4"
-    - "data/targets/race/videos/race.mp4"
+    - "data/targets/car-drift/videos/car-drift.mp4"
     - "data/targets/tesla/videos/tesla.mp4"
 
   prompts:
     - "a $MERCEDES is driving on the highway"
     - "a $MERCEDES driving down a curvy road in the countryside"
-    - "a $MERCEDES is drifting on the race track"
+    - "a $MERCEDES is drifting around a curve road with the background of a forest"
     - "a $MERCEDES is drifting in the snow"
   num_frames: 6
   sample_stride: 6
