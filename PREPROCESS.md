@@ -3,6 +3,7 @@
 ## Extracting targets mask 
 python scripts/extract_masks.py -v data/targets/car-turn/videos/car-turn.mp4 -s jeep
 python scripts/extract_masks.py -v data/targets/car-drift/videos/car-drift.mp4 -s car
+python scripts/extract_masks.py -v data/targets/forest-drift/videos/forest-drift.mp4 -s car
 python scripts/extract_masks.py -v data/targets/capsule-rot/videos/capsule-rot.mp4 -s capsule -t 0.004695
 python scripts/extract_masks.py -v data/targets/man-skate/videos/man-skate.mp4 -s man
 python scripts/extract_masks.py -v data/targets/usa-flag/videos/usa-flag.mp4 -s flag

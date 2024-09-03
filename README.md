@@ -343,6 +343,25 @@
 
 
 <details>
+<summary>Swap swan to <code>$PELICAN</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_pelican.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/swan/swan_to_pelican.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/swan/pelican.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/swan/pelican.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+
+<details>
 <summary>Swap swan to <code>flamingo</code></summary>
 <ul>
 <li>finetune SD with spatial&amp;temporal modules:
