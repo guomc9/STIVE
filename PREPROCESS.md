@@ -67,3 +67,6 @@ python scripts/check_mpsnr.py -v1 assets/jeep-unet-full-supvis/car-turn.gif -v2 
 
 ## Check word in tokenizer
 python scripts/check_word_in_tokenizer.py -w Shiba-Inu
+
+## To H264 MP4
+python scripts/to_h264_mp4.py -i assets/jeep-unet-full-supvis/concat.mp4 -o assets/jeep-unet-full-supvis/concat.mp4

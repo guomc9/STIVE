@@ -2,18 +2,122 @@
 
 <video autoplay loop muted playsinline>
     <source src="assets/jeep-unet-full-supvis/concat.mp4" type="video/mp4">
-    Your browser does not support the video tag.
 </video>
 
 <video autoplay loop muted playsinline>
     <source src="assets/man-skate-unet-full-supvis/concat.mp4" type="video/mp4">
-    Your browser does not support the video tag.
 </video>
-
 <video autoplay loop muted playsinline>
     <source src="assets/tesla-unet-full-supvis/concat.mp4" type="video/mp4">
-    Your browser does not support the video tag.
 </video>
+
+<table style="width:100%; border-collapse: collapse;">
+  <tr>
+    <th style="border: 1px solid black; padding: 10px;">Source Video</th>
+    <th style="border: 1px solid black; padding: 10px;">Concept Video</th>
+    <th style="border: 1px solid black; padding: 10px;">Target Video</th>
+    <th style="border: 1px solid black; padding: 10px;">Target Prompt</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/lambo/videos/lambo.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/to-$LAMBO.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#jeep">a $LAMBO driving down a curvy road in the countryside</a>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/bmw/videos/bmw.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/to-$BMW.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#jeep">a $BMW driving down a curvy road in the countryside</a>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/cybertruck/videos/cybertruck.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/to-$CYBERTRUCK.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#jeep">a $CYBERTRUCK driving down a curvy road in the countryside</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/optimus/videos/optimus.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/to-$OPTIMUS.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#man-skate">a $OPTIMUS rides a wooden skateboard on the handrail of the staircase with arms outstretched</a>
+    </td>
+  </tr>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/neo/videos/neo.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/to-$NEO.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#man-skate">a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched</a>
+    </td>
+  </tr>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tesla-unet-full-supvis/tesla.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <video autoplay loop muted playsinline>
+        <source src="data/concepts/ferrari/videos/ferrari.mp4" type="video/mp4">
+        </video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tesla-unet-full-supvis/to-$FERRARI.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#tesla">a $FERRARI is drifting in the snow</a>
+    </td>
+  </tr>
+</table>
+
 
 ## Get started
 ### Prepare Environment
