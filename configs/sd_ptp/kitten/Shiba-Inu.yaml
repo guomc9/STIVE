@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/shiba-inu"
+pretrained_lora_model_path: "./checkpoints/sd_unet/kitten/shiba-inu"
 output_dir: ".log/ptp/sd_Shiba-Inu/to-Shiba-Inu/"
 checkpoints_dir: "checkpoints/sd_ptp/kitten/to-Shiba-Inu"
 

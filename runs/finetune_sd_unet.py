@@ -257,6 +257,7 @@ def main(
         pretrained_lora_model_path = os.path.join(pretrained_concepts_model_path, 'lora')
         lora_unet = PeftModel.from_pretrained(lora_unet, pretrained_lora_model_path)
         lora_unet.requires_grad_(False)
+        print(f'Load concept lora from {os.path.join(pretrained_concepts_model_path, "lora")}')
 
     vae.requires_grad_(False)
     unet.requires_grad_(False)

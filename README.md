@@ -179,6 +179,43 @@
 
 </details>
 
+<details>
+<summary>Swap jeep to <code>$GT3</code></summary>
+
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_gt3.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-turn/jeep_to_gt3.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/car-turn/gt3.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car-turn/gt3.yaml</code></pre>
+</li>
+</ul>
+</details>
+
+<details>
+<summary>Swap jeep to <code>$MERCEDES</code></summary>
+
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_mercedes.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-turn/jeep_to_mercedes.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/car-turn/mercedes.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car-turn/mercedes.yaml</code></pre>
+</li>
+</ul>
+</details>
 
 <details>
 <summary>Swap jeep to <code>porsche</code></summary>
@@ -212,45 +249,62 @@
 </details>
 
 
-### race
+### car-drift
 <details>
-<summary>Swap race-car to <code>$AUDI</code></summary>
+<summary>Swap car to <code>$AUDI</code></summary>
 <ul>
 <li>finetune concept from SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_audi.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/race/car_to_audi.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-drift/car_to_audi.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/race/audi.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/car-drift/audi.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/race/audi.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car-drift/audi.yaml</code></pre>
 </li>
 </ul>
 </details>
 
 <details>
-<summary>Swap race-car to <code>$GT3</code></summary>
+<summary>Swap car to <code>$GT3</code></summary>
 <ul>
 <li>finetune concept from SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_gt3.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/race/car_to_gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-drift/car_to_gt3.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/race/gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/car-drift/gt3.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/race/gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car-drift/gt3.yaml</code></pre>
 </li>
 </ul>
 </details>
 
+<details>
+<summary>Swap car to <code>$FERRARI</code></summary>
+<ul>
+<li>finetune concept from SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ferrari.yaml</code></pre>
+</li>
+<li>finetune SD with spatial&amp;temporal modules:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/car-drift/car_to_ferrari.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and pretrained SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/car-drift/ferrari.yaml</code></pre>
+</li>
+<li>prompt-to-prompt inference with concept and tuned SD:
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/car-drift/ferrari.yaml</code></pre>
+</li>
+</ul>
+</details>
 
-
+<!-- 
 ### steel
 <details>
 <summary>Swap steel to <code>$POKEBALL</code></summary>
@@ -304,7 +358,7 @@
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/steel/football.yaml</code></pre>
 </li>
 </ul>
-</details>
+</details> -->
 
 ### lotus
 <details>

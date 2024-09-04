@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/chrysanthemum"
+pretrained_lora_model_path: "./checkpoints/sd_unet/lotus/chrysanthemum"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/chrysanthemum"
 output_dir: ".log/ptp/lotus/to-chrysanthemum/"
 checkpoints_dir: "checkpoints/sd_ptp/lotus/to-chrysanthemum"

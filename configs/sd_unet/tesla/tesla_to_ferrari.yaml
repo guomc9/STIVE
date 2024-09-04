@@ -1,7 +1,7 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/ferrari"
-output_dir: ".log/sd_unet/ferrari/base/"
-checkpoints_dir: "checkpoints/sd_unet/ferrari"
+output_dir: ".log/sd_unet/tesla/ferrari/base/"
+checkpoints_dir: "checkpoints/sd_unet/tesla/ferrari"
 
 train_data:
   video_paths:

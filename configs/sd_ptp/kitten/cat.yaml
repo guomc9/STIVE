@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/cat"
+pretrained_lora_model_path: "./checkpoints/sd_unet/kitten/cat"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/cat"
 output_dir: ".log/ptp/kitten/to-cat/"
 checkpoints_dir: "checkpoints/sd_ptp/kitten/to-cat"
@@ -11,7 +11,7 @@ validation_data:
   edit_prompts:
     - "a $CAT walking on the floor next to a wall"
   num_frames: 6
-  sample_stride: 6
+  sample_stride: 8
   width: 512
   height: 512
 
@@ -25,8 +25,8 @@ ptp_conf:
   source_mask: "data/targets/kitten/videos/kitten_cat_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.01]
+  self_replace_steps: [0.0, 0.1]
   blend_words: 
     sources:
       - "cat"

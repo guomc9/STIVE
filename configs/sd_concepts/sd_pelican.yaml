@@ -8,7 +8,7 @@ train_data:
   prompts: 
     - "a $PELICAN is swimming in a lake"
   mask_paths:
-    - "data/concepts/pelican/masks/pelican_car_frame_masks.mp4"
+    - "data/concepts/pelican/masks/pelican_pelican_frame_masks.mp4"
   width: 512
   height: 512
   num_frames: 8

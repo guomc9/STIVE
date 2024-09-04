@@ -1,40 +1,39 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/savior"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/savior"
-output_dir: ".log/ptp/man-skate/to-savior/"
-checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-savior"
+pretrained_lora_model_path: "./checkpoints/sd_unet/man-skate/ultron"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/ultron"
+output_dir: ".log/ptp/man-skate/to-ultron/"
+checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-ultron"
 
 validation_data:
   source: "data/targets/man-skate/videos/man-skate.mp4"
   source_prompt: "a man rides a wooden skateboard on the handrail of the staircase with arms outstretched"
-
   edit_prompts:
-    - "a $SAVIOR rides a wooden skateboard on the handrail of the staircase with arms outstretched"
+    - "a $ULTRON rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 50
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 50
+  num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.1]
+  self_replace_steps: [0.0, 0.1]
   blend_words: 
     sources:
       - "man"
     targets:
-      - "$SAVIOR"
+      - "$ULTRON"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.3, 0.3]
+  blend_th: [0., 0.]
   fuse_th: 0.01
   # fuse_scale: 1.5
 

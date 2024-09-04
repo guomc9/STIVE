@@ -1,15 +1,15 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/gray-dog/fox"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/fox"
-output_dir: ".log/ptp/sd_fox/to-fox/"
-checkpoints_dir: "checkpoints/sd_ptp/gray-dog/to-fox"
+pretrained_lora_model_path: "./checkpoints/sd_unet/gray-dog/cat"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/cat"
+output_dir: ".log/ptp/sd_cat/to-cat/"
+checkpoints_dir: "checkpoints/sd_ptp/gray-dog/to-cat"
 
 validation_data:
   source: "data/targets/gray-dog/videos/gray-dog.mp4"
   source_prompt: "a dog sitting on a mat"
 
   edit_prompts:
-    - "a $FOX sitting on a mat"
+    - "a $CAT sitting on a mat"
   num_frames: 6
   sample_stride: 8
   width: 512
@@ -31,7 +31,7 @@ ptp_conf:
     sources:
       - "dog"
     targets:
-      - "$FOX"
+      - "$CAT"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]

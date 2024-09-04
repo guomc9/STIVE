@@ -1,43 +1,40 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/cat"
-output_dir: ".log/sd_unet/gray-dog/cat/base/"
-checkpoints_dir: "checkpoints/sd_unet/gray-dog/cat"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/gt3"
+output_dir: ".log/sd_unet/tesla/gt3/base/"
+checkpoints_dir: "checkpoints/sd_unet/tesla/gt3"
 
 train_data:
   video_paths:
-    - "data/targets/gray-dog/videos/gray-dog.mp4"
-    - "data/concepts/cat/videos/cat.mp4"
+    - "data/targets/tesla/videos/tesla.mp4"
+    - "data/concepts/gt3/videos/gt3.mp4"
   prompts:
-    - "a dog sitting on the mat"
-    - "a $CAT sitting in the grass"
+    - "a car is drifting in the snow"
+    - "a $GT3 is driving on the race track"
   mask_paths:
-    - "data/targets/gray-dog/masks/gray-dog_dog_frame_masks.mp4"
-    - "data/concepts/cat/masks/cat_cat_frame_masks.mp4"
-  enable_temporal_modules:
-    - True
-    - True
+    - "data/targets/tesla/masks/tesla_car_frame_masks.mp4"
+    - "data/concepts/gt3/masks/gt3_car_frame_masks.mp4"
   num_frames: 6
   sample_stride: 8
   width: 512
   height: 512
   rand_slice: False
   target_video_paths:
-    - "data/targets/gray-dog/videos/gray-dog.mp4"
+    - "data/targets/tesla/videos/tesla.mp4"
   target_mask_paths:
-    - "data/targets/gray-dog/masks/gray-dog_dog_frame_masks.mp4"
+    - "data/targets/tesla/masks/tesla_car_frame_masks.mp4"
   target_prompts:
-    - "a $CAT sitting on the mat"
+    - "a $GT3 is drifting in the snow"
 
 validation_data:
-  source: "data/targets/gray-dog/videos/gray-dog.mp4"
-  source_prompt: "a dog sitting on the mat"
+  source: "data/targets/tesla/videos/tesla.mp4"
+  source_prompt: "a car is drifting in the snow"
   edit_prompts:
-    - "a $CAT sitting on the mat"
+    - "a $GT3 is drifting in the snow"
   num_frames: 6
   sample_stride: 8
   width: 512
   height: 512
-  replace_indices: [[2]]    # dog -> '$CAT'
+  replace_indices: [[2]]    # car -> '$GT3'
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
@@ -47,7 +44,7 @@ extra_trainable_modules:
 
 inference_conf:
   num_inference_steps: 50
-  guidance_scale: 7.5
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 50
 
@@ -60,13 +57,13 @@ scam_weight: 0.1
 scam_only_neg: True
 enable_tcam_loss: True
 tcam_only_neg: True
-tcam_weight: 0.1
+tcam_weight: 0.2
 cam_loss_reduction: 'mean'
 attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 55
+num_train_epoch: 150
 checkpointing_steps: 2000
 validation_steps: 10
 

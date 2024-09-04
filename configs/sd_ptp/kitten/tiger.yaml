@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/tiger"
+pretrained_lora_model_path: "./checkpoints/sd_unet/kitten/tiger"
 output_dir: ".log/ptp/sd_tiger/to-tiger/"
 checkpoints_dir: "checkpoints/sd_ptp/kitten/to-tiger"
 

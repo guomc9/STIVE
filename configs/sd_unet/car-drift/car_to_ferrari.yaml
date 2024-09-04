@@ -36,12 +36,6 @@ validation_data:
   height: 512
   replace_indices: [[2]]    # car -> '$FERRARI'
 
-lora_conf:
-  r: 6
-  lora_alpha: 1.0
-  lora_dropout: 0.1
-  target_modules:
-  bias: "none"
 
 extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn1\\.to_q\\..*$"
@@ -70,7 +64,7 @@ attn_check_steps: 25
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 100
+num_train_epoch: 150
 checkpointing_steps: 2000
 validation_steps: 50
 

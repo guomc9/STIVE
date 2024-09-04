@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/car-drift"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/gt3"
 output_dir: ".log/sd_unet/car-drift/gt3/base/"
 checkpoints_dir: "checkpoints/sd_unet/car-drift/gt3"
 
@@ -46,10 +46,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 50
+  num_inference_steps: 60
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 50
+  num_inv_steps: 60
 
 # CHECK
 sub_sot: True
@@ -66,9 +66,9 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 100
+num_train_epoch: 150
 checkpointing_steps: 2000
-validation_steps: 10
+validation_steps: 50
 
 seed: 33
 mixed_precision: 'fp16'

@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/spiderman"
+pretrained_lora_model_path: "./checkpoints/sd_unet/man-skate/spiderman"
 output_dir: ".log/ptp/man-skate/to-spiderman/"
 checkpoints_dir: "checkpoints/sd_ptp/man-skate/to-spiderman"
 

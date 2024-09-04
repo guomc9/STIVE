@@ -24,8 +24,8 @@ ptp_conf:
   source_mask: "data/targets/man-skate/videos/man-skate_man_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.0]
-  self_replace_steps: [0.0, 0.0]
+  cross_replace_steps: [0.0, 0.1]
+  self_replace_steps: [0.0, 0.1]
   blend_words: 
     sources:
       - "man"
