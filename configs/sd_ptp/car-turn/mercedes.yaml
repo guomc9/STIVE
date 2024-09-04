@@ -1,14 +1,15 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/cybertruck"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/cybertruck"
-output_dir: ".log/ptp/sd_car-turn/to-cybertruck/"
-checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-cybertruck"
+pretrained_lora_model_path: "./checkpoints/sd_unet/car-turn/mercedes"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/mercedes"
+output_dir: ".log/ptp/sd_car-turn/to-mercedes/"
+checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-mercedes"
 
 validation_data:
   source: "data/targets/car-turn/videos/car-turn.mp4"
   source_prompt: "a jeep driving down a curvy road in the countryside"
+
   edit_prompts:
-    - "a $CYBERTRUCK driving down a curvy road in the countryside"
+    - "a $MERCEDES driving down a curvy road in the countryside"
   num_frames: 6
   sample_stride: 8
   width: 512
@@ -16,25 +17,24 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 40
-  guidance_scale: 12.5
+  guidance_scale: 8
   use_inv_latent: True
   num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.5]
-  self_replace_steps: [0.0, 0.5]
+  cross_replace_steps: [0.0, 0.05]
+  self_replace_steps: [0.0, 0.05]
   blend_words: 
     sources:
       - "jeep"
     targets:
-      - "$CYBERTRUCK"
+      - "$MERCEDES"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]
   fuse_th: 0.01
-  # fuse_scale: 1.5
 
 seed: 33
 mixed_precision: 'fp16'

@@ -16,15 +16,15 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 40
-  guidance_scale: 10.5
+  guidance_scale: 12.5
   use_inv_latent: True
   num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/car-drift/check/car-drift_car_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.0]
-  self_replace_steps: [0.0, 0.0]
+  cross_replace_steps: [0.0, 0.35]
+  self_replace_steps: [0.0, 0.35]
   blend_words: 
     sources:
       - "car"

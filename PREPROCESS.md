@@ -59,6 +59,16 @@ python scripts/extract_gif.py data/targets/man-skate/videos/man-skate.mp4 6 8 as
 
 python scripts/extract_gif.py data/targets/tesla/videos/tesla.mp4 6 8 assets/tesla-unet-full-supvis/tesla.gif
 
+python scripts/extract_gif.py data/targets/car-drift/videos/car-drift.mp4 6 6 assets/car-drift-unet-full-supvis/car-drift.gif
+
+python scripts/extract_gif.py data/targets/gray-dog/videos/gray-dog.mp4 6 1 assets/gray-dog-unet-full-supvis/gray-dog.gif
+
+python scripts/extract_gif.py data/targets/kitten/videos/kitten.mp4 6 1 assets/kitten-unet-full-supvis/kitten.gif
+
+python scripts/extract_gif.py data/targets/swan/videos/swan.mp4 6 1 assets/swan-unet-full-supvis/swan.gif
+
+python scripts/extract_gif.py data/targets/tennis/videos/tennis.mp4 6 6 assets/tennis-unet-full-supvis/tennis.gif
+
 
 ## Check clip-score, fc-score, mpsnr
 python scripts/check_fc_score.py -v "assets/jeep-unet-full-supvis/to-\$LAMBO.gif"

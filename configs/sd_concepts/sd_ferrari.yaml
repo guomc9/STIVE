@@ -31,11 +31,13 @@ train_data:
 validation_data:
   sources:
     - "data/concepts/ferrari/videos/ferrari.mp4"
+    - "data/targets/car-turn/videos/car-turn.mp4"
     - "data/targets/car-drift/videos/car-drift.mp4"
     - "data/targets/tesla/videos/tesla.mp4"
   prompts:
     - "a $FERRARI is driving through the forest"
-    - ""
+    - "a $FERRARI driving down a curvy road in the countryside"
+    - "a $FERRARI is drifting around a curve road with the background of a forest"
     - "a $FERRARI is drifting in the snow"
   num_frames: 8
   sample_stride: 2
