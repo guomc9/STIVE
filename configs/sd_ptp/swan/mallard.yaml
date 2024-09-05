@@ -1,15 +1,15 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/duck"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/duck"
-output_dir: ".log/ptp/swan/to-duck/"
-checkpoints_dir: "checkpoints/sd_ptp/swan/to-duck"
+pretrained_lora_model_path: "./checkpoints/sd_unet/swan/mallard"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/mallard"
+output_dir: ".log/ptp/swan/to-mallard/"
+checkpoints_dir: "checkpoints/sd_ptp/swan/to-mallard"
 
 validation_data:
   source: "data/targets/swan/videos/swan.mp4"
   source_prompt: "a swan swimming in a river near a wall and bushes"
 
   edit_prompts:
-    - "a $DUCK swimming in a river near a wall and bushes"
+    - "a $MALLARD swimming in a river near a wall and bushes"
   num_frames: 6
   sample_stride: 6
   width: 512
@@ -31,7 +31,7 @@ ptp_conf:
     sources:
       - "swan"
     targets:
-      - "$DUCK"
+      - "$MALLARD"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]
