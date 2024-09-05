@@ -10,7 +10,7 @@ validation_data:
   edit_prompts:
     - "a $OPTIMUS rides a wooden skateboard on the handrail of the staircase with arms outstretched"
   num_frames: 6
-  sample_stride: 6
+  sample_stride: 3
   width: 512
   height: 512
 

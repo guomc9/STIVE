@@ -17,7 +17,7 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 35
-  guidance_scale: 12.5
+  guidance_scale: 10.5
   use_inv_latent: True
   num_inv_steps: 35
 

@@ -16,7 +16,7 @@ def extract_frames(video_path, frame_count, frame_interval, output_path):
             frames.append(frame)
     
     # Save frames as GIF
-    imageio.mimsave(output_path, frames, format='GIF', fps=8)
+    imageio.mimsave(output_path, frames, format='GIF', fps=8, loop=0)
 
 def main():
     parser = argparse.ArgumentParser(description='Convert MP4 to GIF with frame extraction.')

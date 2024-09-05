@@ -67,7 +67,7 @@ python scripts/extract_gif.py data/targets/kitten/videos/kitten.mp4 6 1 assets/k
 
 python scripts/extract_gif.py data/targets/swan/videos/swan.mp4 6 1 assets/swan-unet-full-supvis/swan.gif
 
-python scripts/extract_gif.py data/targets/tennis/videos/tennis.mp4 6 6 assets/tennis-unet-full-supvis/tennis.gif
+python scripts/extract_gif.py data/targets/tennis/videos/tennis.mp4 6 3 assets/tennis-unet-full-supvis/tennis.gif
 
 
 ## Check clip-score, fc-score, mpsnr
