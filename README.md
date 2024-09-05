@@ -51,6 +51,20 @@
   </tr>
     <tr>
     <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <div style="text-align: center;">---</text>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/to-porsche.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#jeep">a porsche driving down a curvy road in the countryside</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
@@ -62,7 +76,6 @@
     <td style="border: 1px solid black; padding: 10px;">
       <a href="#man-skate">a $OPTIMUS rides a wooden skateboard on the handrail of the staircase with arms outstretched</a>
     </td>
-  </tr>
   </tr>
     <tr>
     <td style="border: 1px solid black; padding: 10px;">
@@ -78,7 +91,6 @@
       <a href="#man-skate">a $NEO rides a wooden skateboard on the handrail of the staircase with arms outstretched</a>
     </td>
   </tr>
-  </tr>
     <tr>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/tesla-unet-full-supvis/tesla.gif" >
@@ -90,7 +102,77 @@
         <img src="assets/tesla-unet-full-supvis/to-$FERRARI.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-      <a href="#tesla">a $FERRARI is drifting in the snow</a>
+      <a href="#tesla">a $FERRARI is drifting around a curve road with the background of a forest</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/car-drift-unet-full-supvis/car-drift.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/ferrari/videos/ferrari.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/car-drift-unet-full-supvis/to-$FERRARI.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#car-drift">a $FERRARI is drifting around a curve road with the background of a forest</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/car-drift-unet-full-supvis/car-drift.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/gt3/videos/gt3.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/car-drift-unet-full-supvis/to-$GT3.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#car-drift">a $GT3 is drifting around a curve road with the background of a forest</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/gray-dog-unet-full-supvis/gray-dog.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/cat/videos/cat.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/gray-dog-unet-full-supvis/to-$CAT.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#gray-dog">a $CAT sitting on a mat</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/gray-dog-unet-full-supvis/gray-dog.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/fox/videos/fox.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/gray-dog-unet-full-supvis/to-$FOX.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#gray-dog">a $CAT sitting on a mat</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/kitten-unet-full-supvis/kitten.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <div style="text-align: center;">---</text>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/kitten-unet-full-supvis/to-red_tiger.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#kitten">a red tiger walking on the floor next to a wall</a>
     </td>
   </tr>
 </table>
