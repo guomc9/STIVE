@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/porsche"
+pretrained_lora_model_path: "./checkpoints/sd_unet/car-turn/porsche"
 output_dir: ".log/ptp/sd_car-turn/to-porsche/"
 checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-porsche"
 
@@ -15,10 +15,10 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 35
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 35
+  num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"

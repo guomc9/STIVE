@@ -15,10 +15,10 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 37
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 37
+  num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/kitten/check/kitten_cat_frame_masks.mp4"

@@ -93,6 +93,20 @@
   </tr>
     <tr>
     <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/man-skate.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/ultron/videos/ultron.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/man-skate-unet-full-supvis/to-$ULTRON.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#man-skate">a $ULTRON rides a wooden skateboard on the handrail of the staircase with arms outstretched</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/tesla-unet-full-supvis/tesla.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
