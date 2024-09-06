@@ -1,39 +1,37 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/swan/flamingo"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/flamingo"
-output_dir: ".log/ptp/swan/to-flamingo/"
-checkpoints_dir: "checkpoints/sd_ptp/swan/to-flamingo"
+pretrained_lora_model_path: "./checkpoints/sd_unet/swan/pelican"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/pelican"
+output_dir: ".log/ptp/swan/to-pelican/"
+checkpoints_dir: "checkpoints/sd_ptp/swan/to-pelican"
 
 validation_data:
   source: "data/targets/swan/videos/swan.mp4"
-  source_prompt: "a black swan swimming in a river near a wall and bushes"
+  source_prompt: "a swan swimming in a river near a wall and bushes"
 
   edit_prompts:
-    - "a pink flagmingo swimming in a river near a wall and bushes"
+    - "a $PELICAN swimming in a river near a wall and bushes"
   num_frames: 6
   sample_stride: 6
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 40
-  guidance_scale: 12.5
+  num_inference_steps: 50
+  guidance_scale: 10.5
   use_inv_latent: True
-  num_inv_steps: 40
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/swan/videos/swan_swan_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.0]
+  cross_replace_steps: [0.0, 0.5]
   self_replace_steps: [0.0, 0.5]
   blend_words: 
     sources:
-      - "black"
       - "swan"
     targets:
-      - "pink"
-      - "flamingo"
+      - "$PELICAN"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.2, 0.2]

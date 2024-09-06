@@ -16,17 +16,17 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 33
+  num_inference_steps: 50
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 33
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/swan/videos/swan_swan_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.4]
+  self_replace_steps: [0.0, 0.4]
   blend_words: 
     sources:
       - "swan"
@@ -34,7 +34,7 @@ ptp_conf:
       - "$MALLARD"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.3, 0.3]
+  blend_th: [0.2, 0.2]
   fuse_th: 0.01
   # fuse_scale: 1.5
 

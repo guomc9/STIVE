@@ -116,7 +116,21 @@
         <img src="assets/tesla-unet-full-supvis/to-$FERRARI.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-      <a href="#tesla">a $FERRARI is drifting around a curve road with the background of a forest</a>
+      <a href="#tesla">a $FERRARI is drifting in the snow</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tesla-unet-full-supvis/tesla.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/lambo/videos/lambo.gif">
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tesla-unet-full-supvis/to-$LAMBO.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#tesla">a $LAMBO is drifting in the snow</a>
     </td>
   </tr>
     <tr>
@@ -187,6 +201,76 @@
     </td>
     <td style="border: 1px solid black; padding: 10px;">
       <a href="#kitten">a red tiger walking on the floor next to a wall</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/swan.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/mallard/videos/mallard.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/to-$MALLARD.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#swan">a $MALLARD swimming in a river near a wall and bushes</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/swan.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/pelican/videos/pelican.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/to-$PELICAN.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#swan">a $PELICAN swimming in a river near a wall and bushes</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/tennis.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/optimus/videos/optimus.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/to-$OPTIMUS.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#tennis">a $OPTIMUS playing tennis on the red ground</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/tennis.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/neo/videos/neo.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/to-$NEO.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#tennis">a $NEO playing tennis on the red ground</a>
+    </td>
+  </tr>
+      <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/tennis.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/ultron/videos/ultron.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/tennis-unet-full-supvis/to-$ULTRON.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#tennis">a $ULTRON playing tennis on the red ground</a>
     </td>
   </tr>
 </table>
@@ -345,19 +429,19 @@
 </details>
 
 <details>
-<summary>Swap tesla to <code>$GT3</code></summary>
+<summary>Swap tesla to <code>$LAMBO</code></summary>
 <ul>
 <li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_lambo.yaml</code></pre>
 </li>
 <li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/tesla/tesla_to_gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/tesla/tesla_to_lambo.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/tesla/gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/tesla/lambo.yaml</code></pre>
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/tesla/gt3.yaml</code></pre>
+    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/tesla/lambo.yaml</code></pre>
 </li>
 </ul>
 </details>

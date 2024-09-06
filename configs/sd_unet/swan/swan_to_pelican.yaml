@@ -1,43 +1,43 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/neo"
-output_dir: ".log/sd_unet/tennis/neo/base/"
-checkpoints_dir: "checkpoints/sd_unet/tennis/neo"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/pelican"
+output_dir: ".log/sd_unet/swan/pelican/base/"
+checkpoints_dir: "checkpoints/sd_unet/swan/pelican"
 
 train_data:
   video_paths:
-    - "data/targets/tennis/videos/tennis.mp4"
-    - "data/concepts/neo/videos/neo.mp4"
+    - "data/targets/swan/videos/swan.mp4"
+    - "data/concepts/pelican/videos/pelican.mp4"
   prompts:
-    - "a man playing tennis on the red ground"
-    - "a $NEO is outstretching his arms"
+    - "a swan swimming in a river near a wall and bushes"
+    - "a $PELICAN is swimming in a lake"
   mask_paths:
-    - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
-    - "data/concepts/neo/masks/neo_man_frame_masks.mp4"
+    - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
+    - "data/concepts/pelican/masks/pelican_pelican_frame_masks.mp4"
   enable_temporal_modules:
     - True
     - True
   num_frames: 6
-  sample_stride: 3
+  sample_stride: 6
   width: 512
   height: 512
   rand_slice: False
   target_video_paths:
-    - "data/targets/tennis/videos/tennis.mp4"
+    - "data/targets/swan/videos/swan.mp4"
   target_mask_paths:
-    - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
+    - "data/targets/swan/masks/swan_swan_frame_masks.mp4"
   target_prompts:
-    - "a $NEO playing tennis on the red ground"
+    - "a $PELICAN swimming in a river near a wall and bushes"
 
 validation_data:
-  source: "data/targets/tennis/videos/tennis.mp4"
-  source_prompt: "a man playing tennis on the red ground"
+  source: "data/targets/swan/videos/swan.mp4"
+  source_prompt: "a swan swimming in a river near a wall and bushes"
   edit_prompts:
-    - "a $NEO playing tennis on the red ground"
+    - "a $PELICAN swimming in a river near a wall and bushes"
   num_frames: 6
-  sample_stride: 3
+  sample_stride: 6
   width: 512
   height: 512
-  replace_indices: [[2]]    # man -> '$NEO'
+  replace_indices: [[2]]    # swan -> '$PELICAN'
 
 
 extra_trainable_modules:
@@ -67,7 +67,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 240
+num_train_epoch: 200
 checkpointing_steps: 2000
 validation_steps: 10
 
