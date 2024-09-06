@@ -8,7 +8,9 @@ train_data:
     - "data/targets/tennis/videos/tennis.mp4"
     - "data/concepts/optimus/videos/optimus.mp4"
   prompts:
-    - "a man playing tennis on the red ground"
+    # - "a man playing tennis on the red ground with a background of a blue banner, black low wall and trees"
+    - "a man playing tennis on the red ground with a background of a blue banner"
+    # - "a man playing tennis on the red ground"
     - "a $OPTIMUS is squatting on a wooden floor with its back to a white wall"
   mask_paths:
     - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
@@ -26,13 +28,19 @@ train_data:
   target_mask_paths:
     - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
   target_prompts:
-    - "a $OPTIMUS playing tennis on the red ground"
+    # - "a $OPTIMUS playing tennis on the red ground with a background of a blue banner, black low wall and trees"
+    - "a $OPTIMUS playing tennis on the red ground with a background of a blue banner"
+    # - "a $OPTIMUS playing tennis on the red ground"
 
 validation_data:
   source: "data/targets/tennis/videos/tennis.mp4"
-  source_prompt: "a man playing tennis on the red ground"
+  # source_prompt: "a man playing tennis on the red ground with a background of a blue banner, black low wall and trees"
+  source_prompt: "a man playing tennis on the red ground with a background of a blue banner"
+  # source_prompt: "a man playing tennis on the red ground"
   edit_prompts:
-    - "a $OPTIMUS playing tennis on the red ground"
+    # - "a $OPTIMUS playing tennis on the red ground with a background of a blue banner, black low wall and trees"
+    - "a $OPTIMUS playing tennis on the red ground with a background of a blue banner"
+    # - "a $OPTIMUS playing tennis on the red ground"
   num_frames: 6
   sample_stride: 3
   width: 512
@@ -47,10 +55,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 50
-  guidance_scale: 12.5
+  num_inference_steps: 30
+  guidance_scale: 18.5
   use_inv_latent: True
-  num_inv_steps: 50
+  num_inv_steps: 30
 
 # CHECK
 sub_sot: True
@@ -67,7 +75,7 @@ attn_check_steps: 15
 
 learning_rate: 1.0e-5
 batch_size: 1
-num_train_epoch: 240
+num_train_epoch: 250
 checkpointing_steps: 2000
 validation_steps: 10
 

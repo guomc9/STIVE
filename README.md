@@ -186,7 +186,7 @@
         <img src="assets/gray-dog-unet-full-supvis/to-$FOX.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-      <a href="#gray-dog">a $CAT sitting on a mat</a>
+      <a href="#gray-dog">a $FOX sitting on a mat</a>
     </td>
   </tr>
     <tr>
