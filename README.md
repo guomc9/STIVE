@@ -54,7 +54,7 @@
         <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <div style="text-align: center;">---</text>
+        <div style="text-align: center;">No Concept Video</text>
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/jeep-unet-full-supvis/to-porsche.gif" >
@@ -194,7 +194,7 @@
         <img src="assets/kitten-unet-full-supvis/kitten.gif" >
     </td>
     <td style="border: 1px solid black; padding: 10px;">
-        <div style="text-align: center;">---</text>
+        <div style="text-align: center;">No Concept Video</text>
     </td>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/kitten-unet-full-supvis/to-red_tiger.gif" >
@@ -229,6 +229,20 @@
     </td>
     <td style="border: 1px solid black; padding: 10px;">
       <a href="#swan">a $PELICAN swimming in a river near a wall and bushes</a>
+    </td>
+  </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/swan.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <div style="text-align: center;">No Concept Video</text>
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/swan-unet-full-supvis/to-pink_flamingo.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#swan">a pink flamingo swimming in a river near a wall and bushes</a>
     </td>
   </tr>
     <tr>
@@ -812,7 +826,6 @@
 </details>
 
 
-<!-- 
 ### bear
 <details>
 <summary>Swap bear to <code>$GOLDENTIGER</code></summary>
@@ -867,4 +880,4 @@
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/rhino.yaml</code></pre>
 </li>
 </ul>
-</details> -->
+</details>

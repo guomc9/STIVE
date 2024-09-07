@@ -11,7 +11,7 @@ train_data:
     - "a bear walking on the rock against a wall"
     - "a $RHINO is walking near a pile of rocks and a forest"
   mask_paths:
-    - "data/targets/bear/masks/bear_dog_frame_masks.mp4"
+    - "data/targets/bear/masks/bear_bear_frame_masks.mp4"
     - "data/concepts/rhino/masks/rhino_rhino_frame_masks.mp4"
   enable_temporal_modules:
     - True

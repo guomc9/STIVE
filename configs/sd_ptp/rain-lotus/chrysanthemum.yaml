@@ -16,18 +16,18 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 39
-  guidance_scale: 15
+  num_inference_steps: 50
+  guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 39
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/lotus/videos/lotus_lotus_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
 
-  cross_replace_steps: [0.0, 0.15]
-  self_replace_steps: [0.0, 0.15]
+  cross_replace_steps: [0.0, 0.03]
+  self_replace_steps: [0.0, 0.03]
   blend_words: 
     sources:
       - "lotus"
