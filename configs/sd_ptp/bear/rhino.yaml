@@ -1,37 +1,37 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/bear/goldentiger"
-pretrained_concepts_model_path: "./checkpoints/sd_concepts/goldentiger"
-output_dir: ".log/ptp/sd_goldentiger/to-goldentiger/"
-checkpoints_dir: "checkpoints/sd_ptp/bear/to-goldentiger"
+pretrained_lora_model_path: "./checkpoints/sd_unet/bear/rhino"
+pretrained_concepts_model_path: "./checkpoints/sd_concepts/rhino"
+output_dir: ".log/ptp/sd_rhino/to-rhino/"
+checkpoints_dir: "checkpoints/sd_ptp/bear/to-rhino"
 
 validation_data:
   source: "data/targets/bear/videos/bear.mp4"
-  source_prompt: "a $GOLDENTIGER walking on the rock against a wall"
+  source_prompt: "a $RHINO walking on the rock against a wall"
 
   edit_prompts:
-    - "a $GOLDENTIGER walking on the rock against a wall"
+    - "a $RHINO walking on the rock against a wall"
   num_frames: 6
   sample_stride: 8
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 50
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 50
+  num_inv_steps: 40
 
 ptp_conf:
   source_mask: "data/targets/bear/check/bear_bear_frame_masks.mp4"
   # is_replace_controller: True
   is_replace_controller: False
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.1]
+  self_replace_steps: [0.0, 0.1]
   blend_words: 
     sources:
       - "bear"
     targets:
-      - "$GOLDENTIGER"
+      - "$RHINO"
   blend_self_attention: True
   use_inversion_attention: True
   blend_th: [0.3, 0.3]

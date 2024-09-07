@@ -7,25 +7,28 @@ checkpoints_dir: "checkpoints/sd_ptp/tennis/to-optimus"
 validation_data:
   source: "data/targets/tennis/videos/tennis.mp4"
   source_prompt: "a man is moving on the red ground with a background of a blue banner, wall and trees"
+  # source_prompt: "a man is running on the red ground with a background of a blue banner, wall and trees"
+
   edit_prompts:
     - "a $OPTIMUS is moving on the red ground with a background of a blue banner, wall and trees"
+    # - "a $OPTIMUS is running on the red ground with a background of a blue banner, wall and trees"
   num_frames: 6
   sample_stride: 3
   width: 512
   height: 512
 
 inference_conf:
-  num_inference_steps: 40
-  guidance_scale: 12.5
+  num_inference_steps: 50
+  guidance_scale: 7.5
   use_inv_latent: True
-  num_inv_steps: 40
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/tennis/videos/tennis_man_frame_masks.mp4"
   # is_replace_controller: False
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.3]
-  self_replace_steps: [0.0, 0.3]
+  cross_replace_steps: [0.0, 0.25]
+  self_replace_steps: [0.0, 0.25]
   blend_words: 
     sources:
       - "man"
