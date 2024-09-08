@@ -17,7 +17,7 @@ validation_data:
 
 inference_conf:
   num_inference_steps: 40
-  guidance_scale: 12.5
+  guidance_scale: 10.5
   use_inv_latent: True
   num_inv_steps: 40
 
@@ -25,8 +25,8 @@ ptp_conf:
   source_mask: "data/targets/bear/check/bear_bear_frame_masks.mp4"
   # is_replace_controller: True
   is_replace_controller: False
-  cross_replace_steps: [0.0, 0.1]
-  self_replace_steps: [0.0, 0.1]
+  cross_replace_steps: [0.0, 0.9]
+  self_replace_steps: [0.0, 0.9]
   blend_words: 
     sources:
       - "bear"
