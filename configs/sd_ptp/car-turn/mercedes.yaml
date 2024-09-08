@@ -16,16 +16,16 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 40
-  guidance_scale: 8
+  num_inference_steps: 50
+  guidance_scale: 10.5
   use_inv_latent: True
-  num_inv_steps: 40
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.2]
-  self_replace_steps: [0.0, 0.2]
+  cross_replace_steps: [0.0, 0.5]
+  self_replace_steps: [0.0, 0.5]
   blend_words: 
     sources:
       - "jeep"

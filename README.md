@@ -35,6 +35,20 @@
       <a href="#jeep">a $BMW driving down a curvy road in the countryside</a>
     </td>
   </tr>
+    <tr>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="data/concepts/mercedes/videos/mercedes.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+        <img src="assets/jeep-unet-full-supvis/to-$MERCEDES.gif" >
+    </td>
+    <td style="border: 1px solid black; padding: 10px;">
+      <a href="#jeep">a $MERCEDES driving down a curvy road in the countryside</a>
+    </td>
+  </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/jeep-unet-full-supvis/car-turn.gif" >
