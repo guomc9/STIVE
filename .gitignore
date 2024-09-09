@@ -12,3 +12,5 @@ trash
 log.txt
 .vscode
 .local
+*_fz
+*_tav

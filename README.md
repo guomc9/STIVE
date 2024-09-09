@@ -245,7 +245,7 @@
       <a href="#swan">a $PELICAN swimming in a river near a wall and bushes</a>
     </td>
   </tr>
-    <tr>
+    <!-- <tr>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/swan-unet-full-supvis/swan.gif" >
     </td>
@@ -258,7 +258,7 @@
     <td style="border: 1px solid black; padding: 10px;">
       <a href="#swan">a pink flamingo swimming in a river near a wall and bushes</a>
     </td>
-  </tr>
+  </tr> -->
     <tr>
     <td style="border: 1px solid black; padding: 10px;">
         <img src="assets/tennis-unet-full-supvis/tennis.gif" >
