@@ -1,68 +1,86 @@
-import csv
-import argparse
-from collections import Counter
-import json
+import os
+import cv2
+import numpy as np
+from tqdm import tqdm
 
-def read_concept_prompts(file_path):
-    video_concepts = {}
-    with open(file_path, mode='r', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            video_name = row['Video name']
-            concept_prompt = row['Concepts Prompt']
-            if video_name not in video_concepts:
-                video_concepts[video_name] = []
-            video_concepts[video_name].append(concept_prompt)
-    return video_concepts
+def find_mp4_file(directory):
+    for file in os.listdir(directory):
+        if file.endswith('.mp4'):
+            return os.path.join(directory, file)
+    return None
 
-def extract_dollar_words(concept):
-    dollar_words = []
-    words = concept.split()
-    for word in words:
-        if word.startswith('$'):
-            if word.endswith('.') or word.endswith(','):
-                word = word[:-1]
-            dollar_words.append(word)
-    return dollar_words
+def process_concept_directory(concept_path):
+    masks_dir = os.path.join(concept_path, 'masks')
+    video_dir = os.path.join(concept_path, 'videos')
+    
+    if not os.path.exists(masks_dir) or not os.path.exists(video_dir):
+        print(f"Required directories not found in {concept_path}")
+        return
+    
+    mask_video = find_mp4_file(masks_dir)
+    main_video = find_mp4_file(video_dir)
+    
+    if not mask_video or not main_video:
+        print(f"MP4 files not found in {concept_path}")
+        return
+    
+    concepts_dir = os.path.join(concept_path, 'concepts')
+    os.makedirs(concepts_dir, exist_ok=True)
+    
+    mask_cap = cv2.VideoCapture(mask_video)
+    main_cap = cv2.VideoCapture(main_video)
+    
+    frame_count = int(main_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    for frame_num in tqdm(range(frame_count), desc=f"Processing {concept_path}"):
+        ret_mask, mask_frame = mask_cap.read()
+        ret_main, main_frame = main_cap.read()
+        
+        if not ret_mask or not ret_main:
+            break
+        
+        # Resize mask to 512x512
+        mask_resized = cv2.resize(mask_frame, (512, 512), interpolation=cv2.INTER_NEAREST)
+        
+        main_frame = cv2.resize(main_frame, (512, 512), interpolation=cv2.INTER_NEAREST)
+        # Convert mask to grayscale and binary
+        mask_gray = cv2.cvtColor(mask_resized, cv2.COLOR_BGR2GRAY)
+        _, mask_binary = cv2.threshold(mask_gray, 1, 255, cv2.THRESH_BINARY)
+        
+        # Apply mask
+        masked_frame = cv2.bitwise_and(main_frame, main_frame, mask=mask_binary)
+        
+        # Find bounding box
+        y, x = np.where(mask_binary > 0)
+        if len(y) == 0 or len(x) == 0:
+            continue
+        top, bottom, left, right = y.min(), y.max(), x.min(), x.max()
+        
+        # Crop image
+        cropped_frame = masked_frame[top:bottom+1, left:right+1]
+        
+        # Resize to 512x512
+        resized_frame = cv2.resize(cropped_frame, (512, 512), interpolation=cv2.INTER_AREA)
+        
+        # Save result
+        output_path = os.path.join(concepts_dir, f"concept_{frame_num:04d}.png")
+        cv2.imwrite(output_path, resized_frame)
+    
+    mask_cap.release()
+    main_cap.release()
 
-def categorize_words(words):
-    word_count = Counter(words)
-    global_concepts = [word for word, count in word_count.items() if count > 1]
-    private_concepts = [word for word, count in word_count.items() if count == 1]
-    return global_concepts, private_concepts
-
-def main():
-    parser = argparse.ArgumentParser(description='Analyze concept prompts from a CSV file.')
-    parser.add_argument('-f', '--file_path', type=str, help='Path to the CSV file', required=True)
-    parser.add_argument('-o', '--output_path', type=str, help='Path to the output JSON file', required=True)
-    args = parser.parse_args()
-
-    video_concepts = read_concept_prompts(args.file_path)
-
-    result = {
-        "video_concepts": {},
-        "concepts": [],
-        "global_concepts": [],
-        "private_concepts": []
-    }
-
-    all_dollar_words = []
-
-    for video_name, concepts in video_concepts.items():
-        dollar_words = []
-        for concept in concepts:
-            words = extract_dollar_words(concept)
-            dollar_words.extend(words)
-            all_dollar_words.extend(words)
-        result["video_concepts"][video_name] = dollar_words
-
-    global_concepts, private_concepts = categorize_words(all_dollar_words)
-    result["concepts"] = all_dollar_words
-    result["global_concepts"] = global_concepts
-    result["private_concepts"] = private_concepts
-
-    with open(args.output_path, 'w', encoding='utf-8') as jsonfile:
-        json.dump(result, jsonfile, ensure_ascii=False, indent=4)
+def process_root_directory(root_dir):
+    for concept_dir in os.listdir(root_dir):
+        concept_path = os.path.join(root_dir, concept_dir)
+        if os.path.isdir(concept_path):
+            process_concept_directory(concept_path)
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Process concept videos and create concept images.")
+    parser.add_argument('-r', "--root_dir", help="Root directory containing concept video folders.")
+    
+    args = parser.parse_args()
+    
+    process_root_directory(args.root_dir)
