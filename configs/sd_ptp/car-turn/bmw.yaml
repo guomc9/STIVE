@@ -1,5 +1,5 @@
 pretrained_sd_model_path: "./checkpoints/stable-diffusion-v1-4"
-pretrained_lora_model_path: "./checkpoints/sd_unet/bmw"
+pretrained_lora_model_path: "./checkpoints/sd_unet/car-turn/bmw"
 pretrained_concepts_model_path: "./checkpoints/sd_concepts/bmw"
 output_dir: ".log/ptp/sd_car-turn/to-bmw/"
 checkpoints_dir: "checkpoints/sd_ptp/car-turn/to-bmw"
@@ -16,16 +16,16 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 30
+  num_inference_steps: 35
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 30
+  num_inv_steps: 35
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"
   is_replace_controller: True
-  cross_replace_steps: [0.0, 0.07]
-  self_replace_steps: [0.0, 0.07]
+  cross_replace_steps: [0.0, 0.0]
+  self_replace_steps: [0.0, 0.0]
   blend_words: 
     sources:
       - "jeep"
@@ -33,7 +33,7 @@ ptp_conf:
       - "$BMW"
   blend_self_attention: True
   use_inversion_attention: True
-  blend_th: [0.3, 0.3]
+  blend_th: [0.0, 0.0]
   fuse_th: 0.01
 
 seed: 33

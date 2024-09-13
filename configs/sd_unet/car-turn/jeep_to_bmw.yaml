@@ -46,10 +46,10 @@ extra_trainable_modules:
   - "^.*\\.attentions\\..*\\.attn_temp\\..*$"
 
 inference_conf:
-  num_inference_steps: 30
+  num_inference_steps: 40
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 30
+  num_inv_steps: 40
 
 # CHECK
 sub_sot: True
