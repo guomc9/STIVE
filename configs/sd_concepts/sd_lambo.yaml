@@ -74,9 +74,9 @@ tcam_only_neg: True
 cam_loss_reduction: 'mean'
 attn_check_steps: 500
 
-learning_rate: 5.0e-4
+learning_rate: 1.0e-3
 batch_size: 1
-num_train_epoch: 3500
+num_train_epoch: 5000
 checkpointing_steps: 20000
 validation_steps: 500
 
