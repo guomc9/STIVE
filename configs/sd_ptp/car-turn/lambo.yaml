@@ -15,10 +15,10 @@ validation_data:
   height: 512
 
 inference_conf:
-  num_inference_steps: 38
+  num_inference_steps: 50
   guidance_scale: 12.5
   use_inv_latent: True
-  num_inv_steps: 38
+  num_inv_steps: 50
 
 ptp_conf:
   source_mask: "data/targets/car-turn/check/car-turn_jeep_frame_masks.mp4"

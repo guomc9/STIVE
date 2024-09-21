@@ -8,7 +8,7 @@ train_data:
     - "data/targets/tennis/videos/tennis.mp4"
     - "data/concepts/optimus/videos/optimus.mp4"
   prompts:
-    - "a man is moving with a racket and arms outstretched on the red ground with a background of a blue banner, wall and trees"
+    - "a man is running on the red ground with a background of a blue banner, wall and trees"
     - "a $OPTIMUS is squatting on a wooden floor with its back to a white wall"
   mask_paths:
     - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
@@ -26,13 +26,13 @@ train_data:
   target_mask_paths:
     - "data/targets/tennis/masks/tennis_man_frame_masks.mp4"
   target_prompts:
-    - "a $OPTIMUS is moving with a racket and arms outstretched on the red ground with a background of a blue banner, wall and trees"
+    - "a $OPTIMUS is running on the red ground with a background of a blue banner, wall and trees"
 
 validation_data:
   source: "data/targets/tennis/videos/tennis.mp4"
   source_prompt: "a man is moving with a racket and arms outstretched on the red ground with a background of a blue banner, wall and trees"
   edit_prompts:
-    - "a $OPTIMUS is moving with a racket and arms outstretched on the red ground with a background of a blue banner, wall and trees"
+    - "a $OPTIMUS is running on the red ground with a background of a blue banner, wall and trees"
   num_frames: 6
   sample_stride: 3
   width: 512

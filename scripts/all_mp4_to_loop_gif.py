@@ -32,7 +32,8 @@ def process_directory(root_dir, fps=10):
     root_path = Path(root_dir)
     for subdir in root_path.iterdir():
         if subdir.is_dir():
-            videos_dir = subdir / 'videos'
+            # videos_dir = subdir / 'videos'
+            videos_dir = subdir
             if videos_dir.is_dir():
                 for mp4_file in videos_dir.glob('*.mp4'):
                     gif_file = mp4_file.with_suffix('.gif')
