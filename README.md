@@ -1,5 +1,25 @@
 # STIVE (Stable Textual Inversion Video Editing)
 
+
+## Get started
+### Prepare Environment
+* To create environment with conda:
+    ```shell
+    conda env create --file environment.yml
+    conda activate stive
+    ```
+* or setup environment with pip whether in a conda environment or not:
+    ```shell
+    pip3 install -r requirements.txt
+    ```
+
+### Download Pretrained Models
+* SD1.4 model from: [CompVis/stable-diffusion-v1-4](https://huggingface.co/CompVis/stable-diffusion-v1-4/tree/main) (necessary)
+* clip model from: [openai/clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14/tree/main) (to evaluate clip and frame-consistency scores, not necessary)
+* owlvit model from: [google/owlvit-base-patch16](https://huggingface.co/google/owlvit-base-patch16/tree/main) (to extract mask for attn-prob supervision, necessary for custom data)
+
+## Examples
+
 <table style="width:100%; border-collapse: collapse;">
   <tr>
     <th style="border: 1px solid black; padding: 10px;">Source Video</th>
@@ -260,27 +280,6 @@
     </td>
   </tr> -->
 </table>
-
-
-## Get started
-### Prepare Environment
-* To create environment with conda:
-    ```shell
-    conda env create --file environment.yml
-    conda activate stive
-    ```
-* or setup environment with pip whether in a conda environment or not:
-    ```shell
-    pip3 install -r requirements.txt
-    ```
-
-### Download Pretrained Models
-* SD1.4 model from: [CompVis/stable-diffusion-v1-4](https://huggingface.co/CompVis/stable-diffusion-v1-4/tree/main) (necessary)
-* clip model from: [openai/clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14/tree/main) (to evaluate clip and frame-consistency scores, not necessary)
-* owlvit model from: [google/owlvit-base-patch16](https://huggingface.co/google/owlvit-base-patch16/tree/main) (to extract mask for attn-prob supervision, necessary for custom data)
-
-## Examples
-
 
 ### jeep
 <details>
@@ -679,121 +678,6 @@
 </li>
 <li>prompt-to-prompt inference with concept and tuned SD:
     <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/kitten/tiger.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-### tennis
-
-<details>
-<summary>Swap man to <code>$OPTIMUS</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_optimus.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/tennis/man_to_optimus.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/tennis/optimus.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/tennis/optimus.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-
-<details>
-<summary>Swap man to <code>$NEO</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_neo.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/tennis/man_to_neo.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/tennis/neo.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/tennis/neo.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-
-<details>
-<summary>Swap man to <code>$ULTRON</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_ultron.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/tennis/man_to_ultron.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/tennis/ultron.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/tennis/ultron.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-
-### bear
-<details>
-<summary>Swap bear to <code>$GOLDENTIGER</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_goldentiger.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_goldentiger.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/goldentiger.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/goldentiger.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-<details>
-<summary>Swap bear to <code>$COW</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_cow.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_cow.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/cow.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/cow.yaml</code></pre>
-</li>
-</ul>
-</details>
-
-
-<details>
-<summary>Swap bear to <code>$RHINO</code></summary>
-<ul>
-<li>finetune concept from SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_concepts.py --config configs/sd_concepts/sd_rhino.yaml</code></pre>
-</li>
-<li>finetune SD with spatial&amp;temporal modules:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/finetune_sd_unet.py --config configs/sd_unet/bear/bear_to_rhino.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and pretrained SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_sd_ptp.py --config configs/sd_ptp/bear/rhino.yaml</code></pre>
-</li>
-<li>prompt-to-prompt inference with concept and tuned SD:
-    <pre><code>CUDA_VISIBLE_DEVICES=0 accelerate launch runs/inference_lora_sd_ptp.py --config configs/sd_ptp/bear/rhino.yaml</code></pre>
 </li>
 </ul>
 </details>
