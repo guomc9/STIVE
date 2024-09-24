@@ -16,7 +16,7 @@ import stive.prompt_attention.ptp_utils as ptp_utils
 import stive.prompt_attention.seq_aligner as seq_aligner
 from stive.prompt_attention.spatial_blend import SpatialBlender
 from stive.prompt_attention.visualization import show_cross_attention, show_self_attention_comp
-from stive.prompt_attention.attention_store import AttentionStore, AttentionControl
+from stive.prompt_attention.attention_store import AttentionStore, AttentionControl, StepAttentionStore
 from stive.prompt_attention.attention_register import register_attention_control
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -49,31 +49,42 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
         x_t_device = x_t.device
         x_t_dtype = x_t.dtype
         if self.latent_blend is not None:
-            if self.use_inversion_attention:
-                step_in_store = len(self.additional_attention_store.latents_store) - self.cur_step
-            else:
-                step_in_store = self.cur_step
-            
-            inverted_latents = self.additional_attention_store.latents_store[step_in_store]
+            if self.additional_attention_store is not None:
+                if self.use_inversion_attention:
+                    step_in_store = len(self.additional_attention_store.latents_store) - self.cur_step
+                else:
+                    step_in_store = self.cur_step
+                
+                inverted_latents = self.additional_attention_store.latents_store[step_in_store]
+            elif self.additional_step_attention_store is not None:
+                inverted_latents = self.additional_attention_store.get_latents()
+
             inverted_latents = inverted_latents.to(device =x_t_device, dtype=x_t_dtype)
             # [prompt, channel, clip, res, res] = [1, 4, 2, 64, 64]
             
             blend_dict = self.get_empty_cross_store()
             # each element in blend_dict have (prompt head) clip_length (res res) words, 
             # to better align with  (b c f h w)
-            
-            step_in_store_atten_dict = self.additional_attention_store.attention_store_all_step[step_in_store]
+            if self.additional_attention_store is not None:
+                step_in_store_atten_dict = self.additional_attention_store.attention_store_all_step[step_in_store]
+            elif self.additional_step_attention_store is not None:
+                step_in_store_atten_dict = self.additional_step_attention_store.get_attentions()
+
             if isinstance(step_in_store_atten_dict, str): 
                 step_in_store_atten_dict = torch.load(step_in_store_atten_dict)
             
-            for key in blend_dict.keys():
-                place_in_unet_cross_atten_list = step_in_store_atten_dict[key]
-                for i, attention in enumerate(place_in_unet_cross_atten_list):
+            if step_in_store_atten_dict is not None and inverted_latents is not None:
+                for key in blend_dict.keys():
+                    place_in_unet_cross_atten_list = step_in_store_atten_dict[key]
+                    for i, attention in enumerate(place_in_unet_cross_atten_list):
 
-                    concate_attention = torch.cat([attention[None, ...], self.attention_store[key][i][None, ...]], dim=0)
-                    blend_dict[key].append(copy.deepcopy(concate_attention))
-            x_t = self.latent_blend(x_t = copy.deepcopy(torch.cat([inverted_latents, x_t], dim=0)), attention_store = copy.deepcopy(blend_dict))
-            return x_t[1:, ...]
+                        concate_attention = torch.cat([attention[None, ...], self.attention_store[key][i][None, ...]], dim=0)
+                        blend_dict[key].append(copy.deepcopy(concate_attention))
+                
+                x_t = self.latent_blend(x_t = copy.deepcopy(torch.cat([inverted_latents, x_t], dim=0)), attention_store = copy.deepcopy(blend_dict))
+                return x_t[1:, ...]
+            else:
+                return x_t
         else:
             return x_t
         
@@ -105,16 +116,19 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             key = f"{place_in_unet}_{'cross' if is_cross else 'self'}"
             current_pos = self.attention_position_counter_dict[key]
 
-            if self.use_inversion_attention:
-                step_in_store = len(self.additional_attention_store.attention_store_all_step) - self.cur_step -1
-            else:
-                step_in_store = self.cur_step
+            if self.additional_attention_store is not None:
+                if self.use_inversion_attention:
+                    step_in_store = len(self.additional_attention_store.attention_store_all_step) - self.cur_step -1
+                else:
+                    step_in_store = self.cur_step
+                    
+                step_in_store_atten_dict = self.additional_attention_store.attention_store_all_step[step_in_store]
                 
-            step_in_store_atten_dict = self.additional_attention_store.attention_store_all_step[step_in_store]
-            
-            if isinstance(step_in_store_atten_dict, str): 
-                step_in_store_atten_dict = torch.load(step_in_store_atten_dict)
-            
+                if isinstance(step_in_store_atten_dict, str): 
+                    step_in_store_atten_dict = torch.load(step_in_store_atten_dict)
+            elif self.additional_step_attention_store is not None:
+                step_in_store_atten_dict = self.additional_step_attention_store.get_attentions()
+
             # Note that attn is append to step_store, 
             # if attn is get through clean -> noisy, we should inverse it
             attn_base = step_in_store_atten_dict[key][current_pos]          
@@ -169,6 +183,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                  self_replace_steps: Union[float, Tuple[float, float]],
                  latent_blend: Optional[SpatialBlender], tokenizer=None, 
                  additional_attention_store: AttentionStore =None,
+                 additional_step_attention_store: StepAttentionStore =None, 
                  use_inversion_attention: bool=False,
                  attention_blend: SpatialBlender= None,
                  save_self_attention: bool=True,
@@ -180,9 +195,10 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             save_self_attention=save_self_attention,
             disk_store=disk_store)
         self.additional_attention_store = additional_attention_store
+        self.additional_step_attention_store = additional_step_attention_store
         self.batch_size = len(prompts)
         self.attention_blend = attention_blend
-        if self.additional_attention_store is not None:
+        if self.additional_attention_store is not None or self.additional_step_attention_store is not None:
             # the attention_store is provided outside, only pass in one promp
             self.batch_size = len(prompts) //2
             assert self.batch_size==1, 'Only support single video editing with additional attention_store'
@@ -225,6 +241,7 @@ class AttentionReplace(AttentionControlEdit):
     def __init__(self, prompts, num_steps: int, cross_replace_steps: float, self_replace_steps: float,
                  latent_blend: Optional[SpatialBlender] = None, tokenizer=None,
                  additional_attention_store=None,
+                 additional_step_attention_store=None, 
                  use_inversion_attention = False,
                  attention_blend: SpatialBlender=None,
                  save_self_attention: bool = True,
@@ -233,7 +250,9 @@ class AttentionReplace(AttentionControlEdit):
                  cond_mask=None):
         super(AttentionReplace, self).__init__(
             prompts, num_steps, cross_replace_steps, self_replace_steps, latent_blend, tokenizer=tokenizer,
-            additional_attention_store=additional_attention_store, use_inversion_attention = use_inversion_attention,
+            additional_attention_store=additional_attention_store, 
+            additional_step_attention_store=additional_step_attention_store, 
+            use_inversion_attention = use_inversion_attention,
             attention_blend=attention_blend,
             save_self_attention = save_self_attention,
             fuse_th=fuse_th, 
@@ -259,6 +278,7 @@ class AttentionRefine(AttentionControlEdit):
     def __init__(self, prompts, num_steps: int, cross_replace_steps: float, self_replace_steps: float,
                  latent_blend: Optional[SpatialBlender] = None, tokenizer=None,
                  additional_attention_store=None,
+                 additional_step_attention_store=None, 
                  use_inversion_attention = False,
                  attention_blend: SpatialBlender=None,
                  save_self_attention : bool=True,
@@ -266,7 +286,7 @@ class AttentionRefine(AttentionControlEdit):
                  ):
         super(AttentionRefine, self).__init__(
             prompts, num_steps, cross_replace_steps, self_replace_steps, latent_blend, tokenizer=tokenizer,
-            additional_attention_store=additional_attention_store, use_inversion_attention = use_inversion_attention,
+            additional_attention_store=additional_attention_store, additional_step_attention_store=additional_step_attention_store, use_inversion_attention = use_inversion_attention,
             attention_blend=attention_blend,
             save_self_attention = save_self_attention,
             disk_store = disk_store
@@ -292,6 +312,7 @@ class AttentionReweight(AttentionControlEdit):
     def __init__(self, prompts, num_steps: int, cross_replace_steps: float, self_replace_steps: float, equalizer,
                 latent_blend: Optional[SpatialBlender] = None, controller: Optional[AttentionControlEdit] = None, tokenizer=None,
                 additional_attention_store=None,
+                 additional_step_attention_store=None, 
                 use_inversion_attention = False,
                 attention_blend: SpatialBlender=None,
                 save_self_attention:bool = True,
@@ -299,7 +320,8 @@ class AttentionReweight(AttentionControlEdit):
                 ):
         super(AttentionReweight, self).__init__(
             prompts, num_steps, cross_replace_steps, self_replace_steps, latent_blend, tokenizer=tokenizer,
-            additional_attention_store=additional_attention_store,
+            additional_attention_store=additional_attention_store, 
+            additional_step_attention_store=additional_step_attention_store,
             use_inversion_attention = use_inversion_attention,
             attention_blend=attention_blend,
             save_self_attention=save_self_attention,

@@ -158,17 +158,24 @@ class StepAttentionStore(StepAttentionControl):
     def __init__(self):
         super().__init__()
         self.attention_store = {}       # {'down-cross-1024': attn_prob}, attn_prob.shape: [B * F, M, Q, K]
+        self.latents_store = None
 
-    def forward(self, attn, is_cross: bool, place_in_unet: str):
+    def forward(self, attn, is_cross: bool, place_in_unet: str, latents=None):
         key = f"{place_in_unet}-{'cross' if is_cross else 'self'}-{attn.shape[-2]}"
         if key not in self.attention_store:
             self.attention_store[key] = []
         self.attention_store[key].append(attn)
+        self.latents_store = latents
+
+    def set_latents(self, latents):
+        self.latents_store = latents
 
     def reset(self):
         super().reset()
         self.attention_store.clear()
+        self.latents_store = None
         gc.collect()
+        torch.cuda.empty()
 
     def get_mean_head_attns(self):
         attns = {}
@@ -177,6 +184,19 @@ class StepAttentionStore(StepAttentionControl):
                 attn = torch.stack(attn_list).mean(0).detach().cpu()    # [B * F, M, Q, K]
                 attns[key] = attn.mean(1)
         return attns                                        # [B * F, Q, K]
+    
+    def get_attentions(self):
+        keys = ["down-cross", "mid-cross", "up-cross", "down-self", "mid-self", "up-self"]
+        attns = {"down_cross": [], "mid_cross": [], "up_cross": [],
+                "down_self": [],  "mid_self": [],  "up_self": []}
+        for k, v in self.attention_store.items():
+            for key in keys:
+                if key in k:
+                    attns[key].append(v)
+        return attns
+
+    def get_latents(self):
+        return self.latents_store
 
 import numpy as np
 from einops import rearrange, repeat
