@@ -151,13 +151,7 @@ def main(
         all_step_source_latents = validation_pipeline.prepare_ddim_source_latents(
             frames=source['frames'].to(accelerator.device, dtype=weight_dtype), 
             text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype),
-            only_cross=False,
-            self_to_st_attn=True, 
-            prompt=source['source_prompts'], 
-            store_attention=ptp_conf['use_inversion_attention'], 
-            LOW_RESOURCE=True, 
             generator=generator, 
-            save_path=output_dir
         )
         # source_init_latents = all_step_source_latents[-1]
         # print(f'source_init_latents.shape: {source_init_latents.shape}')
@@ -180,6 +174,7 @@ def main(
                 ddim_inv_latents_list=all_step_source_latents, 
                 source_prompt=source_prompts, 
                 target_prompt=target_prompts, 
+                text_embeddings=source_text_embeddings.to(accelerator.device, dtype=weight_dtype), 
                 num_inference_steps=inference_conf["num_inference_steps"], 
                 only_cross=False,
                 self_to_st_attn=True, 
@@ -205,7 +200,8 @@ def main(
             
             save_path = os.path.join(output_dir, f"attn_prob")
             os.makedirs(save_path, exist_ok=True)
-            save_gif_mp4_folder_type(attention_output, os.path.join(save_path, f'{target_prompts}-attn_prob.gif'))
+            if attention_output is not None:
+                save_gif_mp4_folder_type(attention_output, os.path.join(save_path, f'{target_prompts}-attn_prob.gif'))
             
             for p, s in zip([target_prompts], samples):
                 prompts_samples[p] = s

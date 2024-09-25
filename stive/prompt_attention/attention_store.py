@@ -155,27 +155,45 @@ class StepAttentionControl(abc.ABC):
 
 import gc
 class StepAttentionStore(StepAttentionControl):
-    def __init__(self):
+    def __init__(self, cpu_store=False):
         super().__init__()
         self.attention_store = {}       # {'down-cross-1024': attn_prob}, attn_prob.shape: [B * F, M, Q, K]
         self.latents_store = None
+        self.cpu_store = cpu_store
 
     def forward(self, attn, is_cross: bool, place_in_unet: str, latents=None):
         key = f"{place_in_unet}-{'cross' if is_cross else 'self'}-{attn.shape[-2]}"
         if key not in self.attention_store:
             self.attention_store[key] = []
-        self.attention_store[key].append(attn)
-        self.latents_store = latents
+        if not self.cpu_store:
+            self.attention_store[key].append(attn)
+            self.latents_store = latents
+        else:
+            self.attention_store[key].append(attn.detach().cpu())
+            self.latents_store = latents.detach().cpu() if latents is not None else None
+        
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def set_latents(self, latents):
-        self.latents_store = latents
+        if not self.cpu_store:
+            self.latents_store = latents
+        else:
+            self.latents_store = latents.detach().cpu() if latents is not None else None
+        
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def reset(self):
         super().reset()
         self.attention_store.clear()
-        self.latents_store = None
+        del self.attention_store
+        del self.latents_store
         gc.collect()
-        torch.cuda.empty()
+        torch.cuda.empty_cache()
+        self.attention_store = {}
+        self.latents_store = None
+
 
     def get_mean_head_attns(self):
         attns = {}
@@ -192,7 +210,8 @@ class StepAttentionStore(StepAttentionControl):
         for k, v in self.attention_store.items():
             for key in keys:
                 if key in k:
-                    attns[key].append(v)
+                    new_key = key.replace('-', '_')
+                    attns[new_key].extend(v)
         return attns
 
     def get_latents(self):
