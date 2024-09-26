@@ -57,7 +57,9 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 
                 inverted_latents = self.additional_attention_store.latents_store[step_in_store]
             elif self.additional_step_attention_store is not None:
-                inverted_latents = self.additional_attention_store.get_latents()
+                inverted_latents = self.additional_step_attention_store.get_latents()
+                if inverted_latents is None:
+                    print('inverted_latents is None')
 
             inverted_latents = inverted_latents.to(device =x_t_device, dtype=x_t_dtype)
             # [prompt, channel, clip, res, res] = [1, 4, 2, 64, 64]
@@ -68,12 +70,19 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             if self.additional_attention_store is not None:
                 step_in_store_atten_dict = self.additional_attention_store.attention_store_all_step[step_in_store]
             elif self.additional_step_attention_store is not None:
+                print('self.additional_step_attention_store is not None')
                 step_in_store_atten_dict = self.additional_step_attention_store.get_attentions()
+            if self.additional_step_attention_store is not None:
+                print('additional_step_attention_store is not None')
+            else:
+                print('additional_step_attention_store is None')
+
 
             if isinstance(step_in_store_atten_dict, str): 
                 step_in_store_atten_dict = torch.load(step_in_store_atten_dict)
             
             if step_in_store_atten_dict is not None and inverted_latents is not None:
+                print('step_in_store_atten_dict is not None and inverted_latents is not None')
                 for key in blend_dict.keys():
                     place_in_unet_cross_atten_list = step_in_store_atten_dict[key]
                     for i, attention in enumerate(place_in_unet_cross_atten_list):
@@ -203,6 +212,8 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             self.batch_size = len(prompts) //2
             assert self.batch_size==1, 'Only support single video editing with additional attention_store'
 
+        if self.additional_step_attention_store is not None:
+            print(f'self.additional_step_attention_store is not None')
         
         self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
         

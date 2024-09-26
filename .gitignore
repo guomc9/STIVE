@@ -24,3 +24,4 @@ log.txt
 *_w1.*
 *_no_supvis
 .targets
+.debug*
