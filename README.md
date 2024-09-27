@@ -1,4 +1,4 @@
-# Shaping a Stabilized Video by Mitigating Unintended Changes for Concept-Enhanced Text-Guided Video Editing
+# Shaping a Stabilized Video by Mitigating Unintended Changes for Text-Guided Video Editing
 
 
 ## Get started
