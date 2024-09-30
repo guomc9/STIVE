@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="">
+  <meta name="keywords" content="Cinemagraph">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shaping a Stabilized Video by Mitigating Unintended Changes for Text-Guided Video Editing</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/font-awesome.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav> -->
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Shaping a Stabilized Video by Mitigating Unintended Changes for Text-Guided Video Editing</h1>
+          <!-- <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              Jiyang Li<sup>1*</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=PKFAv-cAAAAJ&hl=en">Lechao Cheng</a><sup>2*</sup>,
+            </span>
+            <span class="author-block">
+              Zhangye Wang<sup>1</sup>,
+            </span>
+            <span class="author-block">
+                 <a href="https://scholar.google.com/citations?hl=zh-CN&user=dOG10IUAAAAJ">Tingting Mu</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              Jingxuan He<sup>2✉</sup>
+            </span>
+          </div> -->
+
+          <!-- <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Zhejiang University,</span>
+            <span class="author-block"><sup>2</sup>Hefei University of Technology,</span>
+            <span class="author-block"><sup>3</sup>The University of Manchester</span>
+          </div> -->
+
+          <!-- <h3>*Equal contribution. ✉Corresponding author.</h3> -->
+          <div class="column has-text-centered">
+            <div class="publication-links">
+
+              <!-- PDF Link. -->
+              <!-- <span class="link-block">
+                <a href="https://arxiv.org/pdf/2404.08966"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span> -->
+
+              <!-- arXiv Link. -->
+              <!-- <span class="link-block">
+                <a href="https://arxiv.org/abs/2404.08966"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span> -->
+
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://anonymous.4open.science/r/STIVE-B926/README.md"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+
+              <!-- Dataset Link. -->
+              <!-- <span class="link-block">
+                <a href="https://1drv.ms/u/s!AstBFXu_8l9KgcsqSnyXlZIUNazXXg?e=nwjkdZ"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Data</span>
+                </a>
+              </span> -->
+
+              <!-- Presentation Link. -->
+              <span class="link-block">
+              <a href="./static/ppt/LoopGaussian.pdf"
+                  class="external-link button is-normal is-rounded is-dark">
+                <span class="icon">
+                  <img src="static/images/hf-logo.png" alt="Hugging Face" style="width:1em; height:1em;">
+                </span>
+                <span>PPT</span>
+              </a>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- <section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <video id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="./static/videos/teaser.mp4"
+                type="video/mp4">
+      </video>
+      <h2 class="subtitle has-text-centered">
+        <span class="dnerf">LoopGaussian</span> convert multi-view images of a stationary scene (a) into authentic 3D cinemagraph by an Eulerian motion field (b).
+        The 3D cinemagraph can be rendered from a novel viewpoint to obtain a natural seamless loopable video (c). 
+      </h2>
+    </div>
+  </div>
+</section> -->
+
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-porsche">
+          <video poster="" id="porsche" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/jeep-unet-full-supvis/to-porsche.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-BMW">
+          <video poster="" id="BMW" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/jeep-unet-full-supvis/to-$BMW.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-CYBERTURCK">
+          <video poster="" id="CAT" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/jeep-unet-full-supvis/to-$CYBERTURCK.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-OPTIMUS">
+          <video poster="" id="OPTIMUS" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/man-skate-unet-full-supvis/to-$OPTIMUS.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-LAMBO">
+          <video poster="" id="LAMBO" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/tesla-unet-full-supvis/to-$LAMBO.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-CAT">
+          <video poster="" id="CAT" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/gray-dog-unet-full-supvis/to-$CAT.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-GT3">
+          <video poster="" id="CAT" autoplay controls muted loop playsinline height="70%" width="70%">
+            <source src="./assets/car-drift-unet-full-supvis/to-$GT3.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Text-guided video editing has experienced a surge in popularity; however, existing approaches often suffer from unintended alterations, where textual descriptions inadvertently affect other parts of the footage. To address this issue, this work aims to ensure that modifications are confined strictly to the targeted editing regions, thereby enhancing the consistency and naturalness of the generated videos. Specifically, we propose using concept augmented textual inversion, which significantly improves efficiency while maintaining plug-and-play characteristics during inference. Additionally, we stabilize text-driven video editing by tuning the video diffusion model with cross-attention supervision. Comparative evaluations against state-of-the-art methods demonstrate that our approach produces more stable and lifelike videos, both with and without the provision of concept videos.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <!-- <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+
+<!-- Optical. -->
+<section class="section">
+  <div class="container is-max-desktop">
+
+      <div class="column is-full-width"></div>
+        <h2 class="title is-3">Comparisons</h2>
+          <div class="column content">
+            <p>
+              Ours(the far right)  vs.  <a href="https://github.com/showlab/Tune-A-Video">Tune-A-Video</a>, <a href="https://github.com/ChenyangQiQi/FateZero">Fatezero</a>, <a href="https://github.com/showlab/MotionDirector?tab=readme-ov-file">MoitionDirector</a>, <a href="https://github.com/RehgLab/RAVE">RAVE</a>
+            </p>
+            <video poster="" id="ficus" autoplay controls muted loop playsinline height="100%">
+              <source src="./assets/cmp/cmp.mp4"
+                      type="video/mp4">
+            </video>
+
+    </div>
+  </div>
+<!-- Optical. -->
+
+<!-- NVS. -->
+<!-- <section class="section">
+  <div class="container is-max-desktop">
+
+      <div class="column is-full-width"></div>
+        <h2 class="title is-3">Novel View Synthesis</h2>
+          <div class="column content">
+            <p>
+              3D Cinemagraph generated by our method can be rendered from any viewpoint.
+            </p>
+            <video poster="" id="ficus" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ficus_nvs.mp4"
+                      type="video/mp4">
+            </video>
+
+    </div>
+  </div> -->
+<!--/ NVS. -->
+
+
+<!-- Optical. -->
+<!-- <section class="section">
+  <div class="container is-max-desktop">
+
+      <div class="column is-full-width"></div>
+        <h2 class="title is-3">Optical Flow Maps</h2>
+          <div class="column content">
+            <p>
+              The rendering results and corresponding optical flow maps.
+            </p>
+            <video poster="" id="ficus" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/optical.mp4"
+                      type="video/mp4">
+            </video>
+
+    </div>
+  </div> -->
+<!-- Optical. -->
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{li2024loopgaussian,
+  title={LoopGaussian: Creating 3D Cinemagraph with Multi-view Images via Eulerian Motion Field},
+  author={Li, Jiyang and Cheng, Lechao and Wang, Zhangye and Mu, Tingting and He, Jingxuan},
+  journal={arXiv preprint arXiv:2404.08966},
+  year={2024}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/loopgaussian_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <!-- <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p> -->
+          <p>
+            Thanks to <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> for providing us with the website template.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
