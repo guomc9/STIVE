@@ -281,6 +281,8 @@
   </tr> -->
 </table>
 
+> For devices with less than 100 GB of RAM, we recommend using the `runs/inference_lora_sd_ptp_ms.py` script instead of the `runs/inference_lora_sd_ptp.py` script for inference, which can achieve almost identical results.
+
 ### jeep
 <details>
 <summary>Swap jeep to <code>$LAMBO</code></summary>
