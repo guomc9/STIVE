@@ -4,7 +4,7 @@
 ## Get started
 ### Prepare Environment
 * To create environment with conda:
-    ```sh
+    ```shell
     conda env create --file environment.yml
     conda activate stive
     ```
