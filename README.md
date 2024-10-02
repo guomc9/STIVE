@@ -1,10 +1,10 @@
-# Shaping a Stabilized Video by Mitigating Unintended Changes for Text-Guided Video Editing
+# Shaping a Stabilized Video by Mitigating Unintended Changes for Concept-Augmented Video Editing
 
 
 ## Get started
 ### Prepare Environment
 * To create environment with conda:
-    ```shell
+    ```sh
     conda env create --file environment.yml
     conda activate stive
     ```
