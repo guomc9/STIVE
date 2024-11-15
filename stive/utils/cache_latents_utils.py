@@ -5,7 +5,7 @@ from einops import rearrange
 from diffusers import AutoencoderKL
 import gc
 
-PRETRAINED_T2V_CHECKPOINT_PATH = 'checkpoints/zeroscope_v2_576w'
+PRETRAINED_T2V_CHECKPOINT_PATH = 'checkpoints/stable-diffusion-v1-4'
 
 @torch.no_grad()
 def encode_video_to_latents(video_path, vae, height, width, device):
